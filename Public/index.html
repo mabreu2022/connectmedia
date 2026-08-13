@@ -101,10 +101,26 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                     <span>Manual de Uso</span>
                 </button>
+
+                <!-- Apenas para Usuários Admin -->
+                <button onclick="mudarSecao('admin')" id="nav-admin" class="hidden w-full items-center justify-between px-4 py-3 rounded-lg text-sm font-medium text-purple-400 hover:bg-purple-500/10 transition-colors border border-purple-500/20 my-2">
+                    <div class="flex items-center space-x-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                        <span>🛡️ Painel Admin SaaS</span>
+                    </div>
+                </button>
             </nav>
         </div>
-        <div class="p-4 border-t border-outline-variant text-xs text-outline text-center">
-            Connect Media v2.0 • Firebird 5.0
+
+        <!-- Footer do Usuário Logado -->
+        <div class="p-4 border-t border-outline-variant bg-surface-variant/10 flex items-center justify-between">
+            <div class="min-w-0 pr-2">
+                <div id="lbl-user-nome" class="text-xs font-bold text-on-surface truncate">Visitante</div>
+                <div id="lbl-user-email" class="text-[10px] text-outline truncate">Não autenticado</div>
+            </div>
+            <button id="btn-user-auth" onclick="abrirModalAuth()" class="bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-colors">
+                Entrar
+            </button>
         </div>
     </aside>
 
@@ -797,6 +813,128 @@
                 </div>
             </section>
 
+            <!-- 11. SEÇÃO: PAINEL ADMIN SAAS (EXCLUSIVO ADMIN) -->
+            <section class="content-section hidden flex flex-col h-full overflow-hidden" id="sec-admin">
+                <div class="flex justify-between items-center mb-6 shrink-0 border-b border-purple-500/30 pb-4">
+                    <div>
+                        <div class="flex items-center space-x-3">
+                            <h1 class="text-2xl font-bold text-on-surface">🛡️ Painel Administrativo Master SaaS</h1>
+                            <span class="bg-purple-500/20 text-purple-400 border border-purple-500/30 text-xs font-bold px-2.5 py-0.5 rounded-full">Painel Admin</span>
+                        </div>
+                        <p class="text-xs text-outline mt-1">Controle global de faturamento, gestão de usuários cadastrados, vendas Pix e configuração financeira mestre.</p>
+                    </div>
+                    <button onclick="carregarAdminDashboard()" class="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 px-4 py-2 rounded-lg text-xs font-bold transition-colors flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        <span>Atualizar Dados</span>
+                    </button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto pr-2 space-y-8">
+                    <!-- Cards de Métricas Globais -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-surface border border-purple-500/30 rounded-2xl p-5 shadow-lg">
+                            <div class="text-xs text-outline font-semibold uppercase">Faturamento Pix Total</div>
+                            <div id="admin-card-fat" class="text-2xl font-extrabold text-amber-400 mt-2">R$ 0,00</div>
+                            <div class="text-[10px] text-outline mt-1">Receita total acumulada das vendas de prompts</div>
+                        </div>
+                        <div class="bg-surface border border-purple-500/30 rounded-2xl p-5 shadow-lg">
+                            <div class="text-xs text-outline font-semibold uppercase">Usuários Cadastrados</div>
+                            <div id="admin-card-users" class="text-2xl font-extrabold text-purple-400 mt-2">0</div>
+                            <div class="text-[10px] text-outline mt-1">Contas registradas na plataforma SaaS</div>
+                        </div>
+                        <div class="bg-surface border border-purple-500/30 rounded-2xl p-5 shadow-lg">
+                            <div class="text-xs text-outline font-semibold uppercase">Vendas Pix Concluídas</div>
+                            <div id="admin-card-vendas" class="text-2xl font-extrabold text-emerald-400 mt-2">0</div>
+                            <div class="text-[10px] text-outline mt-1">Ordens de pagamento confirmadas com sucesso</div>
+                        </div>
+                        <div class="bg-surface border border-purple-500/30 rounded-2xl p-5 shadow-lg">
+                            <div class="text-xs text-outline font-semibold uppercase">Prompts no Catálogo</div>
+                            <div id="admin-card-prompts" class="text-2xl font-extrabold text-cyan-400 mt-2">0</div>
+                            <div class="text-[10px] text-outline mt-1">System Prompts disponíveis para compra</div>
+                        </div>
+                    </div>
+
+                    <!-- Configuração da Chave Pix Mestre da Empresa -->
+                    <div class="bg-surface border border-purple-500/30 rounded-2xl p-6 space-y-4 shadow-xl">
+                        <h2 class="text-sm font-bold text-amber-400 uppercase flex items-center space-x-2">
+                            <span>❖ Chave PIX Mestre do SaaS (Onde caem os pagamentos das vendas)</span>
+                        </h2>
+                        <p class="text-xs text-outline leading-relaxed">Defina aqui os dados de recebimento Pix da sua empresa ou conta bancária mestre. Todas as vendas de prompts geradas por qualquer usuário no aplicativo utilizarão este recebedor.</p>
+
+                        <form onsubmit="salvarChavePixMestreAdmin(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Chave Pix Mestre (CPF/CNPJ/E-mail/EVP)</label>
+                                <input type="text" id="admin-input-chave-mestre" required placeholder="Ex: financeiro@meusaas.com.br" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:border-amber-400 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Nome do Recebedor Mestre</label>
+                                <input type="text" id="admin-input-nome-mestre" required placeholder="Ex: Connect Media Tecnologia" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:border-amber-400 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Cidade do Recebedor Mestre</label>
+                                <input type="text" id="admin-input-cidade-mestre" required placeholder="Ex: Sao Paulo" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:border-amber-400 outline-none">
+                            </div>
+                            <div class="col-span-full pt-2">
+                                <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-black px-5 py-2.5 rounded-xl text-xs font-bold shadow-md transition-all">
+                                    💾 Salvar Chave Pix Mestre
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Tabela de Gestão de Usuários -->
+                    <div class="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-xl">
+                        <div class="bg-surface-variant/20 px-6 py-4 border-b border-outline-variant flex justify-between items-center">
+                            <h2 class="text-sm font-bold text-on-surface uppercase">Gestão de Usuários do SaaS</h2>
+                            <span class="text-xs text-outline">Total: <span id="admin-count-users-table">0</span> usuários</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-background border-b border-outline-variant text-outline uppercase font-mono">
+                                        <th class="p-3">ID</th>
+                                        <th class="p-3">Nome</th>
+                                        <th class="p-3">E-mail</th>
+                                        <th class="p-3">Perfil</th>
+                                        <th class="p-3">Status</th>
+                                        <th class="p-3">Data Cadastro</th>
+                                        <th class="p-3 text-right">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-tabela-usuarios">
+                                    <!-- Usuários inseridos via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Extrato Global de Vendas Pix -->
+                    <div class="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-xl">
+                        <div class="bg-surface-variant/20 px-6 py-4 border-b border-outline-variant flex justify-between items-center">
+                            <h2 class="text-sm font-bold text-on-surface uppercase">Extrato Global de Vendas Pix</h2>
+                            <span class="text-xs text-outline">Histórico completo de ordens</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-background border-b border-outline-variant text-outline uppercase font-mono">
+                                        <th class="p-3">Ordem #</th>
+                                        <th class="p-3">Valor Total</th>
+                                        <th class="p-3">Status</th>
+                                        <th class="p-3">Data</th>
+                                        <th class="p-3">Itens Comprados</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-tabela-vendas">
+                                    <!-- Vendas inseridas via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
         </div>
     </main>
 
@@ -896,6 +1034,88 @@
                 <button onclick="fecharModalPix()" class="w-full text-xs text-outline hover:text-on-surface text-center py-1">
                     Cancelar / Pagar Mais Tarde
                 </button>
+            </div>
+    </div>
+
+    <!-- MODAL SAAS DE AUTENTICAÇÃO (LOGIN, REGISTRO, ESQUECI MINHA SENHA) -->
+    <div id="modal-auth" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="bg-surface border border-outline-variant rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col animate-fade-in">
+            <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface">
+                <div>
+                    <h2 id="modal-auth-titulo" class="text-lg font-bold text-on-surface">Acessar Conta SaaS</h2>
+                    <p id="modal-auth-subtitulo" class="text-xs text-outline">Digite suas credenciais para continuar</p>
+                </div>
+                <button onclick="fecharModalAuth()" class="text-outline hover:text-on-surface p-2 rounded-lg hover:bg-surface-variant/30 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <!-- Tabs de alternância (Entrar / Criar Conta / Esqueci Senha) -->
+            <div class="flex border-b border-outline-variant/60 bg-background text-xs font-semibold">
+                <button onclick="alternarTabAuth('login')" id="tab-auth-login" class="flex-1 py-3 text-center border-b-2 border-primary text-primary transition-colors">Entrar</button>
+                <button onclick="alternarTabAuth('registro')" id="tab-auth-registro" class="flex-1 py-3 text-center border-b-2 border-transparent text-outline hover:text-on-surface transition-colors">Criar Conta</button>
+                <button onclick="alternarTabAuth('esqueci')" id="tab-auth-esqueci" class="flex-1 py-3 text-center border-b-2 border-transparent text-outline hover:text-on-surface transition-colors">Esqueci Senha</button>
+            </div>
+
+            <div class="p-6 bg-surface space-y-4">
+                <!-- FORMULÁRIO DE LOGIN -->
+                <form id="form-auth-login" onsubmit="executarLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">E-mail</label>
+                        <input type="email" id="login-email" required placeholder="seuemail@dominio.com" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2.5 text-xs text-on-surface focus:border-primary outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Senha</label>
+                        <input type="password" id="login-senha" required placeholder="••••••••" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2.5 text-xs text-on-surface focus:border-primary outline-none">
+                    </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-primary-hover text-on-primary font-bold py-3 rounded-xl text-xs shadow-md transition-all">
+                        🔑 Entrar na Plataforma
+                    </button>
+                </form>
+
+                <!-- FORMULÁRIO DE REGISTRO -->
+                <form id="form-auth-registro" onsubmit="executarRegistro(event)" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Nome Completo</label>
+                        <input type="text" id="registro-nome" required placeholder="Seu Nome" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2.5 text-xs text-on-surface focus:border-primary outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">E-mail</label>
+                        <input type="email" id="registro-email" required placeholder="seuemail@dominio.com" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2.5 text-xs text-on-surface focus:border-primary outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Senha (Mínimo 6 caracteres)</label>
+                        <input type="password" id="registro-senha" required placeholder="••••••••" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2.5 text-xs text-on-surface focus:border-primary outline-none">
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3 rounded-xl text-xs shadow-md transition-all">
+                        🚀 Criar Minha Conta Grátis
+                    </button>
+                </form>
+
+                <!-- FORMULÁRIO DE ESQUECI MINHA SENHA -->
+                <form id="form-auth-esqueci" onsubmit="executarEsqueciSenha(event)" class="space-y-4 hidden">
+                    <p class="text-xs text-outline leading-relaxed">Digite seu e-mail cadastrado para receber um código de redefinição de senha.</p>
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">E-mail Cadastrado</label>
+                        <input type="email" id="esqueci-email" required placeholder="seuemail@dominio.com" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2.5 text-xs text-on-surface focus:border-primary outline-none">
+                    </div>
+                    <div id="container-redefinir-codigo" class="hidden space-y-3 pt-2 border-t border-outline-variant">
+                        <div>
+                            <label class="block text-xs font-bold text-amber-400 uppercase mb-1">Código de Recuperação (6 Dígitos)</label>
+                            <input type="text" id="esqueci-token" placeholder="123456" class="w-full bg-background border border-amber-400/50 rounded-lg px-3 py-2.5 text-xs text-on-surface focus:border-amber-400 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Nova Senha</label>
+                            <input type="password" id="esqueci-novasenha" placeholder="••••••••" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2.5 text-xs text-on-surface focus:border-primary outline-none">
+                        </div>
+                        <button type="button" onclick="executarRedefinirSenha()" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-3 rounded-xl text-xs shadow-md transition-all">
+                            🔒 Redefinir Senha
+                        </button>
+                    </div>
+                    <button type="submit" id="btn-solicitar-codigo" class="w-full bg-surface-variant/50 hover:bg-surface-variant text-on-surface font-bold py-3 rounded-xl text-xs transition-all">
+                        ✉️ Gerar Código de Recuperação
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -1039,6 +1259,7 @@
             if(secao === 'skills-aprendidas') carregarSkillsAprendidas();
             if(secao === 'loja') carregarLojaPrompts();
             if(secao === 'meus-prompts') carregarMeusPrompts();
+            if(secao === 'admin') carregarAdminDashboard();
             if(secao === 'logs') {
                 iniciarStreamLogs();
                 renderizarLogsTerminal();
@@ -2307,7 +2528,417 @@
             });
         }
 
+        // ==========================================
+        // LÓGICA DE AUTENTICAÇÃO SAAS & PAINEL ADMIN
+        // ==========================================
+        let usuarioLogadoState = null;
+
+        function obterTokenAuth() {
+            return localStorage.getItem('connect_media_token');
+        }
+
+        function salvarTokenAuth(token) {
+            localStorage.setItem('connect_media_token', token);
+        }
+
+        function removerTokenAuth() {
+            localStorage.removeItem('connect_media_token');
+        }
+
+        async function checarSessaoUsuario() {
+            const token = obterTokenAuth();
+            if (!token) {
+                atualizarUiUsuario(null);
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    usuarioLogadoState = data.user;
+                    atualizarUiUsuario(data.user);
+                } else {
+                    removerTokenAuth();
+                    atualizarUiUsuario(null);
+                }
+            } catch(e) {
+                console.error('Erro ao checar sessão:', e);
+            }
+        }
+
+        function atualizarUiUsuario(user) {
+            const lblNome = document.getElementById('lbl-user-nome');
+            const lblEmail = document.getElementById('lbl-user-email');
+            const btnAuth = document.getElementById('btn-user-auth');
+            const navAdmin = document.getElementById('nav-admin');
+
+            if (user) {
+                if (lblNome) lblNome.innerText = user.nome || 'Usuário';
+                if (lblEmail) lblEmail.innerText = user.email + (user.perfil === 'ADMIN' ? ' (ADMIN)' : '');
+                if (btnAuth) {
+                    btnAuth.innerText = 'Sair';
+                    btnAuth.onclick = realizarLogout;
+                    btnAuth.className = 'bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-colors';
+                }
+
+                if (user.perfil === 'ADMIN') {
+                    if (navAdmin) {
+                        navAdmin.classList.remove('hidden');
+                        navAdmin.classList.add('flex');
+                    }
+                } else {
+                    if (navAdmin) {
+                        navAdmin.classList.add('hidden');
+                        navAdmin.classList.remove('flex');
+                    }
+                }
+            } else {
+                if (lblNome) lblNome.innerText = 'Visitante';
+                if (lblEmail) lblEmail.innerText = 'Não autenticado';
+                if (btnAuth) {
+                    btnAuth.innerText = 'Entrar';
+                    btnAuth.onclick = abrirModalAuth;
+                    btnAuth.className = 'bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-colors';
+                }
+                if (navAdmin) {
+                    navAdmin.classList.add('hidden');
+                    navAdmin.classList.remove('flex');
+                }
+            }
+        }
+
+        function abrirModalAuth() {
+            const modal = document.getElementById('modal-auth');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            alternarTabAuth('login');
+        }
+
+        function fecharModalAuth() {
+            const modal = document.getElementById('modal-auth');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function alternarTabAuth(tab) {
+            ['login', 'registro', 'esqueci'].forEach(t => {
+                const form = document.getElementById(`form-auth-${t}`);
+                const tabBtn = document.getElementById(`tab-auth-${t}`);
+                if (form) {
+                    if (t === tab) form.classList.remove('hidden');
+                    else form.classList.add('hidden');
+                }
+                if (tabBtn) {
+                    if (t === tab) tabBtn.className = 'flex-1 py-3 text-center border-b-2 border-primary text-primary transition-colors font-bold';
+                    else tabBtn.className = 'flex-1 py-3 text-center border-b-2 border-transparent text-outline hover:text-on-surface transition-colors font-medium';
+                }
+            });
+        }
+
+        async function executarLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const senha = document.getElementById('login-senha').value;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, senha })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.token) {
+                    salvarTokenAuth(data.token);
+                    usuarioLogadoState = data.user;
+                    atualizarUiUsuario(data.user);
+                    fecharModalAuth();
+                    alert(`🎉 Bem-vindo de volta, ${data.user.nome}!`);
+                    if (data.user.perfil === 'ADMIN') mudarSecao('admin');
+                } else {
+                    alert(data.error || 'Falha ao efetuar login.');
+                }
+            } catch(err) {
+                console.error(err);
+                alert('Erro de conexão ao efetuar login.');
+            }
+        }
+
+        async function executarRegistro(e) {
+            e.preventDefault();
+            const nome = document.getElementById('registro-nome').value;
+            const email = document.getElementById('registro-email').value;
+            const senha = document.getElementById('registro-senha').value;
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email, senha })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.token) {
+                    salvarTokenAuth(data.token);
+                    usuarioLogadoState = data.user;
+                    atualizarUiUsuario(data.user);
+                    fecharModalAuth();
+                    alert(`🚀 Sua conta SaaS foi criada com sucesso, ${data.user.nome}!`);
+                } else {
+                    alert(data.error || 'Erro ao criar conta.');
+                }
+            } catch(err) {
+                console.error(err);
+                alert('Erro ao conectar ao servidor para criar conta.');
+            }
+        }
+
+        async function executarEsqueciSenha(e) {
+            e.preventDefault();
+            const email = document.getElementById('esqueci-email').value;
+
+            try {
+                const res = await fetch('/api/auth/esqueci-senha', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    document.getElementById('container-redefinir-codigo').classList.remove('hidden');
+                    document.getElementById('btn-solicitar-codigo').classList.add('hidden');
+                    if (data.tokenSimulado) {
+                        alert(`📧 [CÓDIGO DE RECUPERAÇÃO]: Seu código é: ${data.tokenSimulado}`);
+                        document.getElementById('esqueci-token').value = data.tokenSimulado;
+                    } else {
+                        alert('Código enviado! Verifique seu e-mail.');
+                    }
+                } else {
+                    alert(data.error || 'Erro ao solicitar código.');
+                }
+            } catch(err) {
+                console.error(err);
+            }
+        }
+
+        async function executarRedefinirSenha() {
+            const email = document.getElementById('esqueci-email').value;
+            const token = document.getElementById('esqueci-token').value;
+            const novaSenha = document.getElementById('esqueci-novasenha').value;
+
+            if (!email || !token || !novaSenha) {
+                alert('Preencha o e-mail, código e a nova senha.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/redefinir-senha', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, token, novaSenha })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert(data.message || 'Senha redefinida com sucesso!');
+                    alternarTabAuth('login');
+                } else {
+                    alert(data.error || 'Erro ao redefinir senha.');
+                }
+            } catch(err) {
+                console.error(err);
+            }
+        }
+
+        function realizarLogout() {
+            if (confirm('Deseja realmente sair da sua conta?')) {
+                removerTokenAuth();
+                usuarioLogadoState = null;
+                atualizarUiUsuario(null);
+                mudarSecao('descoberta');
+                alert('Sessão encerrada com sucesso.');
+            }
+        }
+
+        // ==========================================
+        // PAINEL ADMINISTRATIVO MASTER SAAS
+        // ==========================================
+        async function carregarAdminDashboard() {
+            const token = obterTokenAuth();
+            if (!token) {
+                alert('Acesso negado. Por favor, faça login como Administrador.');
+                abrirModalAuth();
+                return;
+            }
+
+            const headers = { 'Authorization': 'Bearer ' + token };
+
+            try {
+                // 1. Carregar Métricas
+                const resMet = await fetch('/api/admin/metricas', { headers });
+                if (resMet.ok) {
+                    const met = await resMet.json();
+                    document.getElementById('admin-card-fat').innerText = `R$ ${met.faturamentoTotal.toFixed(2).replace('.', ',')}`;
+                    document.getElementById('admin-card-users').innerText = met.totalUsuarios;
+                    document.getElementById('admin-card-vendas').innerText = met.totalVendasPix;
+                    document.getElementById('admin-card-prompts').innerText = met.totalPrompts;
+                }
+
+                // 2. Carregar Usuários
+                const resUsers = await fetch('/api/admin/usuarios', { headers });
+                if (resUsers.ok) {
+                    const users = await resUsers.json();
+                    renderizarTabelaUsuariosAdmin(users);
+                }
+
+                // 3. Carregar Extrato de Vendas
+                const resVendas = await fetch('/api/admin/vendas', { headers });
+                if (resVendas.ok) {
+                    const vendas = await resVendas.json();
+                    renderizarTabelaVendasAdmin(vendas);
+                }
+
+                // 4. Carregar Configuração Pix Mestre
+                const resCfg = await fetch('/api/configuracoes');
+                if (resCfg.ok) {
+                    const cfg = await resCfg.json();
+                    if (document.getElementById('admin-input-chave-mestre')) document.getElementById('admin-input-chave-mestre').value = cfg.chavePix || '';
+                    if (document.getElementById('admin-input-nome-mestre')) document.getElementById('admin-input-nome-mestre').value = cfg.nomeRecebedorPix || '';
+                    if (document.getElementById('admin-input-cidade-mestre')) document.getElementById('admin-input-cidade-mestre').value = cfg.cidadeRecebedorPix || '';
+                }
+
+            } catch(e) {
+                console.error('Erro ao carregar Painel Admin:', e);
+            }
+        }
+
+        function renderizarTabelaUsuariosAdmin(users) {
+            const tbody = document.getElementById('admin-tabela-usuarios');
+            const lblCount = document.getElementById('admin-count-users-table');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (lblCount) lblCount.innerText = users.length;
+
+            users.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-outline-variant/40 hover:bg-surface-variant/20 transition-colors';
+
+                const isAct = u.ATIVO === 1;
+                const statusBadge = isAct
+                    ? '<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-bold">ATIVO</span>'
+                    : '<span class="bg-red-500/10 text-red-400 border border-red-500/30 px-2 py-0.5 rounded text-[10px] font-bold">BLOQUEADO</span>';
+
+                const perfilBadge = u.PERFIL === 'ADMIN'
+                    ? '<span class="bg-purple-500/20 text-purple-300 font-bold px-2 py-0.5 rounded text-[10px]">ADMIN</span>'
+                    : '<span class="text-outline">CLIENTE</span>';
+
+                const btnAcaoStatus = isAct
+                    ? `<button onclick="alterarStatusUsuarioAdmin(${u.ID_USUARIO}, 0)" class="bg-red-500/20 text-red-400 hover:bg-red-500/30 px-2.5 py-1 rounded text-[10px] font-bold transition-colors">Bloquear</button>`
+                    : `<button onclick="alterarStatusUsuarioAdmin(${u.ID_USUARIO}, 1)" class="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 px-2.5 py-1 rounded text-[10px] font-bold transition-colors">Ativar</button>`;
+
+                tr.innerHTML = `
+                    <td class="p-3 font-mono">#${u.ID_USUARIO}</td>
+                    <td class="p-3 font-bold text-on-surface">${escaparHtml(u.NOME)}</td>
+                    <td class="p-3 font-mono text-outline">${escaparHtml(u.EMAIL)}</td>
+                    <td class="p-3">${perfilBadge}</td>
+                    <td class="p-3">${statusBadge}</td>
+                    <td class="p-3 text-outline font-mono">${u.DATA_CADASTRO ? new Date(u.DATA_CADASTRO).toLocaleDateString('pt-BR') : '-'}</td>
+                    <td class="p-3 text-right">${btnAcaoStatus}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function alterarStatusUsuarioAdmin(idUser, novoStatus) {
+            const token = obterTokenAuth();
+            try {
+                const res = await fetch(`/api/admin/usuarios/${idUser}/status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ ativo: novoStatus })
+                });
+                if (res.ok) {
+                    carregarAdminDashboard();
+                } else {
+                    alert('Erro ao alterar status do usuário.');
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        function renderizarTabelaVendasAdmin(vendas) {
+            const tbody = document.getElementById('admin-tabela-vendas');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (vendas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-outline">Nenhuma ordem de pagamento registrada ainda.</td></tr>';
+                return;
+            }
+
+            vendas.forEach(v => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-outline-variant/40 hover:bg-surface-variant/20 transition-colors';
+
+                const isPago = v.STATUS === 'PAGO';
+                const statusBadge = isPago
+                    ? '<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-bold">✓ PAGO</span>'
+                    : '<span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded text-[10px] font-bold">⏳ PENDENTE</span>';
+
+                let itensResumo = '-';
+                try {
+                    const parsed = JSON.parse(v.ITENS_JSON);
+                    if (Array.isArray(parsed)) itensResumo = parsed.map(i => i.titulo).join(', ');
+                } catch(_) {}
+
+                tr.innerHTML = `
+                    <td class="p-3 font-mono font-bold">#${v.ID_VENDA}</td>
+                    <td class="p-3 font-bold text-amber-400">R$ ${parseFloat(v.VALOR_TOTAL || 0).toFixed(2).replace('.', ',')}</td>
+                    <td class="p-3">${statusBadge}</td>
+                    <td class="p-3 font-mono text-outline">${v.DATA_CRIACAO ? new Date(v.DATA_CRIACAO).toLocaleString('pt-BR') : '-'}</td>
+                    <td class="p-3 text-outline truncate max-w-xs" title="${escaparHtml(itensResumo)}">${escaparHtml(itensResumo)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function salvarChavePixMestreAdmin(e) {
+            e.preventDefault();
+            const token = obterTokenAuth();
+            const chavePixMestre = document.getElementById('admin-input-chave-mestre').value;
+            const nomeRecebedor = document.getElementById('admin-input-nome-mestre').value;
+            const cidadeRecebedor = document.getElementById('admin-input-cidade-mestre').value;
+
+            try {
+                const res = await fetch('/api/admin/config-pix', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ chavePixMestre, nomeRecebedor, cidadeRecebedor })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert('🎉 Chave PIX Mestre do SaaS atualizada com sucesso! Todos os pagamentos serão direcionados a este recebedor.');
+                } else {
+                    alert(data.error || 'Erro ao salvar Chave Pix Mestre.');
+                }
+            } catch(e) { console.error(e); }
+        }
+
         // Inicialização
+        checarSessaoUsuario();
         carregarComboCanais();
         carregarDescoberta();
         if (!intervaloDescoberta) intervaloDescoberta = setInterval(carregarDescoberta, 15000);

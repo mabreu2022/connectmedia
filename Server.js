@@ -878,6 +878,290 @@ app.post('/api/prompts/confirmar-pix', (req, res) => {
     });
 });
 
+// =======================================================================
+// ROTAS DE AUTENTICAÇÃO SAAS (LOGIN, CADASTRO, ESQUECI SENHA)
+// =======================================================================
+const crypto = require('crypto');
+
+function hashSenha(senha) {
+    return crypto.createHash('sha256').update(senha || '').digest('hex');
+}
+
+function gerarTokenSessao(usuario) {
+    const payload = {
+        id: usuario.ID_USUARIO,
+        nome: usuario.NOME,
+        email: usuario.EMAIL,
+        perfil: usuario.PERFIL,
+        exp: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 dias
+    };
+    return Buffer.from(JSON.stringify(payload)).toString('base64');
+}
+
+function obterUsuarioSessao(req) {
+    const authHeader = req.headers['authorization'] || req.headers['x-auth-token'];
+    if (!authHeader) return null;
+    const token = authHeader.replace(/^Bearer\s+/, '');
+    try {
+        const payload = JSON.parse(Buffer.from(token, 'base64').toString('utf8'));
+        if (payload.exp && payload.exp > Date.now()) {
+            return payload;
+        }
+    } catch (_) {}
+    return null;
+}
+
+// Rota: Cadastro de Novo Usuário
+app.post('/api/auth/register', (req, res) => {
+    const { nome, email, senha } = req.body;
+    if (!nome || !email || !senha) {
+        return res.status(400).json({ error: 'Nome, e-mail e senha são obrigatórios.' });
+    }
+    if (senha.length < 6) {
+        return res.status(400).json({ error: 'A senha deve ter no mínimo 6 caracteres.' });
+    }
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        const emailLower = email.trim().toLowerCase();
+        db.query('SELECT ID_USUARIO FROM TB_USUARIOS WHERE EMAIL = ?', [emailLower], (err, resExist) => {
+            if (resExist && resExist.length > 0) {
+                db.detach();
+                return res.status(400).json({ error: 'Este e-mail já está cadastrado no sistema.' });
+            }
+
+            const senhaHash = hashSenha(senha);
+            const queryInsert = `
+                INSERT INTO TB_USUARIOS (NOME, EMAIL, SENHA_HASH, PERFIL, ATIVO)
+                VALUES (?, ?, ?, 'CLIENTE', 1)
+                RETURNING ID_USUARIO, NOME, EMAIL, PERFIL
+            `;
+
+            db.query(queryInsert, [nome.trim(), emailLower, senhaHash], (errIns, resIns) => {
+                db.detach();
+                if (errIns) return res.status(500).json({ error: 'Erro ao cadastrar usuário.' });
+
+                const idUser = (resIns && resIns[0] && resIns[0].ID_USUARIO) ? resIns[0].ID_USUARIO : 1;
+                const userObj = { ID_USUARIO: idUser, NOME: nome.trim(), EMAIL: emailLower, PERFIL: 'CLIENTE' };
+                const token = gerarTokenSessao(userObj);
+
+                logger.success('SAAS AUTH', `👤 Novo usuário cadastrado: ${emailLower} (#${idUser})`);
+                res.json({ success: true, token, user: { id: idUser, nome: nome.trim(), email: emailLower, perfil: 'CLIENTE' } });
+            });
+        });
+    });
+});
+
+// Rota: Login de Usuário
+app.post('/api/auth/login', (req, res) => {
+    const { email, senha } = req.body;
+    if (!email || !senha) {
+        return res.status(400).json({ error: 'E-mail e senha são obrigatórios.' });
+    }
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        const emailLower = email.trim().toLowerCase();
+        const senhaHash = hashSenha(senha);
+
+        const query = 'SELECT ID_USUARIO, NOME, EMAIL, PERFIL, ATIVO FROM TB_USUARIOS WHERE EMAIL = ? AND SENHA_HASH = ?';
+        db.query(query, [emailLower, senhaHash], (err, resUser) => {
+            db.detach();
+            if (err || !resUser || resUser.length === 0) {
+                return res.status(401).json({ error: 'E-mail ou senha incorretos.' });
+            }
+
+            const u = resUser[0];
+            if (u.ATIVO === 0) {
+                return res.status(403).json({ error: 'Sua conta está bloqueada pelo Administrador. Entre em contato com o suporte.' });
+            }
+
+            const token = gerarTokenSessao(u);
+            logger.info('SAAS AUTH', `🔑 Login efetuado: ${u.EMAIL} [${u.PERFIL}]`);
+
+            res.json({
+                success: true,
+                token,
+                user: { id: u.ID_USUARIO, nome: u.NOME, email: u.EMAIL, perfil: u.PERFIL }
+            });
+        });
+    });
+});
+
+// Rota: Solicitacao de Recuperação de Senha (Esqueci Minha Senha)
+app.post('/api/auth/esqueci-senha', (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'E-mail é obrigatório.' });
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        const emailLower = email.trim().toLowerCase();
+        const tokenRecuperacao = Math.floor(100000 + Math.random() * 900000).toString(); // Código de 6 dígitos
+
+        db.query('UPDATE TB_USUARIOS SET TOKEN_RECUPERACAO = ? WHERE EMAIL = ?', [tokenRecuperacao, emailLower], (err, resUp) => {
+            db.detach();
+            logger.info('SAAS AUTH', `🔑 Código de recuperação gerado para ${emailLower}: ${tokenRecuperacao}`);
+            res.json({ success: true, message: 'Se o e-mail estiver cadastrado, um código de recuperação foi gerado.', tokenSimulado: tokenRecuperacao });
+        });
+    });
+});
+
+// Rota: Redefinição de Senha com Código
+app.post('/api/auth/redefinir-senha', (req, res) => {
+    const { email, token, novaSenha } = req.body;
+    if (!email || !token || !novaSenha) {
+        return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
+    }
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        const emailLower = email.trim().toLowerCase();
+        const novaSenhaHash = hashSenha(novaSenha);
+
+        const query = 'UPDATE TB_USUARIOS SET SENHA_HASH = ?, TOKEN_RECUPERACAO = NULL WHERE EMAIL = ? AND TOKEN_RECUPERACAO = ?';
+        db.query(query, [novaSenhaHash, emailLower, token], (err, resUp) => {
+            db.detach();
+            logger.success('SAAS AUTH', `✅ Senha redefinida com sucesso para ${emailLower}`);
+            res.json({ success: true, message: 'Senha redefinida com sucesso! Você já pode fazer login com a nova senha.' });
+        });
+    });
+});
+
+// Rota: Perfil do usuário atual
+app.get('/api/auth/me', (req, res) => {
+    const sessao = obterUsuarioSessao(req);
+    if (!sessao) return res.status(401).json({ error: 'Não autenticado.' });
+    res.json({ user: sessao });
+});
+
+// =======================================================================
+// ROTAS EXCLUSIVAS DO PAINEL ADMIN SAAS (APENAS PERFIL 'ADMIN')
+// =======================================================================
+
+// Rota Admin: Métricas Globais e Faturamento
+app.get('/api/admin/metricas', (req, res) => {
+    const sessao = obterUsuarioSessao(req);
+    if (!sessao || sessao.perfil !== 'ADMIN') {
+        return res.status(403).json({ error: 'Acesso negado. Requer perfil de Administrador.' });
+    }
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        db.query('SELECT COUNT(ID_USUARIO) AS TOTAL_USER FROM TB_USUARIOS', (err1, resUser) => {
+            db.query("SELECT SUM(VALOR_TOTAL) AS TOTAL_FAT, COUNT(ID_VENDA) AS TOTAL_VENDAS FROM TB_VENDAS_PIX WHERE STATUS = 'PAGO'", (err2, resFats) => {
+                db.query('SELECT COUNT(ID_PROMPT) AS TOTAL_PROMPTS FROM TB_PROMPTS_LOJA', (err3, resPrompts) => {
+                    db.detach();
+
+                    const totalUsuarios = (resUser && resUser[0]) ? resUser[0].TOTAL_USER : 0;
+                    const faturamentoTotal = (resFats && resFats[0] && resFats[0].TOTAL_FAT) ? parseFloat(resFats[0].TOTAL_FAT) : 0;
+                    const totalVendasPix = (resFats && resFats[0]) ? resFats[0].TOTAL_VENDAS : 0;
+                    const totalPrompts = (resPrompts && resPrompts[0]) ? resPrompts[0].TOTAL_PROMPTS : 0;
+
+                    res.json({
+                        totalUsuarios,
+                        faturamentoTotal,
+                        totalVendasPix,
+                        totalPrompts
+                    });
+                });
+            });
+        });
+    });
+});
+
+// Rota Admin: Lista todos os usuários
+app.get('/api/admin/usuarios', (req, res) => {
+    const sessao = obterUsuarioSessao(req);
+    if (!sessao || sessao.perfil !== 'ADMIN') {
+        return res.status(403).json({ error: 'Acesso negado. Requer perfil de Administrador.' });
+    }
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        db.query('SELECT ID_USUARIO, NOME, EMAIL, PERFIL, ATIVO, DATA_CADASTRO FROM TB_USUARIOS ORDER BY ID_USUARIO DESC', (err, result) => {
+            db.detach();
+            if (err) return res.status(500).json({ error: 'Erro ao buscar usuários.' });
+            res.json(result || []);
+        });
+    });
+});
+
+// Rota Admin: Bloquear / Ativar usuário
+app.post('/api/admin/usuarios/:id/status', (req, res) => {
+    const sessao = obterUsuarioSessao(req);
+    if (!sessao || sessao.perfil !== 'ADMIN') {
+        return res.status(403).json({ error: 'Acesso negado. Requer perfil de Administrador.' });
+    }
+
+    const idUser = req.params.id;
+    const { ativo } = req.body; // 1 ou 0
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        db.query('UPDATE TB_USUARIOS SET ATIVO = ? WHERE ID_USUARIO = ?', [ativo, idUser], (err) => {
+            db.detach();
+            if (err) return res.status(500).json({ error: 'Erro ao atualizar status do usuário.' });
+            logger.info('ADMIN SAAS', `⚙️ Status do usuário #${idUser} alterado para ${ativo === 1 ? 'ATIVO' : 'BLOQUEADO'}`);
+            res.json({ success: true, message: 'Status do usuário atualizado!' });
+        });
+    });
+});
+
+// Rota Admin: Extrato completo de Vendas Pix Globais
+app.get('/api/admin/vendas', (req, res) => {
+    const sessao = obterUsuarioSessao(req);
+    if (!sessao || sessao.perfil !== 'ADMIN') {
+        return res.status(403).json({ error: 'Acesso negado. Requer perfil de Administrador.' });
+    }
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        const query = `
+            SELECT v.ID_VENDA, v.VALOR_TOTAL, v.STATUS, v.DATA_CRIACAO, v.ITENS_JSON
+            FROM TB_VENDAS_PIX v
+            ORDER BY v.ID_VENDA DESC
+        `;
+        db.query(query, (err, result) => {
+            db.detach();
+            if (err) return res.status(500).json({ error: 'Erro ao buscar extrato de vendas.' });
+            res.json(result || []);
+        });
+    });
+});
+
+// Rota Admin: Salva Chave Pix Mestre da Empresa
+app.post('/api/admin/config-pix', (req, res) => {
+    const sessao = obterUsuarioSessao(req);
+    if (!sessao || sessao.perfil !== 'ADMIN') {
+        return res.status(403).json({ error: 'Acesso negado. Requer perfil de Administrador.' });
+    }
+
+    const { chavePixMestre, nomeRecebedor, cidadeRecebedor } = req.body;
+    if (!chavePixMestre) return res.status(400).json({ error: 'A Chave Pix Mestre é obrigatória.' });
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        // Atualiza a tabela mestre do SaaS e também a configuração padrão
+        db.query('UPDATE TB_CONFIGURACOES SET CHAVE_PIX = ?, NOME_RECEBEDOR_PIX = ?, CIDADE_RECEBEDOR_PIX = ? WHERE ID_CONFIG = 1', [
+            chavePixMestre, nomeRecebedor || 'Connect Media Solucoes', cidadeRecebedor || 'Sao Paulo'
+        ], (err) => {
+            db.detach();
+            if (err) return res.status(500).json({ error: 'Erro ao salvar Chave Pix Mestre.' });
+            logger.success('ADMIN SAAS', `❖ Chave Pix Mestre do SaaS atualizada para: ${chavePixMestre}`);
+            res.json({ success: true, message: 'Chave Pix Mestre do SaaS salva com sucesso!' });
+        });
+    });
+});
+
 // Inicializa o Servidor
 app.listen(PORT, () => {
     logger.info('SERVIDIOR', `🚀 Connect Media rodando em http://localhost:${PORT}`);
