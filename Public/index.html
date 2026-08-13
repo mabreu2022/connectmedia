@@ -294,12 +294,15 @@
                     <div class="bg-surface border border-outline-variant rounded-xl p-6 mb-6 space-y-4">
                         <div>
                             <label class="block text-xs font-bold text-outline uppercase mb-2">URL do Vídeo YouTube</label>
-                            <input type="url" id="skill-url" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-background border border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:border-primary outline-none transition-colors text-sm">
+                            <input type="url" id="skill-url" oninput="buscarTituloVideo(this.value)" onpaste="setTimeout(() => buscarTituloVideo(this.value), 50)" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-background border border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:border-primary outline-none transition-colors text-sm">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-outline uppercase mb-2">Título (opcional)</label>
-                                <input type="text" id="skill-titulo" placeholder="Ex: Firebird 5.0 Setup" class="w-full bg-background border border-outline-variant rounded-lg px-4 py-2 text-on-surface focus:border-primary outline-none transition-colors text-sm">
+                                <label class="block text-xs font-bold text-outline uppercase mb-2 flex justify-between items-center">
+                                    <span>Título do Vídeo</span>
+                                    <span id="skill-titulo-status" class="text-[10px] text-primary font-normal"></span>
+                                </label>
+                                <input type="text" id="skill-titulo" placeholder="Preenchido automaticamente ao colando a URL" class="w-full bg-background border border-outline-variant rounded-lg px-4 py-2 text-on-surface focus:border-primary outline-none transition-colors text-sm">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-outline uppercase mb-2">Idioma preferencial</label>
@@ -1049,6 +1052,35 @@
             } catch(e) { console.error(e); }
         }
         // ─── Gerador de Skills ────────────────────────────────────────────────────────
+        let debounceTitulo = null;
+        async function buscarTituloVideo(url) {
+            url = url.trim();
+            if (!url || (!url.includes('youtube.com') && !url.includes('youtu.be'))) return;
+
+            const inputTitulo = document.getElementById('skill-titulo');
+            const statusEl = document.getElementById('skill-titulo-status');
+            
+            if (debounceTitulo) clearTimeout(debounceTitulo);
+
+            debounceTitulo = setTimeout(async () => {
+                try {
+                    if (statusEl) statusEl.textContent = '⏳ Buscando título...';
+                    const res = await fetch(`/api/video-info?url=${encodeURIComponent(url)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.title) {
+                            inputTitulo.value = data.title;
+                            if (statusEl) statusEl.textContent = '✓ Título auto-preenchido!';
+                            setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 4000);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Erro ao buscar título:', e);
+                    if (statusEl) statusEl.textContent = '';
+                }
+            }, 300);
+        }
+
         async function gerarSkill() {
             const url = document.getElementById('skill-url').value.trim();
             const titulo = document.getElementById('skill-titulo').value.trim();

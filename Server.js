@@ -609,6 +609,35 @@ app.get('/api/skills/:slug', (req, res) => {
 });
 
 
+// Rota: Obtém o título do vídeo do YouTube automaticamente
+app.get('/api/video-info', async (req, res) => {
+    const { url } = req.query;
+    if (!url) return res.status(400).json({ error: 'URL é obrigatória' });
+
+    try {
+        // Tenta primeiro via oEmbed API do YouTube (super rápido < 100ms)
+        const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+        const fetchRes = await fetch(oembedUrl);
+        if (fetchRes.ok) {
+            const data = await fetchRes.json();
+            if (data && data.title) {
+                return res.json({ title: data.title, author: data.author_name });
+            }
+        }
+    } catch (_) {}
+
+    // Fallback via yt-dlp
+    const scriptPath = path.join(__dirname, 'yt-dlp.exe');
+    const { execFile } = require('child_process');
+    execFile(scriptPath, ['--get-title', '--no-playlist', url], { timeout: 15000 }, (err, stdout) => {
+        if (!err && stdout && stdout.trim()) {
+            return res.json({ title: stdout.trim() });
+        }
+        res.status(500).json({ error: 'Não foi possível obter o título.' });
+    });
+});
+
+
 // Inicializa o Servidor
 app.listen(PORT, () => {
     console.log(`🚀 Connect Media rodando em http://localhost:${PORT}`);
