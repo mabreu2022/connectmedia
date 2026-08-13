@@ -3529,7 +3529,9 @@
 
 <script>
     (function() {
-        // Cria overlay via JS e injeta no <html> (escapa do body overflow:hidden)
+        var old = document.getElementById('canal-modal-overlay');
+        if (old && old.parentNode) old.parentNode.removeChild(old);
+
         var overlay = document.createElement('div');
         overlay.id = 'canal-modal-overlay';
         overlay.style.cssText = [
@@ -3537,7 +3539,8 @@
             'position:fixed',
             'top:0', 'left:0',
             'width:100%', 'height:100%',
-            'background:rgba(0,0,0,0.82)',
+            'background:rgba(0,0,0,0.85)',
+            'backdrop-filter:blur(6px)',
             'z-index:2147483647',
             'align-items:center',
             'justify-content:center',
@@ -3550,15 +3553,18 @@
             'background:#1e2128',
             'border:1px solid #5c6370',
             'border-radius:14px',
-            'padding:32px',
+            'padding:28px',
             'width:100%',
-            'max-width:480px',
+            'max-width:440px',
             'box-shadow:0 30px 80px rgba(0,0,0,0.8)',
             'position:relative'
         ].join(';');
 
         box.innerHTML = [
-            '<h2 style="font-size:1.2rem;font-weight:700;color:#e8eaf0;margin:0 0 24px 0;">➕ Adicionar Novo Canal</h2>',
+            '<h2 style="font-size:1.2rem;font-weight:700;color:#e8eaf0;margin:0 0 16px 0;display:flex;align-items:center;gap:8px;">',
+            '<span style="color:#adc6ff;">➕</span> Adicionar Novo Canal</h2>',
+            '<div id="canal-modal-msg" style="display:none;padding:8px 12px;border-radius:6px;font-size:13px;font-weight:600;margin-bottom:16px;"></div>',
+            '<form id="form-overlay-canal" onsubmit="return false;">',
             '<div style="margin-bottom:14px;">',
             '<label style="display:block;font-size:11px;font-weight:700;color:#adb5c8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Nome do Canal</label>',
             '<input id="canal-inp-nome" type="text" placeholder="Ex: Canal Tech Brasil" style="display:block;width:100%;background:#111418;border:1px solid #5c6370;border-radius:8px;padding:10px 14px;color:#e8eaf0;font-size:14px;outline:none;box-sizing:border-box;">',
@@ -3569,14 +3575,33 @@
             '</div>',
             '<div style="display:flex;justify-content:flex-end;gap:10px;">',
             '<button id="canal-btn-cancelar" type="button" style="background:#2c3140;color:#c8ccda;padding:9px 20px;border-radius:8px;border:1px solid #5c6370;font-size:14px;cursor:pointer;font-weight:500;">Cancelar</button>',
-            '<button id="canal-btn-salvar" type="button" style="background:#adc6ff;color:#002a78;padding:9px 20px;border-radius:8px;border:none;font-size:14px;font-weight:700;cursor:pointer;">Salvar Canal</button>',
-            '</div>'
+            '<button id="canal-btn-salvar" type="submit" style="background:#adc6ff;color:#002a78;padding:9px 20px;border-radius:8px;border:none;font-size:14px;font-weight:700;cursor:pointer;">Salvar Canal</button>',
+            '</div>',
+            '</form>'
         ].join('');
 
         overlay.appendChild(box);
         document.documentElement.appendChild(overlay);
 
+        function mostrarMensagem(texto, ehErro) {
+            var msg = document.getElementById('canal-modal-msg');
+            if (!msg) return;
+            msg.innerText = texto;
+            msg.style.display = 'block';
+            if (ehErro) {
+                msg.style.background = 'rgba(147,0,10,0.4)';
+                msg.style.color = '#ffb4ab';
+                msg.style.border = '1px solid #ff5540';
+            } else {
+                msg.style.background = 'rgba(0,100,50,0.4)';
+                msg.style.color = '#a0f0c0';
+                msg.style.border = '1px solid #20c070';
+            }
+        }
+
         function abrirCanal() {
+            var msg = document.getElementById('canal-modal-msg');
+            if (msg) { msg.style.display = 'none'; msg.innerText = ''; }
             overlay.style.display = 'flex';
             var n = document.getElementById('canal-inp-nome');
             var u = document.getElementById('canal-inp-url');
@@ -3594,34 +3619,64 @@
         document.getElementById('canal-btn-cancelar').onclick = fecharCanal;
         overlay.addEventListener('click', function(e){ if (e.target === overlay) fecharCanal(); });
 
-        document.getElementById('canal-btn-salvar').onclick = async function() {
-            var nome = (document.getElementById('canal-inp-nome').value || '').trim();
-            var url  = (document.getElementById('canal-inp-url').value  || '').trim();
-            if (!nome || !url) { alert('Preencha o Nome e a URL do canal.'); return; }
+        async function executarSalvar() {
+            var msg = document.getElementById('canal-modal-msg');
+            if (msg) msg.style.display = 'none';
+
+            var nomeInp = document.getElementById('canal-inp-nome');
+            var urlInp  = document.getElementById('canal-inp-url');
+            var nome = (nomeInp ? nomeInp.value : '').trim();
+            var url  = (urlInp  ? urlInp.value  : '').trim();
+
+            if (!nome || !url) {
+                mostrarMensagem('⚠️ Preencha o Nome e a URL do canal.', true);
+                return;
+            }
+
             var btn = document.getElementById('canal-btn-salvar');
-            btn.disabled = true; btn.textContent = 'Salvando...';
+            if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+
             try {
-                var res  = await fetch('/api/canais', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({nome:nome, url:url}) });
+                var res  = await fetch('/api/canais', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({nome: nome, url: url})
+                });
                 var data = await res.json();
                 if (res.ok) {
                     fecharCanal();
-                    if (typeof carregarCanais      === 'function') carregarCanais();
+                    if (typeof carregarCanais === 'function') carregarCanais();
                     if (typeof carregarComboCanais === 'function') carregarComboCanais();
-                    alert(data.message || 'Canal cadastrado com sucesso!');
-                } else { alert(data.error || 'Erro ao salvar.'); }
-            } catch(e) { alert('Erro de conexão.'); }
-            finally { btn.disabled = false; btn.textContent = 'Salvar Canal'; }
+                } else {
+                    mostrarMensagem('❌ ' + (data.error || 'Erro ao salvar canal.'), true);
+                }
+            } catch(e) {
+                console.error(e);
+                mostrarMensagem('❌ Erro de conexão ao salvar canal.', true);
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Salvar Canal'; }
+            }
+        }
+
+        var form = document.getElementById('form-overlay-canal');
+        if (form) {
+            form.onsubmit = function(e) {
+                if (e) e.preventDefault();
+                executarSalvar();
+                return false;
+            };
+        }
+
+        document.getElementById('canal-btn-salvar').onclick = function(e) {
+            if (e) e.preventDefault();
+            executarSalvar();
         };
 
-        // Vincula todos os botoes de adicionar canal
         var botoesAdicionar = document.querySelectorAll('#btn-adicionar-canal, [onclick*="abrirModalCanal"]');
         botoesAdicionar.forEach(function(btn) {
             btn.onclick = null;
             btn.addEventListener('click', abrirCanal);
         });
-
-        console.log('[Canal Modal v3] OK. Botoes:', botoesAdicionar.length, '| Overlay no html:', overlay.parentElement.tagName);
     })();
 </script>
-
 </html>
