@@ -274,7 +274,7 @@
 <div id="modal-canal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); align-items:center; justify-content:center; z-index:9999; padding:1rem;">
     <div style="background:#1a1d24; border:1px solid #424754; border-radius:12px; padding:1.5rem; width:100%; max-width:28rem; box-shadow:0 25px 50px rgba(0,0,0,0.6);">
         <h2 style="font-size:1.125rem; font-weight:700; color:#e1e2ec; margin-bottom:1rem;">Adicionar Novo Canal</h2>
-        <form id="form-novo-canal">
+        <form id="form-novo-canal" onsubmit="salvarNovoCanal(event)">
             <div id="modal-error" style="display:none; color:#ffb4ab; background:rgba(147,0,10,0.3); border:1px solid #ff5540; padding:0.5rem 0.75rem; border-radius:6px; font-size:0.8rem; margin-bottom:1rem;"></div>
             <div style="margin-bottom:1rem;">
                 <label style="display:block; font-size:0.7rem; font-weight:700; color:#c2c6d6; text-transform:uppercase; margin-bottom:0.25rem;">Nome do Canal</label>
@@ -287,7 +287,7 @@
                     style="width:100%; background:#10131a; border:1px solid #424754; border-radius:6px; padding:0.5rem 0.75rem; color:#e1e2ec; outline:none; font-size:0.875rem; box-sizing:border-box;">
             </div>
             <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem;">
-                <button type="button" id="btn-cancelar-modal" style="background:rgba(50,53,60,0.5); color:#e1e2ec; padding:0.5rem 1rem; border-radius:6px; border:1px solid #424754; font-size:0.875rem; cursor:pointer;">Cancelar</button>
+                <button type="button" id="btn-cancelar-modal" onclick="fecharModalCanal()" style="background:rgba(50,53,60,0.5); color:#e1e2ec; padding:0.5rem 1rem; border-radius:6px; border:1px solid #424754; font-size:0.875rem; cursor:pointer;">Cancelar</button>
                 <button type="submit" id="btn-salvar-canal" style="background:#adc6ff; color:#002e6a; padding:0.5rem 1rem; border-radius:6px; border:none; font-size:0.875rem; font-weight:700; cursor:pointer;">Salvar Canal</button>
             </div>
         </form>
@@ -397,23 +397,26 @@
     }
     window.fecharModalCanal = fecharModalCanal;
 
-    document.getElementById('btn-cancelar-modal').addEventListener('click', fecharModalCanal);
-
-    document.getElementById('form-novo-canal').addEventListener('submit', async function(e) {
-        e.preventDefault();
+    async function salvarNovoCanal(e) {
+        if (e) e.preventDefault();
         const errDiv = document.getElementById('modal-error');
         const btnSalvar = document.getElementById('btn-salvar-canal');
         if (errDiv) { errDiv.style.display = 'none'; errDiv.innerText = ''; }
 
-        const nome = document.getElementById('modal-nome').value.trim();
-        const url = document.getElementById('modal-url').value.trim();
+        const nomeEl = document.getElementById('modal-nome');
+        const urlEl = document.getElementById('modal-url');
+        const nome = nomeEl ? nomeEl.value.trim() : '';
+        const url = urlEl ? urlEl.value.trim() : '';
+
         if (!nome || !url) { 
             if (errDiv) { errDiv.innerText = 'Preencha o Nome e a URL do canal.'; errDiv.style.display = 'block'; }
             return; 
         }
 
-        btnSalvar.disabled = true;
-        btnSalvar.innerText = 'Salvando...';
+        if (btnSalvar) {
+            btnSalvar.disabled = true;
+            btnSalvar.innerText = 'Salvando...';
+        }
 
         try {
             const res = await fetch('/api/canais', {
@@ -442,10 +445,13 @@
                 alert('Erro de conexão ao salvar canal.');
             }
         } finally {
-            btnSalvar.disabled = false;
-            btnSalvar.innerText = 'Salvar Canal';
+            if (btnSalvar) {
+                btnSalvar.disabled = false;
+                btnSalvar.innerText = 'Salvar Canal';
+            }
         }
-    });
+    }
+    window.salvarNovoCanal = salvarNovoCanal;
 
     document.addEventListener('DOMContentLoaded', carregarCanais);
 </script>

@@ -1336,7 +1336,7 @@
     <div id="modal-canal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); align-items:center; justify-content:center; z-index:99999; padding:1rem;">
         <div style="background:#191c20; border:1px solid #43474e; border-radius:12px; padding:1.5rem; width:100%; max-width:28rem; box-shadow:0 25px 50px rgba(0,0,0,0.6);">
             <h2 style="font-size:1.125rem; font-weight:700; color:#e2e2e6; margin-bottom:1rem;">Adicionar Novo Canal</h2>
-            <form id="form-canal">
+            <form id="form-canal" onsubmit="salvarNovoCanal(event)">
                 <div id="modal-canal-error" style="display:none; color:#ffb4ab; background:rgba(147,0,10,0.3); border:1px solid #ff5540; padding:0.5rem 0.75rem; border-radius:6px; font-size:0.8rem; margin-bottom:1rem;"></div>
                 <div style="margin-bottom:1rem;">
                     <label style="display:block; font-size:0.7rem; font-weight:700; color:#8d9199; text-transform:uppercase; margin-bottom:0.25rem;">Nome do Canal</label>
