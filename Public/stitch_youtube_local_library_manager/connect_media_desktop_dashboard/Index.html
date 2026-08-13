@@ -241,7 +241,7 @@
 <h2 class="font-display-lg text-display-lg text-primary">Canais Monitorados</h2>
 <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Configuração de scraping e monitoramento ativo.</p>
 </div>
-<button class="bg-[#3b82f6] hover:bg-blue-400 text-white px-4 py-2 rounded-lg font-body-sm font-medium flex items-center gap-2 transition-colors shadow-sm">
+<button onclick="abrirModalCanal()" class="bg-[#3b82f6] hover:bg-blue-400 text-white px-4 py-2 rounded-lg font-body-sm font-medium flex items-center gap-2 transition-colors shadow-sm cursor-pointer">
 <span class="material-symbols-outlined text-sm">add</span> Adicionar Canal
                     </button>
 </div>
@@ -339,5 +339,77 @@
             });
             document.getElementById('sec-' + tabId).classList.remove('hidden');
         }
+
+        function abrirModalCanal() {
+            if (document.getElementById('modal-nome')) document.getElementById('modal-nome').value = '';
+            if (document.getElementById('modal-url')) document.getElementById('modal-url').value = '';
+            const modal = document.getElementById('modal-canal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                modal.style.setProperty('display', 'flex', 'important');
+            }
+        }
+        window.abrirModalCanal = abrirModalCanal;
+
+        function fecharModalCanal() {
+            const modal = document.getElementById('modal-canal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                modal.style.setProperty('display', 'none', 'important');
+            }
+        }
+
+        async function salvarNovoCanal(e) {
+            e.preventDefault();
+            const nome = document.getElementById('modal-nome').value.trim();
+            const url = document.getElementById('modal-url').value.trim();
+
+            if (!nome || !url) {
+                alert('Preencha o Nome e a URL do canal.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/canais', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, url })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    fecharModalCanal();
+                    alert(data.message || 'Canal cadastrado com sucesso!');
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Erro ao salvar canal.');
+                }
+            } catch(err) {
+                console.error(err);
+                alert('Erro de conexão ao salvar canal.');
+            }
+        }
     </script>
+
+<!-- Modal Novo Canal -->
+<div id="modal-canal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-surface border border-outline-variant rounded-xl p-6 w-full max-w-md shadow-2xl">
+        <h2 class="text-lg font-bold text-on-surface mb-4">Adicionar Novo Canal</h2>
+        <form onsubmit="salvarNovoCanal(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Nome do Canal</label>
+                <input type="text" id="modal-nome" required placeholder="Ex: Canal Tech" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">URL do YouTube</label>
+                <input type="text" id="modal-url" required placeholder="Ex: https://www.youtube.com/@CanalTech" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+            </div>
+            <div class="flex justify-end space-x-3 mt-6">
+                <button type="button" onclick="fecharModalCanal()" class="bg-surface-variant/30 hover:bg-surface-variant/50 text-on-surface px-4 py-2 rounded text-sm transition-colors">Cancelar</button>
+                <button type="submit" class="bg-primary hover:bg-[#d8e2ff] text-on-primary px-4 py-2 rounded text-sm font-medium transition-colors">Salvar Canal</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body></html>
