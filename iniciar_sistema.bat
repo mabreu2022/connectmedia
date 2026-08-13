@@ -2,7 +2,7 @@
 title Connect Media - Ecossistema Completo
 
 :: Navega para a pasta correta do projeto
-cd /d "D:\Projetos AntiGravity\Connect Media"
+cd /d "%~dp0"
 
 echo [0/3] Verificando e Inicializando Banco Firebird...
 node init_db.js

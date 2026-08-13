@@ -9,6 +9,7 @@ set "INSTALL_FIREBIRD=1"
 set "INSTALL_NPM=1"
 set "INSTALL_DB=1"
 set "INSTALL_SHORTCUT=1"
+set "INSTALL_AUTOSTART=1"
 
 :: Variáveis de resultado final para a tabela de resumo
 set "STATUS_NODE=PENDENTE"
@@ -16,6 +17,7 @@ set "STATUS_FIREBIRD=PENDENTE"
 set "STATUS_NPM=PENDENTE"
 set "STATUS_DB=PENDENTE"
 set "STATUS_SHORTCUT=PENDENTE"
+set "STATUS_AUTOSTART=PENDENTE"
 
 cls
 echo.
@@ -43,6 +45,9 @@ echo       Criação da estrutura e tabelas no arquivo BIBLIOTECA_YT.FDB.
 echo.
 echo   [5] 🟢 Atalho na Área de Trabalho
 echo       Atalho "Connect Media" para inicialização invisível em 1-clique.
+echo.
+echo   [6] 🟢 Inicialização Automática com o Windows (Startup)
+echo       Inicia os serviços do Connect Media automaticamente ao ligar o computador.
 echo.
 echo =======================================================================
 echo.
@@ -79,6 +84,9 @@ if /i "%C4%"=="N" set "INSTALL_DB=0"
 set /p C5="> Deseja criar o atalho na Área de Trabalho? (S/N) [S]: "
 if /i "%C5%"=="N" set "INSTALL_SHORTCUT=0"
 
+set /p C6="> Deseja iniciar o Connect Media automaticamente com o Windows? (S/N) [S]: "
+if /i "%C6%"=="N" set "INSTALL_AUTOSTART=0"
+
 echo.
 echo -----------------------------------------------------------------------
 echo Componentes Selecionados:
@@ -87,6 +95,7 @@ if "%INSTALL_FIREBIRD%"=="1" (echo  - Firebird 5.0 (32-bit): SIM) else (echo  - 
 if "%INSTALL_NPM%"=="1" (echo  - Dependências NPM: SIM) else (echo  - Dependências NPM: NÃO)
 if "%INSTALL_DB%"=="1" (echo  - Banco de Dados Firebird: SIM) else (echo  - Banco de Dados Firebird: NÃO)
 if "%INSTALL_SHORTCUT%"=="1" (echo  - Atalho na Área de Trabalho: SIM) else (echo  - Atalho na Área de Trabalho: NÃO)
+if "%INSTALL_AUTOSTART%"=="1" (echo  - Inicialização Automática (Windows): SIM) else (echo  - Inicialização Automática (Windows): NÃO)
 echo -----------------------------------------------------------------------
 echo.
 pause
@@ -300,6 +309,43 @@ if exist "%DESKTOP_DIR%\Connect Media.lnk" (
     set "STATUS_SHORTCUT=AVISO"
 )
 
+:ETAPA_AUTOSTART
+echo.
+:: -------------------------------------------------------------------------
+:: COMPONENTE 6: INICIALIZAÇÃO AUTOMÁTICA (STARTUP DO WINDOWS)
+:: -------------------------------------------------------------------------
+echo -----------------------------------------------------------------------
+echo [Etapa 6/6] Configurando Inicialização Automática com o Windows...
+echo -----------------------------------------------------------------------
+if "%INSTALL_AUTOSTART%"=="0" (
+    echo ℹ️  Inicialização automática ignorada pelo usuário.
+    set "STATUS_AUTOSTART=IGNORADO"
+    goto :EXIBIR_RESUMO
+)
+
+set "VBS_AUTOSTART=%TEMP%\criar_autostart_connectmedia.vbs"
+set "STARTUP_DIR=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
+set "TARGET_PATH=%~dp0iniciar_invisivel.vbs"
+set "WORKING_DIR=%~dp0"
+
+echo Set WshShell = CreateObject("WScript.Shell") > "%VBS_AUTOSTART%"
+echo Set oLink = WshShell.CreateShortcut("%STARTUP_DIR%\Connect Media.lnk") >> "%VBS_AUTOSTART%"
+echo oLink.TargetPath = "%TARGET_PATH%" >> "%VBS_AUTOSTART%"
+echo oLink.WorkingDirectory = "%WORKING_DIR%" >> "%VBS_AUTOSTART%"
+echo oLink.Description = "Connect Media - Inicialização Automática em Segundo Plano" >> "%VBS_AUTOSTART%"
+echo oLink.Save >> "%VBS_AUTOSTART%"
+
+cscript //nologo "%VBS_AUTOSTART%" >nul 2>&1
+del "%VBS_AUTOSTART%" >nul 2>&1
+
+if exist "%STARTUP_DIR%\Connect Media.lnk" (
+    echo ✅ Connect Media configurado para iniciar automaticamente com o Windows!
+    set "STATUS_AUTOSTART=SUCESSO (Criado)"
+) else (
+    echo ⚠️ Não foi possível criar o atalho na pasta de inicialização do Windows.
+    set "STATUS_AUTOSTART=AVISO"
+)
+
 :EXIBIR_RESUMO
 echo.
 echo =======================================================================
@@ -313,6 +359,7 @@ echo  2. Firebird 5.0 32-bit (x86)       | %STATUS_FIREBIRD%
 echo  3. Dependências do Projeto (NPM)   | %STATUS_NPM%
 echo  4. Banco de Dados Firebird (FDB)   | %STATUS_DB%
 echo  5. Atalho Área de Trabalho         | %STATUS_SHORTCUT%
+echo  6. Inicialização Automática        | %STATUS_AUTOSTART%
 echo -----------------------------------------------------------------------
 echo.
 echo =======================================================================

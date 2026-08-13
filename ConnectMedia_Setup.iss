@@ -35,6 +35,7 @@ Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortugue
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "autostarticon"; Description: "Iniciar o Connect Media automaticamente ao ligar o Windows"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
 ; Copia toda a estrutura preparada da pasta Dist_Instalador_ConnectMedia
@@ -43,6 +44,7 @@ Source: "Dist_Instalador_ConnectMedia\*"; DestDir: "{app}"; Flags: ignoreversion
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "wscript.exe"; Parameters: """{app}\{#MyAppExeName}"""; WorkingDir: "{app}"; Comment: "Gerenciador de Mídias e Monitor do YouTube"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "wscript.exe"; Parameters: """{app}\{#MyAppExeName}"""; WorkingDir: "{app}"; Comment: "Gerenciador de Mídias e Monitor do YouTube"; Tasks: desktopicon
+Name: "{autostartup}\{#MyAppName}"; Filename: "wscript.exe"; Parameters: """{app}\{#MyAppExeName}"""; WorkingDir: "{app}"; Comment: "Gerenciador de Mídias e Monitor do YouTube"; Tasks: autostarticon
 
 [Run]
 ; Executa o instalador auxiliar para checar Node.js, Firebird 5.0 (32-bit) e criar banco de dados

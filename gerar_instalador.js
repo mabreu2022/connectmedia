@@ -19,6 +19,7 @@ fs.mkdirSync(outputDir, { recursive: true });
 // 2. Lista de arquivos e diretórios para incluir no pacote do cliente
 const itemsToCopy = [
     'instalar.bat',
+    'configurar_autostart.bat',
     'iniciar_sistema.bat',
     'iniciar_invisivel.vbs',
     'Server.js',
