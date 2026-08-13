@@ -144,21 +144,41 @@ if "%INSTALL_FIREBIRD%"=="0" (
     goto :ETAPA_NPM
 )
 
-:: Verifica se o serviço FirebirdServer está rodando ou se o diretório Firebird de 32 bits existe
+:: CHECAGEM EXAUSTIVA 1: Serviços do Windows (FirebirdServer, FirebirdServerDefault, FirebirdGuardian, etc.)
 sc query FirebirdServer >nul 2>&1
-if %errorlevel% equ 0 (
-    echo ✅ Serviço do Firebird Server (32-bit) detectado e ativo!
-    set "STATUS_FIREBIRD=OK (Já Instalado)"
-    goto :ETAPA_NPM
-)
+if %errorlevel% equ 0 goto :FIREBIRD_DETECTADO
 
-if exist "C:\Program Files (x86)\Firebird\Firebird_5_0\firebird.exe" (
-    echo ✅ Firebird 5.0 (32-bit) encontrado em C:\Program Files (x86)\Firebird.
-    set "STATUS_FIREBIRD=OK (Já Instalado)"
-    goto :ETAPA_NPM
-)
+sc query FirebirdServerDefault >nul 2>&1
+if %errorlevel% equ 0 goto :FIREBIRD_DETECTADO
 
-echo ⏳ Firebird 5.0 (32-bit) não detectado. Iniciando download do instalador 32-bit (x86)...
+sc query FirebirdGuardianDefault >nul 2>&1
+if %errorlevel% equ 0 goto :FIREBIRD_DETECTADO
+
+net start 2>nul | findstr /i "Firebird" >nul 2>&1
+if %errorlevel% equ 0 goto :FIREBIRD_DETECTADO
+
+:: CHECAGEM EXAUSTIVA 2: Chaves de Registro do Windows
+reg query "HKLM\SOFTWARE\Firebird Project\Firebird Server" >nul 2>&1
+if %errorlevel% equ 0 goto :FIREBIRD_DETECTADO
+
+reg query "HKLM\SOFTWARE\WOW6432Node\Firebird Project\Firebird Server" >nul 2>&1
+if %errorlevel% equ 0 goto :FIREBIRD_DETECTADO
+
+:: CHECAGEM EXAUSTIVA 3: Diretórios Padrão de Instalação no Disco
+if exist "C:\Program Files (x86)\Firebird" goto :FIREBIRD_DETECTADO
+if exist "C:\Program Files\Firebird" goto :FIREBIRD_DETECTADO
+if exist "%SystemRoot%\SysWOW64\fbclient.dll" goto :FIREBIRD_DETECTADO
+if exist "%SystemRoot%\System32\fbclient.dll" goto :FIREBIRD_DETECTADO
+
+:: CHECAGEM EXAUSTIVA 4: Executáveis no PATH
+where fbguard >nul 2>&1
+if %errorlevel% equ 0 goto :FIREBIRD_DETECTADO
+
+where isql >nul 2>&1
+if %errorlevel% equ 0 goto :FIREBIRD_DETECTADO
+
+:: Se NENHUMA checagem encontrou o Firebird, efetua o download e instalação
+echo ⏳ Firebird não detectado na máquina. Iniciando download do instalador 32-bit (x86)...
 set "FB_SETUP=%TEMP%\Firebird-5.0-x86_Setup.exe"
 
 :: Tenta primeiro via winget forçando arquitetura 32-bit (x86)
@@ -190,6 +210,11 @@ if exist "%FB_SETUP%" (
     echo 💡 Baixe manualmente em: https://firebirdsql.org/en/firebird-5-0/
     set "STATUS_FIREBIRD=FALHA"
 )
+goto :ETAPA_NPM
+
+:FIREBIRD_DETECTADO
+echo ✅ O Firebird já está instalado nesta máquina! Instalação ignorada para evitar sobreposição.
+set "STATUS_FIREBIRD=OK (Já Instalado)"
 
 :ETAPA_NPM
 echo.
