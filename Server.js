@@ -149,6 +149,16 @@ app.get('/api/videos', (req, res) => {
                 console.error('Erro na query de vídeos:', err);
                 return res.status(500).json({ error: 'Erro ao buscar vídeos.' });
             }
+            if (Array.isArray(result)) {
+                result.forEach(v => {
+                    if (v.THUMBNAIL_URL) {
+                        v.THUMBNAIL_URL = String(v.THUMBNAIL_URL).trim();
+                        if (!v.THUMBNAIL_URL.startsWith('http')) {
+                            v.THUMBNAIL_URL = 'https://img.youtube.com/vi/default/mqdefault.jpg';
+                        }
+                    }
+                });
+            }
             res.json(result);
         });
     });
