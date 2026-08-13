@@ -71,6 +71,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
                     <span>Gerador de Skills</span>
                 </button>
+                <button onclick="mudarSecao('skills-aprendidas')" id="nav-skills-aprendidas" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-variant/20 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /></svg>
+                    <span>Skills Aprendidas</span>
+                </button>
                 <button onclick="mudarSecao('manual')" id="nav-manual" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-variant/20 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                     <span>Manual de Uso</span>
@@ -526,10 +530,52 @@
                         Connect Media v2.0 • Desenvolvido com Antigravity IDE • Banco de dados: Firebird 5.0
                     </div>
                 </div>
+            <!-- 8. SEÇÃO: SKILLS APRENDIDAS -->
+            <section class="content-section hidden flex flex-col h-full overflow-hidden" id="sec-skills-aprendidas">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4 shrink-0 p-8 pb-0">
+                    <div>
+                        <h1 class="text-2xl font-bold text-on-surface">🎓 Skills Aprendidas da IA</h1>
+                        <p class="text-xs text-outline mt-1">Conhecimentos técnicos extraídos de vídeos disponíveis para orientação do Antigravity IDE.</p>
+                    </div>
+                    <button onclick="carregarSkillsAprendidas()" class="bg-surface-variant/30 hover:bg-surface-variant/50 text-on-surface px-4 py-2 rounded-lg text-xs font-medium transition-colors flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        <span>Atualizar Lista</span>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto px-8 pb-8">
+                    <div id="grid-skills-aprendidas" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <!-- Cards das skills são inseridos via JS -->
+                    </div>
+                </div>
             </section>
 
         </div>
     </main>
+
+    <!-- MODAL VISUALIZADOR DE SKILL -->
+    <div id="modal-skill-viewer" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4 sm:p-8">
+        <div class="bg-surface border border-outline-variant rounded-xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+            <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface">
+                <div>
+                    <h2 id="modal-skill-titulo" class="text-lg font-bold text-on-surface">Título da Skill</h2>
+                    <p id="modal-skill-slug" class="text-xs text-primary font-mono mt-0.5"></p>
+                </div>
+                <button onclick="fecharModalSkill()" class="text-outline hover:text-on-surface p-2 rounded-lg hover:bg-surface-variant/30 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 bg-background">
+                <pre id="modal-skill-conteudo" class="text-xs text-on-surface/90 font-mono whitespace-pre-wrap leading-relaxed select-text"></pre>
+            </div>
+            <div class="p-4 border-t border-outline-variant flex justify-between items-center bg-surface">
+                <a id="modal-skill-yt-link" href="#" target="_blank" class="bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 px-4 py-2 rounded text-xs font-semibold flex items-center gap-2 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                    Assistir Vídeo Fonte no YouTube
+                </a>
+                <button onclick="fecharModalSkill()" class="bg-surface-variant/30 hover:bg-surface-variant/50 text-on-surface px-4 py-2 rounded text-xs font-medium transition-colors">Fechar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal Novo Canal -->
     <div id="modal-canal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
@@ -596,6 +642,11 @@
                 const conteudo = linha.innerText.toLowerCase();
                 linha.style.display = conteudo.includes(texto) ? '' : 'none';
             });
+
+            document.querySelectorAll('#grid-skills-aprendidas > div').forEach(card => {
+                const conteudo = card.innerText.toLowerCase();
+                card.style.display = conteudo.includes(texto) ? '' : 'none';
+            });
         }
 
         function aplicarFiltroAtual() {
@@ -637,6 +688,7 @@
                 if (!intervaloFila) intervaloFila = setInterval(carregarFila, 3000);
             }
             if(secao === 'configuracoes') carregarConfiguracoes();
+            if(secao === 'skills-aprendidas') carregarSkillsAprendidas();
             
             aplicarFiltroAtual();
         }
@@ -1049,6 +1101,94 @@
             btn.disabled = false;
             btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg> Gerar Skill .md`;
         }
+
+        // ─── Listagem e Exibição de Skills Aprendidas ─────────────────────────────
+        async function carregarSkillsAprendidas() {
+            try {
+                const res = await fetch('/api/skills');
+                const skills = await res.json();
+                const grid = document.getElementById('grid-skills-aprendidas');
+                grid.innerHTML = '';
+
+                if (!skills || skills.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-span-full bg-surface border border-outline-variant rounded-xl p-8 text-center space-y-3">
+                            <div class="text-3xl">🧠</div>
+                            <h3 class="text-base font-bold text-on-surface">Nenhuma skill aprendida ainda</h3>
+                            <p class="text-xs text-outline max-w-md mx-auto">Use o <strong>Gerador de Skills</strong> no menu lateral para extrair conhecimentos de vídeos do YouTube.</p>
+                            <button onclick="mudarSecao('skill')" class="bg-primary hover:bg-[#d8e2ff] text-on-primary px-4 py-2 rounded-lg text-xs font-medium transition-colors inline-flex items-center gap-2">
+                                🚀 Ir para o Gerador de Skills
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                skills.forEach(s => {
+                    const card = document.createElement('div');
+                    card.className = "bg-surface border border-outline-variant hover:border-primary/50 rounded-xl p-6 flex flex-col justify-between transition-all duration-200 shadow-sm hover:shadow-md";
+                    
+                    const dateFormatted = s.generated_at ? `Gerado em ${s.generated_at}` : 'Skill Recente';
+                    const ytLink = s.source ? `<a href="${s.source}" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 font-medium hover:underline"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg> Ver no YouTube</a>` : '<span class="text-xs text-outline">Vídeo local</span>';
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-3">
+                                <span class="text-[10px] bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded font-mono uppercase font-bold">@${s.slug}</span>
+                                <span class="text-[10px] text-outline">${dateFormatted}</span>
+                            </div>
+                            <h3 class="text-base font-bold text-on-surface line-clamp-2 mb-2">${s.name}</h3>
+                            <p class="text-xs text-outline line-clamp-3 leading-relaxed mb-4">${s.description}</p>
+                        </div>
+                        <div class="pt-4 border-t border-outline-variant/60 flex items-center justify-between gap-2 mt-2">
+                            ${ytLink}
+                            <button onclick="abrirModalSkill('${s.slug}')" class="bg-surface-variant/30 hover:bg-surface-variant/60 text-on-surface px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                Ler Transcrição
+                            </button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+                aplicarFiltroAtual();
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function abrirModalSkill(slug) {
+            try {
+                const res = await fetch(`/api/skills/${slug}`);
+                const data = await res.json();
+                
+                document.getElementById('modal-skill-titulo').textContent = data.slug.replace(/_/g, ' ').toUpperCase();
+                document.getElementById('modal-skill-slug').textContent = `.agents/skills/${data.slug}/SKILL.md`;
+                document.getElementById('modal-skill-conteudo').textContent = data.content;
+
+                const matchYt = data.content.match(/source:\s*(.+)$/m) || data.content.match(/\[Assistir no YouTube\]\((.+?)\)/);
+                const ytUrl = matchYt ? matchYt[1].trim() : '#';
+                const linkBtn = document.getElementById('modal-skill-yt-link');
+                linkBtn.href = ytUrl;
+                if (ytUrl === '#' || !ytUrl.startsWith('http')) {
+                    linkBtn.classList.add('hidden');
+                } else {
+                    linkBtn.classList.remove('hidden');
+                }
+
+                const modal = document.getElementById('modal-skill-viewer');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        function fecharModalSkill() {
+            const modal = document.getElementById('modal-skill-viewer');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
 
         async function carregarConfiguracoes() {
             try {

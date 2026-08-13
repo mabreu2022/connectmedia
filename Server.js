@@ -545,6 +545,67 @@ app.post('/api/gerar-skill', (req, res) => {
     });
 });
 
+// Rota: Listagem de Skills aprendidas (.agents/skills/*)
+app.get('/api/skills', (req, res) => {
+    const skillsDir = path.join(__dirname, '.agents', 'skills');
+    
+    if (!fs.existsSync(skillsDir)) {
+        return res.json([]);
+    }
+
+    try {
+        const folders = fs.readdirSync(skillsDir, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name);
+
+        const skills = [];
+
+        for (const slug of folders) {
+            const filePath = path.join(skillsDir, slug, 'SKILL.md');
+            if (fs.existsSync(filePath)) {
+                const content = fs.readFileSync(filePath, 'utf8');
+                
+                const nameMatch = content.match(/^name:\s*(.+)$/m) || content.match(/^#\s*(.+)$/m);
+                const sourceMatch = content.match(/^source:\s*(.+)$/m) || content.match(/\[Assistir no YouTube\]\((.+?)\)/);
+                const descMatch = content.match(/description:\s*>([\s\S]*?)(?:---|\n[a-z_]+:|$)/m) || content.match(/^description:\s*(.+)$/m);
+                const dateMatch = content.match(/^generated_at:\s*(.+)$/m) || content.match(/Gerado em:\s*(.+)/);
+
+                let description = '';
+                if (descMatch && descMatch[1]) {
+                    description = descMatch[1].replace(/\n/g, ' ').trim();
+                }
+
+                skills.push({
+                    slug,
+                    name: nameMatch ? nameMatch[1].trim() : slug,
+                    source: sourceMatch ? sourceMatch[1].trim() : '',
+                    description: description || 'Conhecimento extraído para o Antigravity IDE.',
+                    generated_at: dateMatch ? dateMatch[1].trim() : '',
+                    path: `.agents/skills/${slug}/SKILL.md`
+                });
+            }
+        }
+
+        res.json(skills);
+    } catch (err) {
+        console.error('Erro ao listar skills:', err);
+        res.status(500).json({ error: 'Erro ao carregar a lista de skills.' });
+    }
+});
+
+// Rota: Conteúdo completo de uma Skill
+app.get('/api/skills/:slug', (req, res) => {
+    const { slug } = req.params;
+    const filePath = path.join(__dirname, '.agents', 'skills', slug, 'SKILL.md');
+    if (fs.existsSync(filePath)) {
+        const content = fs.readFileSync(filePath, 'utf8');
+        res.json({ slug, content });
+    } else {
+        res.status(404).json({ error: 'Skill não encontrada.' });
+    }
+});
+
+
 // Inicializa o Servidor
 app.listen(PORT, () => {
     console.log(`🚀 Connect Media rodando em http://localhost:${PORT}`);
