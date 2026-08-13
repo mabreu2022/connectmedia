@@ -15,8 +15,8 @@ app.use((req, res, next) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     next();
 });
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '200mb' }));
+app.use(express.urlencoded({ limit: '200mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public'), { etag: false, lastModified: false }));
 
 // Configuração de Conexão com o Firebird 5.0
@@ -592,7 +592,24 @@ app.post('/api/gerar-skill', (req, res) => {
 });
 
 // Rota: Gerador de Skill a partir de arquivo PDF (Livros / Documentos Técnicos)
-const pdfParse = require('pdf-parse');
+const pdfModule = require('pdf-parse');
+
+async function extrairTextoPdf(pdfBuffer) {
+    if (typeof pdfModule === 'function') {
+        const data = await pdfModule(pdfBuffer);
+        return { text: data.text || '', numpages: data.numpages || 0, info: data.info || {} };
+    }
+    const { PDFParse } = pdfModule;
+    const parser = new PDFParse({ data: pdfBuffer });
+    await parser.load();
+    const result = await parser.getText();
+    const info = await parser.getInfo().catch(() => ({}));
+    return {
+        text: result.text || '',
+        numpages: result.total || (result.pages ? result.pages.length : 0),
+        info: info ? (info.info || info) : {}
+    };
+}
 
 app.post('/api/gerar-skill-pdf', async (req, res) => {
     try {
@@ -612,10 +629,10 @@ app.post('/api/gerar-skill-pdf', async (req, res) => {
         }
 
         // Parse do PDF
-        const pdfData = await pdfParse(pdfBuffer);
+        const pdfData = await extrairTextoPdf(pdfBuffer);
 
         const numPages = pdfData.numpages || 0;
-        const metaTitle = (pdfData.info && pdfData.info.Title) ? pdfData.info.Title.trim() : '';
+        const metaTitle = (pdfData.info && pdfData.info.Title) ? String(pdfData.info.Title).trim() : '';
         const nomeDoc = filename || 'livro_pdf';
         
         let tituloSkill = titulo && titulo.trim() ? titulo.trim() : (metaTitle || nomeDoc.replace(/\.pdf$/i, '').replace(/[-_]/g, ' '));
@@ -1524,6 +1541,23 @@ app.post('/api/configuracoes/db', (req, res) => {
             res.json({ success: true, message: 'Configurações de conexão do Banco Firebird salvas com sucesso!' });
         });
     });
+});
+
+// Middleware Global de Tratamento de Erros (Retorna JSON em vez de HTML para erros 413 Payload Too Large)
+app.use((err, req, res, next) => {
+    if (err && (err.status === 413 || err.type === 'entity.too.large')) {
+        return res.status(413).json({
+            sucesso: false,
+            error: 'O arquivo PDF é muito grande para upload direto via navegador. Informe o caminho absoluto do arquivo no campo "OU CAMINHO ABSOLUTO NO COMPUTADOR" (ex: C:\\Livros\\Manual.pdf).'
+        });
+    }
+    if (err) {
+        return res.status(err.status || 500).json({
+            sucesso: false,
+            error: err.message || 'Erro no processamento do servidor.'
+        });
+    }
+    next();
 });
 
 // Inicializa o Servidor

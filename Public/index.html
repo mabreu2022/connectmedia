@@ -2359,7 +2359,15 @@
                     body: JSON.stringify(payload)
                 });
 
-                const data = await res.json();
+                let data;
+                try {
+                    data = await res.json();
+                } catch(jsonErr) {
+                    if (res.status === 413) {
+                        throw new Error('O arquivo PDF é muito grande para enviar diretamente. Por favor, informe o caminho absoluto do arquivo no campo "OU CAMINHO ABSOLUTO NO COMPUTADOR" (ex: C:\\Livros\\Manual.pdf).');
+                    }
+                    throw new Error(`Erro na resposta do servidor (Código ${res.status}).`);
+                }
 
                 if (res.ok && data.sucesso) {
                     logEl.textContent = data.log || '✅ Skill do livro PDF criada com sucesso!';
