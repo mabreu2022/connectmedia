@@ -847,8 +847,9 @@
             </section>
 
             <!-- 11. SEÇÃO: PAINEL ADMIN SAAS (EXCLUSIVO ADMIN) -->
+            <!-- 11. SEÇÃO: PAINEL ADMINISTRATIVO MASTER SAAS -->
             <section class="content-section hidden flex flex-col h-full overflow-hidden" id="sec-admin">
-                <div class="flex justify-between items-center mb-6 shrink-0 border-b border-purple-500/30 pb-4">
+                <div class="flex justify-between items-center mb-4 shrink-0 border-b border-purple-500/30 pb-4">
                     <div>
                         <div class="flex items-center space-x-3">
                             <h1 class="text-2xl font-bold text-on-surface">🛡️ Painel Administrativo Master SaaS</h1>
@@ -862,140 +863,178 @@
                     </button>
                 </div>
 
-                <div class="flex-1 overflow-y-auto pr-2 space-y-8">
-                    <!-- Cards de Métricas Globais -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-surface border border-purple-500/30 rounded-2xl p-5 shadow-lg">
-                            <div class="text-xs text-outline font-semibold uppercase">Faturamento Pix Total</div>
-                            <div id="admin-card-fat" class="text-2xl font-extrabold text-amber-400 mt-2">R$ 0,00</div>
-                            <div class="text-[10px] text-outline mt-1">Receita total acumulada das vendas de prompts</div>
+                <!-- BARRA DE ABAS (SUB-TABS) DO PAINEL ADMIN -->
+                <div class="flex items-center gap-2 border-b border-outline-variant/40 pb-3 mb-4 shrink-0 overflow-x-auto">
+                    <button id="tab-btn-dashboard" onclick="trocarAbaAdmin('dashboard')" class="tab-admin-btn bg-amber-500 text-black px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 whitespace-nowrap">
+                        <span>📊 Visão Geral &amp; Métricas</span>
+                    </button>
+                    <button id="tab-btn-usuarios" onclick="trocarAbaAdmin('usuarios')" class="tab-admin-btn bg-surface-variant/30 text-outline hover:text-on-surface hover:bg-surface-variant/60 px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 whitespace-nowrap">
+                        <span>👥 Gestão de Usuários</span>
+                    </button>
+                    <button id="tab-btn-pix" onclick="trocarAbaAdmin('pix')" class="tab-admin-btn bg-surface-variant/30 text-outline hover:text-on-surface hover:bg-surface-variant/60 px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 whitespace-nowrap">
+                        <span>❖ Chave PIX Mestre</span>
+                    </button>
+                    <button id="tab-btn-prompts" onclick="trocarAbaAdmin('prompts')" class="tab-admin-btn bg-surface-variant/30 text-outline hover:text-on-surface hover:bg-surface-variant/60 px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 whitespace-nowrap">
+                        <span>📦 Catálogo de Prompts &amp; Módulos</span>
+                    </button>
+                    <button id="tab-btn-vendas" onclick="trocarAbaAdmin('vendas')" class="tab-admin-btn bg-surface-variant/30 text-outline hover:text-on-surface hover:bg-surface-variant/60 px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 whitespace-nowrap">
+                        <span>💳 Extrato de Vendas Pix</span>
+                    </button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto pr-2">
+                    <!-- ABA 1: VISÃO GERAL & MÉTRICAS GLOBAIS -->
+                    <div id="tab-admin-dashboard" class="tab-admin-content space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-surface border border-purple-500/30 rounded-2xl p-5 shadow-lg">
+                                <div class="text-xs text-outline font-semibold uppercase">Faturamento Pix Total</div>
+                                <div id="admin-card-fat" class="text-2xl font-extrabold text-amber-400 mt-2">R$ 0,00</div>
+                                <div class="text-[10px] text-outline mt-1">Receita total acumulada das vendas de prompts</div>
+                            </div>
+                            <div class="bg-surface border border-purple-500/30 rounded-2xl p-5 shadow-lg">
+                                <div class="text-xs text-outline font-semibold uppercase">Usuários Cadastrados</div>
+                                <div id="admin-card-users" class="text-2xl font-extrabold text-purple-400 mt-2">0</div>
+                                <div class="text-[10px] text-outline mt-1">Contas registradas na plataforma SaaS</div>
+                            </div>
+                            <div class="bg-surface border border-purple-500/30 rounded-2xl p-5 shadow-lg">
+                                <div class="text-xs text-outline font-semibold uppercase">Vendas Pix Concluídas</div>
+                                <div id="admin-card-vendas" class="text-2xl font-extrabold text-emerald-400 mt-2">0</div>
+                                <div class="text-[10px] text-outline mt-1">Ordens de pagamento confirmadas com sucesso</div>
+                            </div>
+                            <div class="bg-surface border border-purple-500/30 rounded-2xl p-5 shadow-lg">
+                                <div class="text-xs text-outline font-semibold uppercase">Prompts no Catálogo</div>
+                                <div id="admin-card-prompts" class="text-2xl font-extrabold text-cyan-400 mt-2">0</div>
+                                <div class="text-[10px] text-outline mt-1">System Prompts disponíveis para compra</div>
+                            </div>
                         </div>
-                        <div class="bg-surface border border-purple-500/30 rounded-2xl p-5 shadow-lg">
-                            <div class="text-xs text-outline font-semibold uppercase">Usuários Cadastrados</div>
-                            <div id="admin-card-users" class="text-2xl font-extrabold text-purple-400 mt-2">0</div>
-                            <div class="text-[10px] text-outline mt-1">Contas registradas na plataforma SaaS</div>
-                        </div>
-                        <div class="bg-surface border border-purple-500/30 rounded-2xl p-5 shadow-lg">
-                            <div class="text-xs text-outline font-semibold uppercase">Vendas Pix Concluídas</div>
-                            <div id="admin-card-vendas" class="text-2xl font-extrabold text-emerald-400 mt-2">0</div>
-                            <div class="text-[10px] text-outline mt-1">Ordens de pagamento confirmadas com sucesso</div>
-                        </div>
-                        <div class="bg-surface border border-purple-500/30 rounded-2xl p-5 shadow-lg">
-                            <div class="text-xs text-outline font-semibold uppercase">Prompts no Catálogo</div>
-                            <div id="admin-card-prompts" class="text-2xl font-extrabold text-cyan-400 mt-2">0</div>
-                            <div class="text-[10px] text-outline mt-1">System Prompts disponíveis para compra</div>
+
+                        <div class="bg-surface border border-outline-variant/60 rounded-2xl p-6 space-y-3">
+                            <h3 class="text-sm font-bold text-on-surface uppercase flex items-center gap-2">
+                                <span>💡 Resumo de Administração SaaS</span>
+                            </h3>
+                            <p class="text-xs text-outline leading-relaxed">
+                                Utilize as abas acima para gerenciar usuários, cadastrar novos System Prompts ou módulos com assistente de IA por vídeo, aprovar comprovantes de Pix e alterar os dados bancários da chave mestre.
+                            </p>
                         </div>
                     </div>
 
-                    <!-- Configuração da Chave Pix Mestre da Empresa -->
-                    <div class="bg-surface border border-purple-500/30 rounded-2xl p-6 space-y-4 shadow-xl">
-                        <h2 class="text-sm font-bold text-amber-400 uppercase flex items-center space-x-2">
-                            <span>❖ Chave PIX Mestre do SaaS (Onde caem os pagamentos das vendas)</span>
-                        </h2>
-                        <p class="text-xs text-outline leading-relaxed">Defina aqui os dados de recebimento Pix da sua empresa ou conta bancária mestre. Todas as vendas de prompts geradas por qualquer usuário no aplicativo utilizarão este recebedor.</p>
+                    <!-- ABA 2: GESTÃO DE USUÁRIOS -->
+                    <div id="tab-admin-usuarios" class="tab-admin-content hidden space-y-6">
+                        <div class="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-xl">
+                            <div class="bg-surface-variant/20 px-6 py-4 border-b border-outline-variant flex justify-between items-center">
+                                <h2 class="text-sm font-bold text-on-surface uppercase">Gestão de Usuários do SaaS</h2>
+                                <span class="text-xs text-outline">Total: <span id="admin-count-users-table">0</span> usuários</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                        <tr class="bg-background border-b border-outline-variant text-outline uppercase font-mono">
+                                            <th class="p-3">ID</th>
+                                            <th class="p-3">Nome</th>
+                                            <th class="p-3">E-mail</th>
+                                            <th class="p-3">Perfil</th>
+                                            <th class="p-3">Status</th>
+                                            <th class="p-3">Data Cadastro</th>
+                                            <th class="p-3 text-right">Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-tabela-usuarios">
+                                        <!-- Usuários inseridos via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
 
-                        <form onsubmit="salvarChavePixMestreAdmin(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Chave Pix Mestre (CPF/CNPJ/E-mail/EVP)</label>
-                                <input type="text" id="admin-input-chave-mestre" required placeholder="Ex: financeiro@meusaas.com.br" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:border-amber-400 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Nome do Recebedor Mestre</label>
-                                <input type="text" id="admin-input-nome-mestre" required placeholder="Ex: Connect Media Tecnologia" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:border-amber-400 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Cidade do Recebedor Mestre</label>
-                                <input type="text" id="admin-input-cidade-mestre" required placeholder="Ex: Sao Paulo" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:border-amber-400 outline-none">
-                            </div>
-                            <div class="col-span-full pt-2">
-                                <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-black px-5 py-2.5 rounded-xl text-xs font-bold shadow-md transition-all">
-                                    💾 Salvar Chave Pix Mestre
+                    <!-- ABA 3: CHAVE PIX MESTRE -->
+                    <div id="tab-admin-pix" class="tab-admin-content hidden space-y-6">
+                        <div class="bg-surface border border-purple-500/30 rounded-2xl p-6 space-y-4 shadow-xl">
+                            <h2 class="text-sm font-bold text-amber-400 uppercase flex items-center space-x-2">
+                                <span>❖ Configuração da Chave PIX Mestre da Empresa</span>
+                            </h2>
+                            <p class="text-xs text-outline leading-relaxed">Defina aqui os dados de recebimento Pix da sua empresa ou conta bancária mestre. Todas as vendas de prompts geradas por qualquer usuário no aplicativo utilizarão este recebedor.</p>
+
+                            <form onsubmit="salvarChavePixMestreAdmin(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Chave Pix Mestre (CPF/CNPJ/E-mail/EVP)</label>
+                                    <input type="text" id="admin-input-chave-mestre" required placeholder="Ex: financeiro@meusaas.com.br" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:border-amber-400 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Nome do Recebedor Mestre</label>
+                                    <input type="text" id="admin-input-nome-mestre" required placeholder="Ex: Connect Media Tecnologia" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:border-amber-400 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Cidade do Recebedor Mestre</label>
+                                    <input type="text" id="admin-input-cidade-mestre" required placeholder="Ex: Sao Paulo" class="w-full bg-background border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:border-amber-400 outline-none">
+                                </div>
+                                <div class="col-span-full pt-2">
+                                    <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-black px-5 py-2.5 rounded-xl text-xs font-bold shadow-md transition-all">
+                                        💾 Salvar Chave Pix Mestre
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- ABA 4: GESTÃO DO CATÁLOGO DE PROMPTS -->
+                    <div id="tab-admin-prompts" class="tab-admin-content hidden space-y-6">
+                        <div class="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-xl">
+                            <div class="bg-surface-variant/20 px-6 py-4 border-b border-outline-variant flex justify-between items-center">
+                                <div>
+                                    <h2 class="text-sm font-bold text-on-surface uppercase">Gestão do Catálogo de Prompts &amp; Módulos Premium</h2>
+                                    <p class="text-xs text-outline">Cadastre, edite ou altere a foto de capa e preços dos itens da loja</p>
+                                </div>
+                                <button onclick="abrirModalCrudPrompt()" class="bg-amber-500 hover:bg-amber-400 text-black px-4 py-2 rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5">
+                                    <span>➕ Novo Prompt / Módulo</span>
                                 </button>
                             </div>
-                        </form>
-                    </div>
-
-                    <!-- Tabela de Gestão de Usuários -->
-                    <div class="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-xl">
-                        <div class="bg-surface-variant/20 px-6 py-4 border-b border-outline-variant flex justify-between items-center">
-                            <h2 class="text-sm font-bold text-on-surface uppercase">Gestão de Usuários do SaaS</h2>
-                            <span class="text-xs text-outline">Total: <span id="admin-count-users-table">0</span> usuários</span>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr class="bg-background border-b border-outline-variant text-outline uppercase font-mono">
-                                        <th class="p-3">ID</th>
-                                        <th class="p-3">Nome</th>
-                                        <th class="p-3">E-mail</th>
-                                        <th class="p-3">Perfil</th>
-                                        <th class="p-3">Status</th>
-                                        <th class="p-3">Data Cadastro</th>
-                                        <th class="p-3 text-right">Ação</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-tabela-usuarios">
-                                    <!-- Usuários inseridos via JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Gestão do Catálogo de Prompts & Módulos Premium (CRUD) -->
-                    <div class="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-xl">
-                        <div class="bg-surface-variant/20 px-6 py-4 border-b border-outline-variant flex justify-between items-center">
-                            <div>
-                                <h2 class="text-sm font-bold text-on-surface uppercase">Gestão do Catálogo de Prompts &amp; Módulos Premium</h2>
-                                <p class="text-xs text-outline">Cadastre, edite ou altere a foto de capa e preços dos itens da loja</p>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                        <tr class="bg-background border-b border-outline-variant text-outline uppercase font-mono">
+                                            <th class="p-3">Capa</th>
+                                            <th class="p-3">ID</th>
+                                            <th class="p-3">Título</th>
+                                            <th class="p-3">Categoria</th>
+                                            <th class="p-3">Tipo</th>
+                                            <th class="p-3">Preço</th>
+                                            <th class="p-3">Status</th>
+                                            <th class="p-3 text-right">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-tabela-prompts">
+                                        <!-- Prompts inseridos via JS -->
+                                    </tbody>
+                                </table>
                             </div>
-                            <button onclick="abrirModalCrudPrompt()" class="bg-amber-500 hover:bg-amber-400 text-black px-4 py-2 rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5">
-                                <span>➕ Novo Prompt / Módulo</span>
-                            </button>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr class="bg-background border-b border-outline-variant text-outline uppercase font-mono">
-                                        <th class="p-3">Capa</th>
-                                        <th class="p-3">ID</th>
-                                        <th class="p-3">Título</th>
-                                        <th class="p-3">Categoria</th>
-                                        <th class="p-3">Tipo</th>
-                                        <th class="p-3">Preço</th>
-                                        <th class="p-3">Status</th>
-                                        <th class="p-3 text-right">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-tabela-prompts">
-                                    <!-- Prompts inseridos via JS -->
-                                </tbody>
-                            </table>
                         </div>
                     </div>
 
-                    <!-- Extrato Global de Vendas Pix -->
-                    <div class="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-xl">
-                        <div class="bg-surface-variant/20 px-6 py-4 border-b border-outline-variant flex justify-between items-center">
-                            <h2 class="text-sm font-bold text-on-surface uppercase">Extrato Global de Vendas Pix</h2>
-                            <span class="text-xs text-outline">Histórico completo e liberação de ordens</span>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr class="bg-background border-b border-outline-variant text-outline uppercase font-mono">
-                                        <th class="p-3">Ordem #</th>
-                                        <th class="p-3">Valor Total</th>
-                                        <th class="p-3">Status</th>
-                                        <th class="p-3">Data</th>
-                                        <th class="p-3">Itens Comprados</th>
-                                        <th class="p-3 text-center">Comprovante</th>
-                                        <th class="p-3 text-right">Ação Admin</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-tabela-vendas">
-                                    <!-- Vendas inseridas via JS -->
-                                </tbody>
-                            </table>
+                    <!-- ABA 5: EXTRATO GLOBAL DE VENDAS PIX -->
+                    <div id="tab-admin-vendas" class="tab-admin-content hidden space-y-6">
+                        <div class="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-xl">
+                            <div class="bg-surface-variant/20 px-6 py-4 border-b border-outline-variant flex justify-between items-center">
+                                <h2 class="text-sm font-bold text-on-surface uppercase">Extrato Global de Vendas Pix</h2>
+                                <span class="text-xs text-outline">Histórico completo e liberação de ordens</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                        <tr class="bg-background border-b border-outline-variant text-outline uppercase font-mono">
+                                            <th class="p-3">Ordem #</th>
+                                            <th class="p-3">Valor Total</th>
+                                            <th class="p-3">Status</th>
+                                            <th class="p-3">Data</th>
+                                            <th class="p-3">Itens Comprados</th>
+                                            <th class="p-3 text-center">Comprovante</th>
+                                            <th class="p-3 text-right">Ação Admin</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-tabela-vendas">
+                                        <!-- Vendas inseridas via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
@@ -3154,8 +3193,33 @@
         }
 
         // ==========================================
-        // PAINEL ADMINISTRATIVO MASTER SAAS
+        // NAVEGAÇÃO POR ABAS DO PAINEL ADMIN
         // ==========================================
+        let abaAdminAtual = 'dashboard';
+        function trocarAbaAdmin(aba) {
+            abaAdminAtual = aba || 'dashboard';
+            const abas = ['dashboard', 'usuarios', 'pix', 'prompts', 'vendas'];
+            abas.forEach(a => {
+                const content = document.getElementById(`tab-admin-${a}`);
+                const btn = document.getElementById(`tab-btn-${a}`);
+                if (content) {
+                    if (a === abaAdminAtual) {
+                        content.classList.remove('hidden');
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                }
+                if (btn) {
+                    if (a === abaAdminAtual) {
+                        btn.className = "tab-admin-btn bg-amber-500 text-black px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 whitespace-nowrap";
+                    } else {
+                        btn.className = "tab-admin-btn bg-surface-variant/30 text-outline hover:text-on-surface hover:bg-surface-variant/60 px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 whitespace-nowrap";
+                    }
+                }
+            });
+        }
+        window.trocarAbaAdmin = trocarAbaAdmin;
+
         async function carregarAdminDashboard() {
             const token = obterTokenAuth();
             if (!token) {
