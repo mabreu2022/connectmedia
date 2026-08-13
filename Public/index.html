@@ -1759,7 +1759,7 @@
 
         function obterCapaVideoHtml(v) {
             const rawThumb = (v.THUMBNAIL_URL || '').trim();
-            const temThumbValida = rawThumb && !rawThumb.includes('mqdefault') && !rawThumb.includes('default.jpg') && (rawThumb.startsWith('http') || rawThumb.startsWith('data:image'));
+            const temThumbValida = rawThumb && rawThumb !== 'THUMBNAIL_URL' && !rawThumb.includes('null') && !rawThumb.includes('undefined') && (rawThumb.startsWith('http') || rawThumb.startsWith('data:image'));
 
             if (temThumbValida) {
                 return `<img src="${rawThumb}" alt="Thumb" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="gerarCapaVideoFallback(this, '${escaparHtml(v.TITULO_VIDEO || '').replace(/'/g, "\\'")}', '${escaparHtml(v.NOME_CANAL || '').replace(/'/g, "\\'")}')">`;
