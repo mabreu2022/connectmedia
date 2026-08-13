@@ -3288,9 +3288,9 @@
                 if (!window._vendasAdminComprovantes) window._vendasAdminComprovantes = {};
                 window._vendasAdminComprovantes[v.ID_VENDA] = v.COMPROVANTE;
 
-                let btnComprovante = '<span class="text-outline text-[11px]">Sem anexo</span>';
-                if (v.COMPROVANTE) {
-                    btnComprovante = `<button onclick="visualizarComprovanteAdmin('${v.ID_VENDA}', window._vendasAdminComprovantes['${v.ID_VENDA}'])" class="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all inline-flex items-center gap-1">📄 Ver Comprovante</button>`;
+                let btnComprovante = `<button onclick="visualizarComprovanteAdmin('${v.ID_VENDA}', window._vendasAdminComprovantes['${v.ID_VENDA}'])" class="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all inline-flex items-center gap-1">📄 Ver Comprovante</button>`;
+                if (!v.COMPROVANTE) {
+                    btnComprovante = `<button onclick="visualizarComprovanteAdmin('${v.ID_VENDA}', null)" class="bg-surface-variant/30 hover:bg-surface-variant/50 text-outline px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all inline-flex items-center gap-1">📄 Ver Comprovante (Sem anexo)</button>`;
                 }
 
                 let btnAcaoAprovar = isPago
@@ -3376,7 +3376,14 @@
             container.innerHTML = '';
 
             if (!comprovanteData) {
-                container.innerHTML = '<p class="text-outline text-xs">Nenhum comprovante anexado para esta venda.</p>';
+                container.innerHTML = `
+                    <div class="text-center py-8 space-y-3">
+                        <div class="text-4xl">📄</div>
+                        <h4 class="text-sm font-bold text-on-surface">Nenhum comprovante anexado</h4>
+                        <p class="text-xs text-outline max-w-sm mx-auto">O cliente gerou a ordem #${idVenda} mas ainda não enviou a imagem do comprovante bancário.</p>
+                        <p class="text-xs text-amber-300 font-semibold bg-amber-500/10 border border-amber-500/30 p-3 rounded-xl mt-2">Caso tenha verificado o depósito direto no seu extrato bancário, você pode aprovar a liberação clicando em <strong>✅ Aprovar &amp; Liberar</strong> na tabela do Admin.</p>
+                    </div>
+                `;
             } else if (comprovanteData.startsWith('data:image/') || comprovanteData.startsWith('data:application/pdf')) {
                 if (comprovanteData.startsWith('data:image/')) {
                     container.innerHTML = `<img src="${comprovanteData}" alt="Comprovante Ordem #${idVenda}" class="max-w-full max-h-[70vh] object-contain rounded-xl border border-outline-variant shadow-md">`;
@@ -3397,51 +3404,6 @@
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
             }
-        }
-
-        function renderizarTabelaVendasAdmin(vendas) {
-            const tbody = document.getElementById('admin-tabela-vendas');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            if (vendas.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-outline">Nenhuma ordem de pagamento registrada ainda.</td></tr>';
-                return;
-            }
-
-            vendas.forEach(v => {
-                const tr = document.createElement('tr');
-                tr.className = 'border-b border-outline-variant/40 hover:bg-surface-variant/20 transition-colors';
-
-                const isPago = v.STATUS === 'PAGO';
-                const statusBadge = isPago
-                    ? '<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-bold">✓ PAGO</span>'
-                    : '<span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded text-[10px] font-bold">⏳ PENDENTE</span>';
-
-                let itensResumo = '-';
-                try {
-                    const parsed = JSON.parse(v.ITENS_JSON);
-                    if (Array.isArray(parsed)) itensResumo = parsed.map(i => i.titulo).join(', ');
-                } catch(_) {}
-
-                if (!window._vendasAdminComprovantes) window._vendasAdminComprovantes = {};
-                window._vendasAdminComprovantes[v.ID_VENDA] = v.COMPROVANTE;
-
-                let btnComprovante = '<span class="text-outline text-[11px]">Sem anexo</span>';
-                if (v.COMPROVANTE) {
-                    btnComprovante = `<button onclick="visualizarComprovanteAdmin('${v.ID_VENDA}', window._vendasAdminComprovantes['${v.ID_VENDA}'])" class="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all inline-flex items-center gap-1">📄 Ver Comprovante</button>`;
-                }
-
-                tr.innerHTML = `
-                    <td class="p-3 font-mono font-bold">#${v.ID_VENDA}</td>
-                    <td class="p-3 font-bold text-amber-400">R$ ${parseFloat(v.VALOR_TOTAL || 0).toFixed(2).replace('.', ',')}</td>
-                    <td class="p-3">${statusBadge}</td>
-                    <td class="p-3 font-mono text-outline">${v.DATA_CRIACAO ? new Date(v.DATA_CRIACAO).toLocaleString('pt-BR') : '-'}</td>
-                    <td class="p-3 text-outline truncate max-w-xs" title="${escaparHtml(itensResumo)}">${escaparHtml(itensResumo)}</td>
-                    <td class="p-3 text-center">${btnComprovante}</td>
-                `;
-                tbody.appendChild(tr);
-            });
         }
 
         async function salvarChavePixMestreAdmin(e) {
