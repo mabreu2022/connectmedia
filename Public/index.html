@@ -1703,6 +1703,71 @@
             } catch(e) { console.error(e); }
         }
 
+        function gerarBandeiraGradientVideoHtml(titulo = '', canal = '') {
+            const textUpper = ((titulo || '') + ' ' + (canal || '')).toUpperCase();
+            let gradiente = 'from-red-950/90 via-slate-900/90 to-zinc-950/90 border-red-500/30';
+            let icon = 'smart_display';
+            let iconColor = 'text-red-400';
+            let badgeText = 'YOUTUBE VIDEO';
+
+            if (textUpper.includes('LINUX') || textUpper.includes('UBUNTU') || textUpper.includes('APACHE') || textUpper.includes('DEVOPS') || textUpper.includes('CGI')) {
+                gradiente = 'from-blue-950/90 via-slate-900/90 to-cyan-950/90 border-cyan-500/30';
+                icon = 'terminal';
+                iconColor = 'text-cyan-400';
+                badgeText = 'LINUX & DEVOPS';
+            } else if (textUpper.includes('FIREBIRD') || textUpper.includes('DATABASE') || textUpper.includes('SQL') || textUpper.includes('BANCO')) {
+                gradiente = 'from-amber-950/90 via-stone-900/90 to-orange-950/90 border-amber-500/30';
+                icon = 'database';
+                iconColor = 'text-amber-400';
+                badgeText = 'FIREBIRD & SQL';
+            } else if (textUpper.includes('REACT') || textUpper.includes('NODE') || textUpper.includes('FRONTEND') || textUpper.includes('JS') || textUpper.includes('WEB')) {
+                gradiente = 'from-purple-950/90 via-slate-900/90 to-indigo-950/90 border-purple-500/30';
+                icon = 'code';
+                iconColor = 'text-purple-400';
+                badgeText = 'WEB DEVELOPMENT';
+            } else if (textUpper.includes('AI') || textUpper.includes('IA') || textUpper.includes('INTE') || textUpper.includes('CHATGPT') || textUpper.includes('GEMINI') || textUpper.includes('PROMPT')) {
+                gradiente = 'from-amber-950/90 via-slate-900/90 to-amber-900/80 border-amber-500/30';
+                icon = 'auto_awesome';
+                iconColor = 'text-amber-400';
+                badgeText = 'ARTIFICIAL INTELLIGENCE';
+            }
+
+            return `
+            <div class="w-full h-full border ${gradiente} bg-gradient-to-br relative flex flex-col justify-between p-3.5 shadow-inner select-none">
+                <div class="absolute -right-3 -bottom-3 opacity-20 text-white pointer-events-none">
+                    <span class="material-symbols-outlined text-7xl">${icon}</span>
+                </div>
+                <div class="flex justify-between items-center z-10">
+                    <span class="text-[10px] font-mono font-bold ${iconColor} tracking-wider flex items-center gap-1 bg-black/50 px-2 py-0.5 rounded-full border border-white/10">
+                        <span class="material-symbols-outlined text-xs">${icon}</span> ${badgeText}
+                    </span>
+                    <span class="text-[9px] font-mono bg-white/10 text-white/80 px-2 py-0.5 rounded-full backdrop-blur-sm">CONNECT MEDIA</span>
+                </div>
+                <div class="z-10 mt-auto">
+                    <p class="text-xs font-bold text-white/95 line-clamp-2 leading-snug drop-shadow-md">${escaparHtml(titulo)}</p>
+                    <span class="text-[9px] font-mono text-white/60 block mt-0.5">${escaparHtml(canal || 'Canal do YouTube')}</span>
+                </div>
+            </div>`;
+        }
+
+        function gerarCapaVideoFallback(imgEl, titulo, canal) {
+            if (!imgEl || !imgEl.parentElement) return;
+            const container = imgEl.parentElement;
+            container.innerHTML = gerarBandeiraGradientVideoHtml(titulo, canal);
+        }
+        window.gerarCapaVideoFallback = gerarCapaVideoFallback;
+
+        function obterCapaVideoHtml(v) {
+            const rawThumb = (v.THUMBNAIL_URL || '').trim();
+            const temThumbValida = rawThumb && !rawThumb.includes('mqdefault') && !rawThumb.includes('default.jpg') && (rawThumb.startsWith('http') || rawThumb.startsWith('data:image'));
+
+            if (temThumbValida) {
+                return `<img src="${rawThumb}" alt="Thumb" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="gerarCapaVideoFallback(this, '${escaparHtml(v.TITULO_VIDEO || '').replace(/'/g, "\\'")}', '${escaparHtml(v.NOME_CANAL || '').replace(/'/g, "\\'")}')">`;
+            }
+
+            return gerarBandeiraGradientVideoHtml(v.TITULO_VIDEO, v.NOME_CANAL);
+        }
+
         async function carregarDescoberta() {
             try {
                 const selectFiltro = document.getElementById('filtro-canal');
@@ -1737,7 +1802,7 @@
                                     <input type="checkbox" id="check-${v.ID_VIDEO}" value="${v.ID_VIDEO}" class="check-video w-5 h-5 cursor-pointer accent-primary rounded" ${checkedAttr} onclick="event.stopPropagation(); atualizarVisualCard(${v.ID_VIDEO}, this.checked)">
                                 </div>
                                 <div class="aspect-video bg-background relative overflow-hidden">
-                                    <img src="${v.THUMBNAIL_URL}" alt="Thumb" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="tratarErroThumb(this)">
+                                    ${obterCapaVideoHtml(v)}
                                 </div>
                                 <div class="p-4">
                                     <span class="text-[10px] bg-surface-variant/30 text-outline px-2 py-0.5 rounded font-mono uppercase">${v.NOME_CANAL || 'Canal'}</span>
@@ -1875,7 +1940,7 @@
                         card.innerHTML = `
                             <div>
                                 <div class="aspect-video bg-background relative overflow-hidden group cursor-pointer" data-title="${safeTitle}" onclick="abrirPlayer(${v.ID_VIDEO}, this.getAttribute('data-title'))">
-                                    <img src="${v.THUMBNAIL_URL}" alt="Thumb" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90 group-hover:opacity-100" onerror="tratarErroThumb(this)">
+                                    ${obterCapaVideoHtml(v)}
                                     <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
                                         <div class="bg-primary text-on-primary rounded-full p-3 shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
