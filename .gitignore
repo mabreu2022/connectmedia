@@ -31,3 +31,6 @@ yt-dlp.exe
 Thumbs.db
 .DS_Store
 desktop.ini
+
+# Distribuicao do Instalador
+Dist_Instalador_ConnectMedia/
