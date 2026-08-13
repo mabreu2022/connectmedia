@@ -21,6 +21,7 @@ const itemsToCopy = [
     'instalar.bat',
     'configurar_autostart.bat',
     'iniciar_sistema.bat',
+    'parar_sistema.bat',
     'iniciar_invisivel.vbs',
     'Server.js',
     'worker_download.js',
