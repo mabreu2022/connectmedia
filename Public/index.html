@@ -1176,6 +1176,23 @@
                     <textarea id="modal-crud-prompt-descricao" rows="2" required placeholder="Resumo do valor e aplicabilidade deste prompt..." class="w-full bg-surface border border-outline-variant rounded-lg p-3 text-on-surface focus:border-amber-400 outline-none"></textarea>
                 </div>
 
+                <!-- Assistente de Extração por Vídeo do YouTube -->
+                <div class="bg-surface-variant/20 border border-amber-500/30 rounded-xl p-3.5 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="font-bold text-amber-400 uppercase flex items-center gap-1.5 text-[11px]">
+                            <span>⚡ Gerar Prompt &amp; Conteúdo a partir de Vídeo do YouTube</span>
+                        </label>
+                        <span class="text-[10px] text-outline">yt-dlp + Transcrição</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="url" id="modal-crud-prompt-yt-url" placeholder="https://www.youtube.com/watch?v=..." class="flex-1 bg-surface border border-outline-variant rounded-lg px-3 py-1.5 text-xs text-on-surface focus:border-amber-400 outline-none">
+                        <button type="button" id="btn-gerar-prompt-yt" onclick="gerarPromptDeVideoYoutube()" class="bg-amber-500 hover:bg-amber-400 text-black px-3.5 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all flex items-center gap-1">
+                            <span>🎬 Extrair e Preencher</span>
+                        </button>
+                    </div>
+                    <p id="modal-crud-prompt-yt-status" class="hidden text-[11px] font-semibold text-amber-300"></p>
+                </div>
+
                 <div>
                     <label class="block font-bold text-outline uppercase mb-1">System Prompt Completo (Instruções da IA)</label>
                     <textarea id="modal-crud-prompt-sistema" rows="5" placeholder="Você é um especialista em..." class="w-full bg-surface border border-outline-variant rounded-lg p-3 font-mono text-on-surface focus:border-amber-400 outline-none"></textarea>
@@ -3311,6 +3328,90 @@
             }
         }
         window.fecharModalCrudPrompt = fecharModalCrudPrompt;
+
+        async function gerarPromptDeVideoYoutube() {
+            const urlInput = document.getElementById('modal-crud-prompt-yt-url');
+            const statusEl = document.getElementById('modal-crud-prompt-yt-status');
+            const btn = document.getElementById('btn-gerar-prompt-yt');
+            const url = urlInput ? urlInput.value.trim() : '';
+
+            if (!url || !url.startsWith('http')) {
+                alert('Cole uma URL válida do YouTube (ex: https://www.youtube.com/watch?v=...)');
+                return;
+            }
+
+            if (statusEl) {
+                statusEl.innerText = '⏳ Extraindo legenda e construindo System Prompt com yt-dlp... (Aguarde alguns segundos)';
+                statusEl.classList.remove('hidden');
+            }
+            if (btn) { btn.disabled = true; btn.innerText = '⏳ Gerando...'; }
+
+            try {
+                const res = await fetch('/api/gerar-skill', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.sucesso) {
+                    // Busca o conteúdo completo da skill gerada recém criada
+                    const logContent = data.log || '';
+                    const matchSlug = logContent.match(/\[Skill\] Salvo em:\s*\.agents\/skills\/([^\/\s]+)/i);
+                    let promptGerado = '';
+
+                    if (matchSlug && matchSlug[1]) {
+                        const resSkill = await fetch(`/api/skills/${matchSlug[1]}`);
+                        if (resSkill.ok) {
+                            const dataSkill = await resSkill.json();
+                            promptGerado = dataSkill.content || '';
+                        }
+                    }
+
+                    // Tenta puxar título do vídeo
+                    let tituloVideo = 'Prompt de Engenharia Sênior';
+                    try {
+                        const resInfo = await fetch(`/api/video-info?url=${encodeURIComponent(url)}`);
+                        if (resInfo.ok) {
+                            const info = await resInfo.json();
+                            if (info.title) tituloVideo = info.title;
+                        }
+                    } catch(_) {}
+
+                    // Preenche automaticamente os campos do formulário do Modal!
+                    const elNome = document.getElementById('modal-crud-prompt-nome');
+                    const elCat = document.getElementById('modal-crud-prompt-categoria');
+                    const elDesc = document.getElementById('modal-crud-prompt-descricao');
+                    const elSist = document.getElementById('modal-crud-prompt-sistema');
+                    const elTags = document.getElementById('modal-crud-prompt-tags');
+
+                    if (elNome && !elNome.value) elNome.value = tituloVideo;
+                    if (elCat && !elCat.value) elCat.value = 'Engenharia de IA';
+                    if (elDesc && !elDesc.value) elDesc.value = `System Prompt técnico especializado extraído automaticamente a partir do tutorial em vídeo do YouTube: "${tituloVideo}".`;
+                    if (elSist) elSist.value = promptGerado || `Você é um engenheiro sênior especializado no tema do vídeo "${tituloVideo}".\nSiga o fluxo e diretrizes abaixo:\n${logContent}`;
+                    if (elTags && !elTags.value) elTags.value = 'YouTube, Skill, System Prompt, AI';
+
+                    if (statusEl) {
+                        statusEl.innerText = '✅ Prompt e metadados extraídos com SUCESSO e preenchidos no formulário!';
+                        statusEl.className = 'text-[11px] font-bold text-emerald-400 block';
+                    }
+                } else {
+                    if (statusEl) {
+                        statusEl.innerText = '❌ Erro ao extrair legenda do vídeo: ' + (data.error || 'Verifique se o vídeo possui legendas.');
+                        statusEl.className = 'text-[11px] font-bold text-red-400 block';
+                    }
+                }
+            } catch(err) {
+                console.error(err);
+                if (statusEl) {
+                    statusEl.innerText = '❌ Erro de conexão ao tentar extrair conteúdo do vídeo.';
+                    statusEl.className = 'text-[11px] font-bold text-red-400 block';
+                }
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = '🎬 Extrair e Preencher'; }
+            }
+        }
+        window.gerarPromptDeVideoYoutube = gerarPromptDeVideoYoutube;
 
         function processarCapaPromptFile(input) {
             if (!input.files || !input.files[0]) return;
