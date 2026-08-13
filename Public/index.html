@@ -215,7 +215,7 @@
                         <h1 class="text-2xl font-bold text-on-surface">Canais Monitorados</h1>
                         <p class="text-xs text-outline mt-1">Fontes do YouTube cadastradas para varredura automática.</p>
                     </div>
-                    <button onclick="abrirModalCanal()" class="bg-primary hover:bg-[#d8e2ff] text-on-primary px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                    <button id="btn-adicionar-canal" onclick="abrirModalCanal()" class="bg-primary hover:bg-[#d8e2ff] text-on-primary px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                         <span>Adicionar Canal</span>
                     </button>
@@ -1875,6 +1875,7 @@
             if (modal) {
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
+                modal.style.setProperty('display', 'flex', 'important');
             }
         }
 
@@ -1883,6 +1884,7 @@
             if (modal) {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
+                modal.style.setProperty('display', 'none', 'important');
             }
         }
 
