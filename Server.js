@@ -757,58 +757,69 @@ ${textoLimpo}
         }
 
         // 🤖 Motor de Síntese e Interpretação via Inteligência Artificial
-        async function sintetizarSkillComIA(rawText, tituloDoc, nomeArquivo, totalPaginas, userApiKey = '') {
+        async function sintetizarSkillComIA(rawText, tituloDoc, nomeArquivo, totalPaginas, userApiKey = '', objetivoAgente = '') {
             const apiKey = userApiKey.trim() || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
             const slug = slugify(tituloDoc);
             const dataHoje = new Date().toLocaleString('pt-BR');
+            const foco = objetivoAgente && objetivoAgente.trim() ? objetivoAgente.trim() : 'Análise, arquitetura e aplicação de boas práticas no projeto';
 
             const systemPrompt = `Você é um Arquiteto de Software Sênior e Especialista em Antigravity IDE.
-Sua missão é analisar o texto do livro/documento técnico PDF "${nomeArquivo}" (Título: "${tituloDoc}") e GERAR UMA SKILL TÉCNICA EXTREMAMENTE ÚTIL, DIDÁTICA E ESTRUTURADA no formato SKILL.md para o Antigravity IDE.
+Sua missão é analisar o texto do livro/documento técnico PDF "${nomeArquivo}" (Título: "${tituloDoc}") e GERAR UMA HABILIDADE (SKILL.md) MODULAR E PROMPT DE SISTEMA PROFISSIONAL para o Antigravity IDE.
 
-A Skill NÃO deve ser um resumo genérico. Deve ser um GUIA ACIONÁVEL que ensine o Antigravity IDE como projetar, codificar, estruturar e aplicar os padrões de projeto e regras deste livro.
+OBJETIVO DA TAREFA DO AGENTE: "${foco}"
 
 Gere a resposta EXATAMENTE no seguinte formato Markdown com Frontmatter YAML:
 
 ---
 name: ${slug}
 description: >
-  Skill técnica e guia de arquitetura extraído do livro PDF "${nomeArquivo}" (${totalPaginas} páginas). Fornece orientações acionáveis, padrões de projeto, regras de conduta e trechos de código compilados para o Antigravity IDE.
+  Skill e guia de atuação baseado no livro "${nomeArquivo}" (${totalPaginas} páginas). Atua como um especialista focado em "${foco}", aplicando as diretrizes, padrões e regras do livro no projeto do usuário.
 source: ${nomeArquivo}
 generated_at: ${dataHoje}
 ---
 
-# 🧠 Skill: ${tituloDoc}
+# 🧠 Skill: ${tituloDoc} — ${foco}
 
 > [!IMPORTANT]
-> **Antigravity Skill Specification** — Conhecimento técnico interpretado por IA a partir do livro: \`${nomeArquivo}\`
-> - **Total de Páginas**: ${totalPaginas}
+> **Manual de Atuação do Agente Antigravity** — Baseado no livro: \`${nomeArquivo}\`
+> - **Objetivo da Tarefa**: ${foco}
+> - **Páginas Processadas**: ${totalPaginas}
 > - **Data de Geramento**: ${dataHoje}
-> - **Interpretação**: Inteligência Artificial Ativada
 
 ---
 
-## 📌 1. Visão Geral & Filosofia Arquitetural
-[Resumo dos conceitos centrais do livro, visão de design e a mentalidade técnica a ser adotada]
+## 🎭 1. Papel & Contexto do Agente
+Atue como um especialista sênior aplicando a metodologia descrita no arquivo \`${nomeArquivo}\`.
+Sua tarefa é analisar o projeto e executar com precisão: **"${foco}"**.
 
 ---
 
-## 📐 2. Padrões de Projeto & Arquitetura (Design Patterns)
-[Explicação detalhada dos principais padrões do livro, quando usar cada um, por que usar e a solução recomendada]
+## ⚙️ 2. Restrições & Diretrizes Técnicas (Regras Invioláveis)
+[Extraia de 5 a 10 regras técnicas estritas do livro que o agente JAMAIS deve violar ao modificar o código ou a arquitetura]
 
 ---
 
-## ⚙️ 3. Regras Estritas de Implementação & Diretrizes de Código
-[Lista de regras claras: O que a IA DEVE fazer, O que NÃO DEVE fazer, convenções e boas práticas de código]
+## 📐 3. Padrões de Projeto & Metodologia Recomendada
+[Detalhamento dos padrões de projeto do livro aplicados a esta tarefa]
 
 ---
 
-## 💻 4. Exemplos Práticos de Código & Schemas de Referência
-[Exemplos de código completos e didáticos implementando os padrões do livro]
+## 💻 4. Exemplos Práticos de Código & Padrão de Saída
+[Exemplos claros de código e formato de entrega esperado]
 
 ---
 
-## ⚠️ 5. Armadilhas, Antipadrões & Erros Comuns
-[O que evitar e gotchas conhecidos ao aplicar estes padrões]
+## 📋 5. Plano de Execução em 5 Etapas (Visão de Gerente)
+1. **Etapa 1: Diagnóstico e Análise** — Mapear os arquivos afetados no projeto.
+2. **Etapa 2: Proposta Arquitetural** — Apresentar o plano de ação para aprovação do usuário.
+3. **Etapa 3: Execução Modular** — Aplicar as modificações seguindo as regras da Skill.
+4. **Etapa 4: Validação & Checklist** — Verificar se nenhuma restrição do livro foi violada.
+5. **Etapa 5: Entrega & Relatório** — Apresentar walkthrough e resumo das melhorias.
+
+---
+
+## 📖 6. Base de Conhecimento Relevante do Livro
+[Trechos e conceitos-chave do livro para orientação contínua]
 `;
 
             let promptText = (rawText || '').substring(0, 80000);
@@ -870,14 +881,31 @@ generated_at: ${dataHoje}
         }
 
         let apiKeyUser = req.body.apiKey || '';
-        const aiResult = await sintetizarSkillComIA(pdfData.text, tituloSkill, nomeDoc, numPages, apiKeyUser);
+        let objetivoAgente = req.body.objetivo || '';
+        const aiResult = await sintetizarSkillComIA(pdfData.text, tituloSkill, nomeDoc, numPages, apiKeyUser, objetivoAgente);
         const skillContent = aiResult.content;
 
         fs.writeFileSync(targetFilePath, skillContent, 'utf8');
 
+        // Opcional: Registra também no Banco de Dados Firebird para a Loja de Prompts
+        Firebird.attach(dbOptions, (err, db) => {
+            if (!err && db) {
+                db.query('INSERT INTO TB_PROMPTS_LOJA (TITULO, CATEGORIA, DESCRICAO, CONTEUDO, PRECO, TIPO) VALUES (?, ?, ?, ?, ?, ?)', [
+                    `Agente: ${tituloSkill} - ${objetivoAgente.substring(0, 30) || 'Metodologia'}`,
+                    'Engenharia de Software & IA',
+                    `Prompt & Skill gerado a partir do livro "${nomeDoc}" para ${objetivoAgente || 'atuação no projeto'}`,
+                    skillContent,
+                    0.00,
+                    'PROMPT'
+                ], (qErr) => {
+                    db.detach();
+                });
+            }
+        });
+
         console.log(`[PDF Skill] Gerada com sucesso e interpretada (${aiResult.provedor}): ${targetFilePath} (${numPages} páginas)`);
         
-        const log = `✅ Skill "${tituloSkill}" gerada com sucesso!\n• Provedor de Interpretação: ${aiResult.provedor}\n• Total de Páginas do Livro: ${numPages}\n• Arquivo da Skill: ${targetFilePath}`;
+        const log = `✅ Skill "${tituloSkill}" gerada com sucesso!\n• Provedor de Interpretação: ${aiResult.provedor}\n• Objetivo da Tarefa: ${objetivoAgente || 'Atuação no Projeto'}\n• Total de Páginas: ${numPages}\n• Arquivo da Skill: ${targetFilePath}\n• Cadastrado na Loja de Prompts automaticamente!`;
 
         res.json({
             sucesso: true,

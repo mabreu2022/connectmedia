@@ -549,6 +549,14 @@
                             </div>
 
                             <div>
+                                <label class="block text-xs font-bold text-primary uppercase mb-2 flex justify-between items-center">
+                                    <span>🎯 Objetivo / Tarefa Específica do Agente no Projeto</span>
+                                    <span class="text-[10px] text-outline font-normal">Ex: Refatorar código em /src, Otimizar queries SQL, etc.</span>
+                                </label>
+                                <input type="text" id="skill-pdf-objetivo" placeholder="Ex: Analisar código em /src e refatorar seguindo Clean Architecture" class="w-full bg-background border border-primary/40 rounded-lg px-4 py-2.5 text-on-surface focus:border-primary outline-none transition-colors text-sm">
+                            </div>
+
+                            <div>
                                 <label class="block text-xs font-bold text-amber-400 uppercase mb-2 flex justify-between items-center">
                                     <span>🤖 Chave API Gemini para Interpretação Avançada por IA (Opcional)</span>
                                     <span class="text-[10px] text-outline font-normal">Sintetiza o livro com Inteligência Artificial</span>
@@ -2348,7 +2356,8 @@
 
             try {
                 const apiKey = document.getElementById('skill-pdf-api-key')?.value.trim();
-                let payload = { titulo, pdfPath: caminhoLocal, apiKey };
+                const objetivo = document.getElementById('skill-pdf-objetivo')?.value.trim();
+                let payload = { titulo, pdfPath: caminhoLocal, apiKey, objetivo };
 
                 if (file) {
                     logEl.textContent += '⏳ Processando bytes do arquivo PDF...\n';
