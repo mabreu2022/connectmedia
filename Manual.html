@@ -118,11 +118,43 @@
                 </ul>
             </section>
 
+            <!-- 6. Central de Logs em Tempo Real ("Big Brother") -->
+            <section class="bg-surface border border-outline-variant rounded-xl p-6 space-y-4">
+                <h2 class="text-xl font-bold text-on-surface flex items-center space-x-2">
+                    <span class="bg-primary text-on-primary w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold">6</span>
+                    <span>Central de Logs em Tempo Real ("Big Brother dos Logs")</span>
+                </h2>
+                <p class="text-sm text-on-surface/90 leading-relaxed">
+                    Monitoramento unificado de todos os processos do sistema em um console web interativo sem abrir janelas externas de terminal.
+                </p>
+                <ul class="list-disc list-inside text-sm text-outline space-y-2 pl-2">
+                    <li><strong class="text-on-surface">Stream SSE Ao Vivo:</strong> Recebe os logs em tempo real do Servidor REST, Worker de Download e Monitor de Canais.</li>
+                    <li><strong class="text-on-surface">Filtros por Serviço e Nível:</strong> Selecione o serviço de origem ou filtre por Informações, Sucessos, Avisos e Erros.</li>
+                    <li><strong class="text-on-surface">Controles:</strong> Botões de Pausar/Retomar stream, Limpar console, Auto-scroll automático e Copiar logs em 1 clique.</li>
+                </ul>
+            </section>
+
+            <!-- 7. Gerador de Skills para Antigravity IDE -->
+            <section class="bg-surface border border-outline-variant rounded-xl p-6 space-y-4">
+                <h2 class="text-xl font-bold text-on-surface flex items-center space-x-2">
+                    <span class="bg-primary text-on-primary w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold">7</span>
+                    <span>Gerador de Skills para Antigravity IDE</span>
+                </h2>
+                <p class="text-sm text-on-surface/90 leading-relaxed">
+                    Transforma vídeos técnicos do YouTube em arquivos <code>SKILL.md</code> altamente estruturados para contextualizar o agente Antigravity IDE.
+                </p>
+                <ul class="list-disc list-inside text-sm text-outline space-y-2 pl-2">
+                    <li><strong class="text-on-surface">Processamento em Lote:</strong> Cole múltiplos links do YouTube (um por linha) para gerar todas as skills em lote.</li>
+                    <li><strong class="text-on-surface">Transcrição Offline com Whisper AI:</strong> Se o vídeo não possui legendas no YouTube, o Whisper AI transcreve o áudio offline de forma 100% gratuita.</li>
+                    <li><strong class="text-on-surface">Skills Aprendidas:</strong> Visualize caminhos absolutos dos arquivos gerados, copie diretórios e leia o Markdown completo diretamente na interface.</li>
+                </ul>
+            </section>
+
         </main>
 
         <!-- Rodapé -->
         <footer class="border-t border-outline-variant pt-6 text-center text-xs text-outline">
-            Connect Media • Desenvolvido com Node.js, Express, Tailwind CSS e Firebird 5.0[cite: 1].
+            Connect Media v2.2 • Desenvolvido com Node.js, Express, Tailwind CSS e Firebird 5.0.
         </footer>
 
     </div>

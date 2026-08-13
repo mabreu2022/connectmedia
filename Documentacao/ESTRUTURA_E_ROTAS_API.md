@@ -22,11 +22,13 @@ Connect Media/
 ├── dbConfig.js                  # Conexão e trava de concorrência (.fdb.lock)
 ├── gerar_skill.js               # Script CLI e batch para extração de Skills e Whisper
 ├── init_db.js                   # Inicializador e migrador do banco
+├── logger.js                    # Módulo centralizador de logs em memória e broadcast SSE
 ├── popular_e_rodar.js           # Worker monitor de canais do YouTube
 ├── Server.js                    # Servidor Express com a API REST
 ├── worker_download.js           # Worker gerenciador de downloads (yt-dlp)
 ├── yt-dlp.exe                   # Binário executável do yt-dlp
 ├── iniciar_sistema.bat          # Script de inicialização do sistema
+├── iniciar_invisivel.vbs        # Script VBScript para inicialização em background sem janela
 └── package.json                 # Manifesto de dependências e scripts npm
 ```
 
@@ -47,6 +49,9 @@ Connect Media/
 | `DELETE` | `/api/canais/:id` | Deleta um canal e seus vídeos vinculados |
 | `GET` | `/api/configuracoes` | Retorna as configurações do sistema |
 | `POST` | `/api/configuracoes` | Salva as configurações do sistema |
+| `GET` | `/api/logs` | Retorna histórico recente de logs em formato JSON |
+| `GET` | `/api/logs/stream` | Stream contínuo em tempo real via Server-Sent Events (SSE) |
+| `POST` | `/api/logs` | Registra uma nova entrada de log (`{ fonte, nivel, mensagem }`) |
 | `GET` | `/api/video-info` | Obtém instantaneamente metadados do vídeo (título/autor) via oEmbed/yt-dlp (`?url=...`) |
 | `POST` | `/api/gerar-skill` | Executa o gerador de skills (`{ url, urls, titulo, idioma }`), suporta URL única ou lote |
 | `GET` | `/api/skills` | Lista todas as skills aprendidas (`.agents/skills/`) com caminhos de diretórios absolutos |

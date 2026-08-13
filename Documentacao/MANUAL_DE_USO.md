@@ -65,3 +65,17 @@ Biblioteca visual com todas as Skills já geradas e disponíveis para o Antigrav
 - **Copiar Caminho**: Botão direto para copiar a localização física do arquivo para a área de transferência.
 - **Assistir no YouTube**: Link direto para abrir o vídeo fonte no navegador.
 - **Ler Conteúdo**: Modal interativo para visualizar todo o Markdown estruturado sem abrir o arquivo externamente.
+
+---
+
+### 8. 📺 Central de Logs em Tempo Real ("Big Brother dos Logs")
+Monitoramento unificado e transparente de todos os serviços do sistema diretamente na interface web sem janelas externas.
+- **Transmissão Ao Vivo (SSE)**: Stream contínuo de dados Server-Sent Events direto do servidor Node.js.
+- **Filtros por Serviço**: Escolha visualizar logs do `Servidor REST`, `Worker Download`, `Monitor Canais` ou `Todas as Fontes`.
+- **Filtros por Nível**: Destaque de cores e ícones para `Info`, `Sucesso`, `Avisos` e `Erros`.
+- **Controles Interativos**:
+  - **Pausar / Retomar**: Pausa a atualização visual mantendo a escuta ativa.
+  - **Limpar Terminal**: Esvazia o histórico do console local.
+  - **Auto-scroll**: Rolagem automática inteligente configurável.
+  - **Copiar Logs**: Copia as linhas exibidas para a área de transferência em 1 clique.
+

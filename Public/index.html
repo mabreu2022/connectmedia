@@ -645,19 +645,38 @@
                             </div>
                         </div>
 
-                        <!-- 6. Iniciando o sistema -->
+                        <!-- 7. Central de Logs em Tempo Real -->
                         <div class="bg-surface border border-outline-variant rounded-xl overflow-hidden">
                             <div class="bg-primary/10 border-b border-outline-variant px-6 py-4 flex items-center gap-3">
-                                <span class="bg-primary text-on-primary text-xs font-bold px-2.5 py-1 rounded-full">06</span>
+                                <span class="bg-primary text-on-primary text-xs font-bold px-2.5 py-1 rounded-full">07</span>
+                                <h2 class="font-bold text-on-surface">Central de Logs em Tempo Real ("Big Brother")</h2>
+                            </div>
+                            <div class="p-6 space-y-3 text-sm text-on-surface/80 leading-relaxed">
+                                <p>Acompanhe todos os eventos do Servidor, Worker e Monitor unificados em um único terminal web sem janelas externas.</p>
+                                <ul class="space-y-2 ml-4">
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Transmissão SSE Ao Vivo</strong>: recepção contínua de eventos via Server-Sent Events</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Filtros Avançados</strong>: filtre por fonte (Servidor, Worker, Monitor) ou por nível (Info, Sucesso, Aviso, Erro)</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Controles Interativos</strong>: botões para Pausar/Retomar stream, Limpar console e Copiar logs em 1 clique</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Auto-scroll</strong>: rolagem automática ajustável para acompanhar novas linhas</span></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 8. Iniciando o sistema -->
+                        <div class="bg-surface border border-outline-variant rounded-xl overflow-hidden">
+                            <div class="bg-primary/10 border-b border-outline-variant px-6 py-4 flex items-center gap-3">
+                                <span class="bg-primary text-on-primary text-xs font-bold px-2.5 py-1 rounded-full">08</span>
                                 <h2 class="font-bold text-on-surface">Iniciando o Sistema</h2>
                             </div>
                             <div class="p-6 space-y-4 text-sm text-on-surface/80 leading-relaxed">
-                                <p>O sistema é composto por 3 processos que devem rodar juntos:</p>
+                                <p>O sistema pode ser iniciado de duas formas no Windows:</p>
                                 <div class="bg-background rounded-lg p-4 border border-outline-variant/50 font-mono text-xs space-y-2">
-                                    <p class="text-outline"># Método mais fácil — inicia tudo de uma vez:</p>
+                                    <p class="text-outline"># Método Invisível (Sem janelas de terminal):</p>
+                                    <p class="text-green-400">iniciar_invisivel.vbs</p>
+                                    <p class="text-outline mt-3"># Método Padrão (Com janelas de console):</p>
                                     <p class="text-primary">iniciar_sistema.bat</p>
                                     <p class="text-outline mt-3"># Ou manualmente em 3 terminais separados:</p>
-                                    <p class="text-green-400">node Server.js</p>
+                                    <p class="text-blue-400">node Server.js</p>
                                     <p class="text-blue-400">node popular_e_rodar.js</p>
                                     <p class="text-purple-400">node worker_download.js</p>
                                 </div>

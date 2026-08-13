@@ -19,7 +19,13 @@
 
 ## 🚀 Como Iniciar o Sistema
 
-### Método Rápido (Windows)
+### Método Rápido Sem Janelas (Background/Invisível)
+Dê um duplo clique no arquivo VBScript para rodar todos os serviços em segundo plano sem abrir nenhuma janela do terminal:
+```cmd
+iniciar_invisivel.vbs
+```
+
+### Método Padrão com Janelas Visíveis (Windows)
 Dê um duplo clique ou execute via terminal:
 ```cmd
 iniciar_sistema.bat
@@ -44,6 +50,7 @@ Acesse o painel web em: [http://localhost:3000](http://localhost:3000)
 ---
 
 ## 🎨 Principais Recursos Desenvolvidos
+- **Central de Logs em Tempo Real ("Big Brother dos Logs")**: Monitoramento unificado do Servidor, Worker e Monitor direto no dashboard web via Server-Sent Events (SSE), com filtros por serviço/nível, auto-scroll, pausa e cópia de logs.
 - **Monitoramento Automático de Canais**: Varredura periódica configurável de canais do YouTube.
 - **Suporte a Formatos MP4 e MP3**: Opção de download de vídeo completo ou extração de áudio em alta qualidade.
 - **Gerador de Skills em Lote**: Suporte para colar múltiplos links de vídeos (um por linha) e gerar todas as skills em lote.
