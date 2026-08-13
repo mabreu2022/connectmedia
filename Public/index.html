@@ -608,9 +608,29 @@
                             <div id="skill-status-badge" class="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary">Processando...</div>
                         </div>
                         <pre id="skill-log" class="text-xs text-on-surface/80 font-mono bg-background/50 rounded p-3 overflow-y-auto max-h-64 whitespace-pre-wrap"></pre>
-                        <div id="skill-resultado" class="hidden mt-4 p-3 bg-[#0a2010] border border-green-700/40 rounded-lg">
-                            <p class="text-xs text-green-400 font-semibold mb-1">✅ Skill gerado com sucesso!</p>
-                            <p id="skill-resultado-path" class="text-xs text-outline font-mono"></p>
+                        <div id="skill-resultado" class="hidden mt-4 p-4 bg-[#0a2010] border border-green-700/40 rounded-xl space-y-3 shadow-lg">
+                            <div class="flex items-center justify-between">
+                                <p class="text-xs text-green-400 font-bold flex items-center gap-1.5">
+                                    <span class="text-base">✅</span> Skill gerado com sucesso!
+                                </p>
+                                <span class="text-[10px] text-green-500/80 font-mono">Antigravity Skill Ready</span>
+                            </div>
+                            
+                            <div class="bg-black/50 p-2.5 rounded-lg border border-white/10 flex items-center justify-between gap-3">
+                                <span id="skill-resultado-path" class="text-xs text-on-surface/90 font-mono break-all select-all"></span>
+                            </div>
+
+                            <div class="flex flex-wrap gap-2 pt-1">
+                                <button onclick="copiarCaminhoResultado('arquivo', this)" class="bg-green-600 hover:bg-green-500 text-black px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                                    <span>Copiar Caminho do Arquivo</span>
+                                </button>
+
+                                <button onclick="copiarCaminhoResultado('pasta', this)" class="bg-surface-variant/40 hover:bg-surface-variant text-on-surface border border-outline-variant px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+                                    <span>Copiar Apenas a Pasta</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -2644,6 +2664,29 @@
                 console.error('Erro ao copiar:', err);
             });
         }
+
+        function copiarCaminhoResultado(tipo, btn) {
+            const el = document.getElementById('skill-resultado-path');
+            if (!el || !el.textContent) return;
+
+            let fullPath = el.textContent.trim();
+            let textToCopy = fullPath;
+
+            if (tipo === 'pasta') {
+                textToCopy = fullPath.replace(/\\[^\\]+$/, '').replace(/\/[^\/]+$/, '');
+            }
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = `<span>✓ Copiado!</span>`;
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                }, 2000);
+            }).catch(err => {
+                console.error('Erro ao copiar:', err);
+            });
+        }
+        window.copiarCaminhoResultado = copiarCaminhoResultado;
 
 
         async function carregarConfiguracoes() {
