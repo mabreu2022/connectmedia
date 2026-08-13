@@ -1108,6 +1108,7 @@
                     Cancelar / Pagar Mais Tarde
                 </button>
             </div>
+        </div>
     </div>
 
     <!-- MODAL DE VISUALIZAÇÃO DE COMPROVANTE (ADMIN) -->
@@ -3218,7 +3219,8 @@
                     ? '<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-bold">ATIVO</span>'
                     : '<span class="bg-red-500/10 text-red-400 border border-red-500/30 px-2 py-0.5 rounded text-[10px] font-bold">INATIVO</span>';
 
-                const capaThumb = p.capaUrl
+                const temCapaValida = p.capaUrl && typeof p.capaUrl === 'string' && p.capaUrl.trim() !== '' && !p.capaUrl.includes('null');
+                const capaThumb = temCapaValida
                     ? `<img src="${p.capaUrl}" class="w-10 h-10 object-cover rounded-lg border border-outline-variant">`
                     : '<span class="text-outline text-[10px]">Sem capa</span>';
 
