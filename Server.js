@@ -4,6 +4,7 @@ const path = require('path');
 const cors = require('cors');
 const { exec } = require('child_process');
 const fs = require('fs');
+const logger = require('./logger');
 
 const app = express();
 const PORT = 3000;
@@ -647,8 +648,26 @@ app.get('/api/video-info', async (req, res) => {
 });
 
 
+// ROTAS DE LOGS (Terminal em Tempo Real / Big Brother)
+app.get('/api/logs', (req, res) => {
+    res.json(logger.getLogs());
+});
+
+app.get('/api/logs/stream', (req, res) => {
+    logger.handleSSE(req, res);
+});
+
+app.post('/api/logs', (req, res) => {
+    const { fonte, nivel, mensagem } = req.body;
+    if (!mensagem) {
+        return res.status(400).json({ error: 'Mensagem de log é obrigatória.' });
+    }
+    const entry = logger.addLog(fonte, nivel, mensagem);
+    res.json({ success: true, entry });
+});
+
 // Inicializa o Servidor
 app.listen(PORT, () => {
-    console.log(`🚀 Connect Media rodando em http://localhost:${PORT}`);
-    console.log(`⚙️  API de Canais disponível em http://localhost:${PORT}/api/canais`);
+    logger.info('SERVIDIOR', `🚀 Connect Media rodando em http://localhost:${PORT}`);
+    logger.info('SERVIDIOR', `⚙️ API REST ativada e escutando na porta ${PORT}`);
 });

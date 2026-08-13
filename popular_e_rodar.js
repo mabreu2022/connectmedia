@@ -45,18 +45,30 @@ process.on('exit', releaseMonitorLock);
 process.on('SIGINT', () => { releaseMonitorLock(); process.exit(0); });
 process.on('uncaughtException', (err) => { releaseMonitorLock(); console.error(err); process.exit(1); });
 
+function registrarLog(nivel, mensagem) {
+    const fonte = 'MONITOR_CANAIS';
+    const icone = nivel === 'SUCCESS' ? '✅' : nivel === 'ERROR' ? '❌' : nivel === 'WARN' ? '⚠️' : 'ℹ️';
+    console.log(`[${new Date().toLocaleTimeString('pt-BR')}] [${fonte}] ${icone} ${mensagem}`);
+    
+    fetch('http://localhost:3000/api/logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fonte, nivel, mensagem })
+    }).catch(() => {});
+}
+
 function monitorarCanais() {
     if (!acquireMonitorLock()) {
-        console.log("ℹ️ [Monitor de Canais] Uma varredura já está em andamento. Execução duplicada ignorada.");
+        registrarLog('INFO', 'Uma varredura já está em andamento. Execução duplicada ignorada.');
         if (runOnce) process.exit(0);
         return;
     }
 
-    console.log("\n🔍 [Monitor de Canais] Iniciando ciclo de varredura...");
+    registrarLog('INFO', 'Iniciando ciclo de varredura automática de canais...');
 
     Firebird.attach(dbOptions, (err, db) => {
         if (err) {
-            console.error("❌ Erro de conexão com o Firebird:", err);
+            registrarLog('ERROR', `Erro de conexão com o Firebird: ${err.message || err}`);
             releaseMonitorLock();
             if (runOnce) {
                 process.exit(1);

@@ -7,17 +7,27 @@ const dbOptions = require('./dbConfig');
 
 let isWorking = false;
 
+function registrarLog(nivel, mensagem) {
+    const fonte = 'WORKER_DOWNLOAD';
+    const icone = nivel === 'SUCCESS' ? '✅' : nivel === 'ERROR' ? '❌' : nivel === 'WARN' ? '⚠️' : 'ℹ️';
+    console.log(`[${new Date().toLocaleTimeString('pt-BR')}] [${fonte}] ${icone} ${mensagem}`);
+    
+    fetch('http://localhost:3000/api/logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fonte, nivel, mensagem })
+    }).catch(() => {});
+}
+
 function verificarDownloads() {
     if (isWorking) {
         return;
     }
     isWorking = true;
-
-    console.log("🔍 [Worker] Verificando novos pedidos de download...");
     
     Firebird.attach(dbOptions, (err, db) => {
         if (err) {
-            console.error("❌ Erro de conexão:", err);
+            registrarLog('ERROR', `Erro de conexão com banco de dados: ${err.message || err}`);
             isWorking = false;
             return;
         }
@@ -40,7 +50,7 @@ function verificarDownloads() {
                     return;
                 }
 
-                console.log(`📥 [Worker] Encontrados ${videos.length} vídeos para baixar na pasta: ${pastaDownloads}`);
+                registrarLog('INFO', `Encontrados ${videos.length} vídeo(s) na fila de download.`);
                 
                 let index = 0;
                 function processarProximo() {
@@ -53,10 +63,11 @@ function verificarDownloads() {
                     index++;
 
                     const formato = (video.FORMATO_DOWNLOAD === 'MP3' ? 'MP3' : 'MP4');
-                    console.log(`🎬 Baixando como ${formato}: ${video.TITULO_VIDEO}`);
+                    registrarLog('INFO', `Iniciando download [${formato}]: "${video.TITULO_VIDEO}"`);
 
                     Firebird.attach(dbOptions, (err, dbVideo) => {
                         if (err) {
+                            registrarLog('ERROR', `Erro ao abrir banco para atualizar ${video.TITULO_VIDEO}`);
                             processarProximo();
                             return;
                         }
@@ -68,18 +79,15 @@ function verificarDownloads() {
                             
                             let cmd;
                             if (formato === 'MP3') {
-                                // Extrai áudio em MP3 com qualidade máxima
                                 cmd = `chcp 65001 >nul && "${ytDlpPath}" --newline -x --audio-format mp3 --audio-quality 0 -o "${outputFile}" "${video.URL_VIDEO}"`;
                             } else {
-                                // Download de vídeo em MP4 (padrão)
                                 cmd = `chcp 65001 >nul && "${ytDlpPath}" --newline -f "best[ext=mp4]/best" -o "${outputFile}" "${video.URL_VIDEO}"`;
                             }
 
-                            // maxBuffer aumentado para downloads enormes não crasharem o Node
                             const processo = exec(cmd, { maxBuffer: 1024 * 1024 * 50 }); 
                             
                             let ultimoProgressoLido = -1;
-                            let isUpdatingDB = false; // 👉 O NOSSO NOVO SEMÁFORO
+                            let isUpdatingDB = false;
 
                             processo.stdout.on('data', (data) => {
                                 const linhas = data.toString().split('\n');
@@ -91,15 +99,14 @@ function verificarDownloads() {
                                         if (match && match[1]) {
                                             const progressoInt = Math.floor(parseFloat(match[1]));
                                             
-                                            if (progressoInt > ultimoProgressoLido) {
+                                            if (progressoInt > ultimoProgressoLido && progressoInt % 10 === 0) {
                                                 ultimoProgressoLido = progressoInt;
-                                                console.log(`📥 [${video.TITULO_VIDEO}] - ${progressoInt}%`);
+                                                registrarLog('INFO', `📥 Download "${video.TITULO_VIDEO}": ${progressoInt}%`);
                                                 
-                                                // Só manda para o Firebird se a conexão não estiver gravando algo agora
                                                 if (!isUpdatingDB) {
                                                     isUpdatingDB = true;
                                                     dbVideo.query("UPDATE TB_VIDEOS_BIBLIOTECA SET PROGRESSO = ? WHERE ID_VIDEO = ?", [ultimoProgressoLido, video.ID_VIDEO], () => {
-                                                        isUpdatingDB = false; // Libera o semáforo para a próxima atualização
+                                                        isUpdatingDB = false;
                                                     });
                                                 }
                                             }
@@ -110,14 +117,13 @@ function verificarDownloads() {
 
                             processo.on('close', (code) => {
                                 if (code === 0) {
-                                    // Força o 100% no final garantindo que o vídeo conclua mesmo se o banco tiver pulado a atualização visual
                                     dbVideo.query("UPDATE TB_VIDEOS_BIBLIOTECA SET STATUS_DOWNLOAD = 'DOWNLOAD_CONCLUIDO', PROGRESSO = 100 WHERE ID_VIDEO = ?", [video.ID_VIDEO], () => {
-                                        console.log(`✅ Download concluído: ${video.TITULO_VIDEO}`);
+                                        registrarLog('SUCCESS', `Download concluído com sucesso: "${video.TITULO_VIDEO}" (${formato})`);
                                         dbVideo.detach();
                                         processarProximo();
                                     });
                                 } else {
-                                    console.log(`❌ Erro no download de ${video.TITULO_VIDEO}`);
+                                    registrarLog('ERROR', `Erro ou cancelamento no download de "${video.TITULO_VIDEO}"`);
                                     dbVideo.detach();
                                     processarProximo();
                                 }
