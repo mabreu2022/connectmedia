@@ -290,38 +290,74 @@
                         <p class="text-sm text-outline mt-2">Extraia o conhecimento de vídeos do YouTube e gere arquivos <code class="bg-surface-variant/30 px-1 rounded text-primary">.md</code> prontos para uso como Skills no Antigravity IDE.</p>
                     </div>
 
+                    <!-- Selector de Modo: Único / Lote -->
+                    <div class="flex items-center space-x-2 mb-6 bg-surface p-1 border border-outline-variant rounded-xl w-fit">
+                        <button id="tab-skill-unico" onclick="alternarModoSkill('unico')" class="px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-on-primary transition-all flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                            Vídeo Único
+                        </button>
+                        <button id="tab-skill-lote" onclick="alternarModoSkill('lote')" class="px-4 py-2 text-xs font-medium rounded-lg text-outline hover:text-on-surface transition-all flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                            📋 Processar em Lote (Vários Links)
+                        </button>
+                    </div>
+
                     <!-- Card de input -->
                     <div class="bg-surface border border-outline-variant rounded-xl p-6 mb-6 space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-outline uppercase mb-2">URL do Vídeo YouTube</label>
-                            <input type="url" id="skill-url" oninput="buscarTituloVideo(this.value)" onpaste="setTimeout(() => buscarTituloVideo(this.value), 50)" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-background border border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:border-primary outline-none transition-colors text-sm">
+                        
+                        <!-- MODO 1: VÍDEO ÚNICO -->
+                        <div id="box-skill-unico" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-outline uppercase mb-2">URL do Vídeo YouTube</label>
+                                <input type="url" id="skill-url" oninput="buscarTituloVideo(this.value)" onpaste="setTimeout(() => buscarTituloVideo(this.value), 50)" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-background border border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:border-primary outline-none transition-colors text-sm">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-outline uppercase mb-2 flex justify-between items-center">
+                                        <span>Título do Vídeo</span>
+                                        <span id="skill-titulo-status" class="text-[10px] text-primary font-normal"></span>
+                                    </label>
+                                    <input type="text" id="skill-titulo" placeholder="Preenchido automaticamente ao colar a URL" class="w-full bg-background border border-outline-variant rounded-lg px-4 py-2 text-on-surface focus:border-primary outline-none transition-colors text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-outline uppercase mb-2">Idioma preferencial</label>
+                                    <select id="skill-idioma" class="w-full bg-background border border-outline-variant rounded-lg px-4 py-2 text-on-surface focus:border-primary outline-none transition-colors text-sm">
+                                        <option value="pt">🇧🇷 Português</option>
+                                        <option value="en">🇺🇸 Inglês</option>
+                                        <option value="">🌐 Automático</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+
+                        <!-- MODO 2: LOTE DE VÍDEOS -->
+                        <div id="box-skill-lote" class="hidden space-y-4">
                             <div>
                                 <label class="block text-xs font-bold text-outline uppercase mb-2 flex justify-between items-center">
-                                    <span>Título do Vídeo</span>
-                                    <span id="skill-titulo-status" class="text-[10px] text-primary font-normal"></span>
+                                    <span>Lista de URLs (Uma por linha)</span>
+                                    <span class="text-[10px] text-outline font-normal">Insira quantos links quiser</span>
                                 </label>
-                                <input type="text" id="skill-titulo" placeholder="Preenchido automaticamente ao colando a URL" class="w-full bg-background border border-outline-variant rounded-lg px-4 py-2 text-on-surface focus:border-primary outline-none transition-colors text-sm">
+                                <textarea id="skill-urls-lote" rows="6" placeholder="https://www.youtube.com/watch?v=VIDEO_1&#10;https://www.youtube.com/watch?v=VIDEO_2&#10;https://www.youtube.com/watch?v=VIDEO_3" class="w-full bg-background border border-outline-variant rounded-lg p-3 text-on-surface focus:border-primary outline-none transition-colors text-xs font-mono leading-relaxed"></textarea>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-outline uppercase mb-2">Idioma preferencial</label>
-                                <select id="skill-idioma" class="w-full bg-background border border-outline-variant rounded-lg px-4 py-2 text-on-surface focus:border-primary outline-none transition-colors text-sm">
+                                <label class="block text-xs font-bold text-outline uppercase mb-2">Idioma preferencial para o Lote</label>
+                                <select id="skill-idioma-lote" class="w-full bg-background border border-outline-variant rounded-lg px-4 py-2 text-on-surface focus:border-primary outline-none transition-colors text-sm">
                                     <option value="pt">🇧🇷 Português</option>
                                     <option value="en">🇺🇸 Inglês</option>
                                     <option value="">🌐 Automático</option>
                                 </select>
                             </div>
                         </div>
+
                         <div class="bg-background/50 rounded-lg p-3 border border-outline-variant/50">
                             <p class="text-xs text-outline flex items-start gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 mt-0.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                O sistema tenta primeiro legendas automáticas do YouTube. Se não houver, usa o <strong class="text-on-surface">Whisper</strong> para transcrição local do áudio (gratuito, roda 100% offline).
+                                O sistema tenta legendas do YouTube. Se não houver, usa o <strong class="text-on-surface">Whisper AI</strong> local para transcrição de áudio 100% offline.
                             </p>
                         </div>
                         <button onclick="gerarSkill()" id="btn-gerar-skill" class="w-full bg-primary hover:bg-[#d8e2ff] text-on-primary py-3 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
-                            Gerar Skill .md
+                            <span>Gerar Skill .md</span>
                         </button>
                     </div>
 
@@ -1052,6 +1088,28 @@
             } catch(e) { console.error(e); }
         }
         // ─── Gerador de Skills ────────────────────────────────────────────────────────
+        let modoSkillAtual = 'unico';
+
+        function alternarModoSkill(modo) {
+            modoSkillAtual = modo;
+            const tabUnico = document.getElementById('tab-skill-unico');
+            const tabLote = document.getElementById('tab-skill-lote');
+            const boxUnico = document.getElementById('box-skill-unico');
+            const boxLote = document.getElementById('box-skill-lote');
+
+            if (modo === 'lote') {
+                tabLote.className = "px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-on-primary transition-all flex items-center gap-1.5";
+                tabUnico.className = "px-4 py-2 text-xs font-medium rounded-lg text-outline hover:text-on-surface transition-all flex items-center gap-1.5";
+                boxLote.classList.remove('hidden');
+                boxUnico.classList.add('hidden');
+            } else {
+                tabUnico.className = "px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-on-primary transition-all flex items-center gap-1.5";
+                tabLote.className = "px-4 py-2 text-xs font-medium rounded-lg text-outline hover:text-on-surface transition-all flex items-center gap-1.5";
+                boxUnico.classList.remove('hidden');
+                boxLote.classList.add('hidden');
+            }
+        }
+
         let debounceTitulo = null;
         async function buscarTituloVideo(url) {
             url = url.trim();
@@ -1082,13 +1140,25 @@
         }
 
         async function gerarSkill() {
-            const url = document.getElementById('skill-url').value.trim();
-            const titulo = document.getElementById('skill-titulo').value.trim();
-            const idioma = document.getElementById('skill-idioma').value;
+            let bodyData = {};
 
-            if (!url) {
-                alert('Por favor, informe a URL do vídeo do YouTube.');
-                return;
+            if (modoSkillAtual === 'lote') {
+                const urls = document.getElementById('skill-urls-lote').value.trim();
+                const idioma = document.getElementById('skill-idioma-lote').value;
+                if (!urls) {
+                    alert('Por favor, insira pelo menos uma URL de vídeo no campo de lote.');
+                    return;
+                }
+                bodyData = { urls, idioma };
+            } else {
+                const url = document.getElementById('skill-url').value.trim();
+                const titulo = document.getElementById('skill-titulo').value.trim();
+                const idioma = document.getElementById('skill-idioma').value;
+                if (!url) {
+                    alert('Por favor, informe a URL do vídeo do YouTube.');
+                    return;
+                }
+                bodyData = { url, titulo, idioma };
             }
 
             const btn = document.getElementById('btn-gerar-skill');
@@ -1099,9 +1169,9 @@
             const resultadoPath = document.getElementById('skill-resultado-path');
 
             btn.disabled = true;
-            btn.innerHTML = `<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Gerando...`;
+            btn.innerHTML = `<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Gerando ${modoSkillAtual === 'lote' ? 'em Lote...' : 'Skill...'}`;
             logContainer.classList.remove('hidden');
-            logEl.textContent = '⏳ Iniciando extração...\n';
+            logEl.textContent = '⏳ Iniciando extração do(s) vídeo(s)...\n';
             badge.textContent = 'Processando...';
             badge.className = 'text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary';
             resultado.classList.add('hidden');
@@ -1110,19 +1180,19 @@
                 const res = await fetch('/api/gerar-skill', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url, titulo, idioma })
+                    body: JSON.stringify(bodyData)
                 });
 
                 const data = await res.json();
 
                 if (res.ok && data.sucesso) {
-                    logEl.textContent = data.log || '✅ Concluído!';
+                    logEl.textContent = data.log || '✅ Processamento em lote concluído!';
                     badge.textContent = '✅ Concluído';
                     badge.className = 'text-xs px-2 py-0.5 rounded-full bg-green-700/30 text-green-400';
                     resultado.classList.remove('hidden');
                     resultadoPath.textContent = data.caminho;
                 } else {
-                    logEl.textContent = data.log || data.error || 'Erro desconhecido.';
+                    logEl.textContent = data.log || data.error || 'Erro no processamento.';
                     badge.textContent = '❌ Erro';
                     badge.className = 'text-xs px-2 py-0.5 rounded-full bg-red-700/30 text-red-400';
                 }
@@ -1133,7 +1203,7 @@
             }
 
             btn.disabled = false;
-            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg> Gerar Skill .md`;
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg> <span>Gerar Skill .md</span>`;
         }
 
         // ─── Listagem e Exibição de Skills Aprendidas ─────────────────────────────

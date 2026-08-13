@@ -511,37 +511,45 @@ app.delete('/api/videos/limpar-descoberta', (req, res) => {
 });
 
 
-// Rota: Gerador de Skills para Antigravity
+// Rota: Gerador de Skills para Antigravity (Suporta URL única ou Lote)
 app.post('/api/gerar-skill', (req, res) => {
-    const { url, titulo, idioma } = req.body;
+    let { url, urls, titulo, idioma } = req.body;
 
-    if (!url) {
-        return res.status(400).json({ sucesso: false, error: 'URL é obrigatória.' });
+    let listaUrls = [];
+    if (Array.isArray(urls)) {
+        listaUrls = urls.map(u => u.trim()).filter(u => u.startsWith('http'));
+    } else if (typeof urls === 'string' && urls.trim()) {
+        listaUrls = urls.split(/\r?\n|,/).map(u => u.trim()).filter(u => u.startsWith('http'));
+    } else if (url && url.trim()) {
+        listaUrls = [url.trim()];
+    }
+
+    if (listaUrls.length === 0) {
+        return res.status(400).json({ sucesso: false, error: 'Forneça pelo menos uma URL de vídeo válida.' });
     }
 
     const scriptPath = path.join(__dirname, 'gerar_skill.js');
-    let args = [url];
-    if (titulo) { args.push('--titulo', titulo); }
+    let args = [...listaUrls];
+    if (titulo && listaUrls.length === 1) { args.push('--titulo', titulo); }
     if (idioma) { args.push('--idioma', idioma); }
 
     const { execFile } = require('child_process');
-    const processo = execFile(process.execPath, [scriptPath, ...args], {
+    execFile(process.execPath, [scriptPath, ...args], {
         cwd: __dirname,
-        timeout: 300000, // 5 minutos
-        maxBuffer: 1024 * 1024 * 10
+        timeout: 900000, // 15 minutos para lote
+        maxBuffer: 1024 * 1024 * 50
     }, (err, stdout, stderr) => {
         const log = (stdout || '') + (stderr ? '\n' + stderr : '');
 
         if (err) {
-            console.error('[Skill] Erro:', err.message);
+            console.error('[Skill Batch] Erro:', err.message);
             return res.status(500).json({ sucesso: false, log, error: err.message });
         }
 
-        // Extrai o caminho do arquivo gerado do log
-        const match = log.match(/Salvo em:\s*(.+\.md)/i);
-        const caminho = match ? match[1].trim() : 'Skill gerado em .agents/skills/';
+        const match = log.match(/Salvo em:\s*(.+\.md)/gi);
+        const caminho = match ? match.join('\n') : 'Skills geradas em .agents/skills/';
 
-        res.json({ sucesso: true, log, caminho });
+        res.json({ sucesso: true, log, caminho, total: listaUrls.length });
     });
 });
 

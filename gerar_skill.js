@@ -28,32 +28,50 @@ const TEMP_DIR = os.tmpdir();
 
 // ─── Argumentos CLI ────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
-if (args.length === 0 || args[0] === '--help') {
+
+if (args.length === 0 || args.includes('--help')) {
     console.log(`
 ┌─────────────────────────────────────────────────────┐
-│         Connect Media → Gerador de Skills .md        │
+│    Connect Media → Gerador de Skills .md (Em Lote)   │
 └─────────────────────────────────────────────────────┘
 
 Uso:
-  node gerar_skill.js <URL_YouTube>
-  node gerar_skill.js <URL_YouTube> --idioma pt
-  node gerar_skill.js <URL_YouTube> --titulo "Meu Tópico"
-  node gerar_skill.js <URL_YouTube> --destino /caminho/custom
+  node gerar_skill.js <URL_1> [URL_2] [URL_3]...
+  node gerar_skill.js --lista urls.txt
+  node gerar_skill.js <URL> --idioma pt --titulo "Meu Tópico"
 
 Exemplos:
-  node gerar_skill.js https://youtube.com/watch?v=9EcuIU4JrHw
-  node gerar_skill.js https://youtube.com/watch?v=abc123 --idioma pt --titulo "Firebird 5.0 Setup"
+  node gerar_skill.js https://youtube.com/watch?v=9EcuIU4JrHw https://youtube.com/watch?v=abc123
+  node gerar_skill.js --lista links.txt
 `);
     process.exit(0);
 }
 
-const url = args[0];
 const idiomaIdx = args.indexOf('--idioma');
 const idioma = idiomaIdx !== -1 ? args[idiomaIdx + 1] : null;
 const tituloIdx = args.indexOf('--titulo');
 const tituloManual = tituloIdx !== -1 ? args[tituloIdx + 1] : null;
 const destinoIdx = args.indexOf('--destino');
 const destinoManual = destinoIdx !== -1 ? args[destinoIdx + 1] : null;
+const listaIdx = args.indexOf('--lista');
+
+let targetUrls = [];
+
+if (listaIdx !== -1 && args[listaIdx + 1]) {
+    const listaPath = path.resolve(args[listaIdx + 1]);
+    if (fs.existsSync(listaPath)) {
+        const fileContent = fs.readFileSync(listaPath, 'utf8');
+        targetUrls = fileContent.split(/\r?\n/).map(u => u.trim()).filter(u => u.startsWith('http'));
+    }
+} else {
+    // Filtra todas as URLs passadas por parâmetro (que iniciam com http)
+    targetUrls = args.filter(a => a.startsWith('http'));
+}
+
+if (targetUrls.length === 0) {
+    console.error('❌ Nenhuma URL válida fornecida.');
+    process.exit(1);
+}
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 function slugify(str) {
@@ -225,21 +243,14 @@ Para referenciar esta skill em qualquer chat com o Antigravity IDE, utilize:
     return md;
 }
 
-// ─── Pipeline Principal ────────────────────────────────────────────────────────
-async function main() {
-    if (!fs.existsSync(YT_DLP)) {
-        console.error(`❌ yt-dlp.exe não encontrado em: ${YT_DLP}`);
-        console.error(`   Baixe em: https://github.com/yt-dlp/yt-dlp/releases/latest`);
-        process.exit(1);
-    }
-
-    console.log(`\n🎬 Connect Media → Gerador de Skill\n${'─'.repeat(50)}`);
-    console.log(`📎 URL/Arquivo: ${url}`);
+async function processarVideo(url, index, total) {
+    console.log(`\n──────────────────────────────────────────────────`);
+    console.log(`📌 [${index + 1}/${total}] Processando vídeo: ${url}`);
 
     // 1. Descobre o título do vídeo
-    let titulo = tituloManual;
+    let titulo = (total === 1 ? tituloManual : null);
     if (!titulo) {
-        console.log('\n🔍 Obtendo informações do vídeo...');
+        console.log('🔍 Obtendo informações do vídeo...');
         const infoResult = spawnSync(YT_DLP, ['--get-title', '--no-playlist', url], { encoding: 'utf8', timeout: 30000 });
         titulo = (infoResult.stdout || '').trim();
         if (!titulo) {
@@ -254,11 +265,9 @@ async function main() {
     const tempBase = path.join(TEMP_DIR, `skill_${slug}_${Date.now()}`);
 
     // 2. Baixa legendas
-    console.log('\n📄 Baixando transcrição/legendas...');
-
+    console.log('📄 Baixando transcrição/legendas...');
     const langArgs = idioma ? ['--sub-lang', `${idioma},${idioma}-*`] : ['--sub-lang', 'pt,pt-BR,pt-PT,en,en-US'];
 
-    // Tenta primeiro legendas manuais, depois auto-geradas
     let subFile = null;
     for (const subType of [['--write-subs'], ['--write-auto-subs']]) {
         const dlArgs = [
@@ -271,13 +280,8 @@ async function main() {
             url
         ];
 
-        const dlResult = spawnSync(YT_DLP, dlArgs, {
-            encoding: 'utf8',
-            timeout: 60000,
-            cwd: TEMP_DIR
-        });
+        spawnSync(YT_DLP, dlArgs, { encoding: 'utf8', timeout: 60000, cwd: TEMP_DIR });
 
-        // Procura arquivo de legenda gerado
         const arquivos = fs.readdirSync(TEMP_DIR).filter(f =>
             f.startsWith(path.basename(tempBase)) && (f.endsWith('.vtt') || f.endsWith('.srt'))
         );
@@ -292,16 +296,12 @@ async function main() {
     let transcricao = '';
 
     if (subFile) {
-        // 3. Processa o texto da legenda
-        console.log('\n🔄 Processando transcrição da legenda...');
+        console.log('🔄 Processando transcrição da legenda...');
         const rawContent = fs.readFileSync(subFile, 'utf8');
         transcricao = limparVTT(rawContent);
         try { fs.unlinkSync(subFile); } catch (_) {}
     } else {
-        console.log('\n🎙️ Legendas automáticas não encontradas. Tentando transcrição por áudio (Whisper local)...');
-        const wavFile = `${tempBase}.wav`;
-        
-        // Baixa áudio em WAV 16kHz mono para o Whisper
+        console.log('🎙️ Legendas não encontradas. Tentando transcrição por áudio (Whisper local)...');
         const audioArgs = [
             '--no-playlist',
             '-x',
@@ -353,15 +353,14 @@ async function main() {
         }
 
         if (!transcricao || transcricao.length < 50) {
-            console.error('\n❌ Nenhuma legenda ou áudio foi transcrito com sucesso.');
-            console.error('   Dica: Certifique-se de que o vídeo possui legendas no YouTube ou que ffmpeg está instalado.');
-            process.exit(1);
+            console.error('❌ Nenhuma legenda ou áudio foi transcrito com sucesso.');
+            return null;
         }
     }
 
     console.log(`   ✅ Transcrição final: ${transcricao.length} caracteres`);
 
-    // 4. Salva na pasta correta
+    // Salva na pasta correta
     const destDir = destinoManual
         ? path.resolve(destinoManual, slug)
         : path.join(AGENTS_DIR, slug);
@@ -369,21 +368,41 @@ async function main() {
     fs.mkdirSync(destDir, { recursive: true });
     const destFile = path.join(destDir, 'SKILL.md');
 
-    // 5. Gera o Markdown
-    console.log('\n✍️  Gerando Skill .md...');
+    console.log('✍️  Gerando Skill .md...');
     const dataGeracao = new Date().toISOString().split('T')[0];
     const conteudoMD = gerarConteudoMD({ titulo, url, idioma, transcricao, dataGeracao, pastaAbsoluta: destDir });
 
     fs.writeFileSync(destFile, conteudoMD, 'utf8');
 
-    // 6. Limpa arquivos temporários
-    try { fs.unlinkSync(subFile); } catch (_) {}
-
-    console.log(`\n✅ Skill gerado com sucesso!`);
+    console.log(`✅ Skill gerado com sucesso!`);
     console.log(`   📁 Salvo em: ${destFile}`);
     console.log(`   📏 Tamanho: ${(conteudoMD.length / 1024).toFixed(1)} KB`);
-    console.log(`\n💡 Para usar no Antigravity, o skill já está disponível em:`);
-    console.log(`   .agents/skills/${slug}/SKILL.md\n`);
+
+    return destFile;
+}
+
+// ─── Pipeline Principal ────────────────────────────────────────────────────────
+async function main() {
+    if (!fs.existsSync(YT_DLP)) {
+        console.error(`❌ yt-dlp.exe não encontrado em: ${YT_DLP}`);
+        console.error(`   Baixe em: https://github.com/yt-dlp/yt-dlp/releases/latest`);
+        process.exit(1);
+    }
+
+    console.log(`\n🎬 Connect Media → Gerador de Skills (Lote de ${targetUrls.length} vídeo(s))\n${'═'.repeat(55)}`);
+
+    const concluidos = [];
+    for (let i = 0; i < targetUrls.length; i++) {
+        try {
+            const resPath = await processarVideo(targetUrls[i], i, targetUrls.length);
+            if (resPath) concluidos.push(resPath);
+        } catch(e) {
+            console.error(`❌ Erro ao processar URL [${targetUrls[i]}]:`, e.message);
+        }
+    }
+
+    console.log(`\n${'═'.repeat(55)}`);
+    console.log(`🎉 Processamento em lote concluído! ${concluidos.length}/${targetUrls.length} skill(s) gerada(s).`);
 }
 
 main().catch(err => {
