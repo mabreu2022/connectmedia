@@ -361,9 +361,33 @@
                                     <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Caminho do Arquivo (.FDB)</label>
                                     <input type="text" id="input-db-database" placeholder="Ex: D:\Projetos AntiGravity\Connect Media\Database\BIBLIOTECA_YT.FDB" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Configuração de Inteligência Artificial (LLM) -->
+                        <div class="border-t border-outline-variant pt-4 mt-4 space-y-3 bg-surface-variant/10 p-4 rounded-xl border">
+                            <h3 class="text-xs font-bold text-amber-400 uppercase flex items-center space-x-2">
+                                <span>🤖 Configuração de Inteligência Artificial (LLM & Gerador de Skills)</span>
+                            </h3>
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Provedor de IA Preferencial</label>
+                                <select id="config-provedor-ai" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-amber-400 outline-none text-xs">
+                                    <option value="auto">🌐 Detecção Automática (Gemini API ➔ Ollama Local ➔ Algoritmo)</option>
+                                    <option value="gemini">Google Gemini AI (API Key)</option>
+                                    <option value="ollama">🦙 Ollama Local (100% Offline & Gratuito)</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Senha DBA</label>
-                                    <input type="password" id="input-db-password" placeholder="Ex: masterkey" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1 flex justify-between">
+                                        <span>Chave API Google Gemini</span>
+                                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-amber-400 hover:underline text-[10px]">Obter Grátis ↗</a>
+                                    </label>
+                                    <input type="password" id="config-gemini-key" placeholder="Ex: AIzaSy..." class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-amber-400 outline-none font-mono text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">URL Servidor Ollama Local</label>
+                                    <input type="text" id="config-ollama-url" placeholder="http://127.0.0.1:11434" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-amber-400 outline-none font-mono text-xs">
                                 </div>
                             </div>
                         </div>
@@ -2642,6 +2666,15 @@
                 if(document.getElementById('input-nome-pix')) document.getElementById('input-nome-pix').value = data.nomeRecebedorPix || '';
                 if(document.getElementById('input-cidade-pix')) document.getElementById('input-cidade-pix').value = data.cidadeRecebedorPix || '';
 
+                if (data.aiConfig) {
+                    if (document.getElementById('config-provedor-ai')) document.getElementById('config-provedor-ai').value = data.aiConfig.provedor || 'auto';
+                    if (document.getElementById('config-gemini-key')) document.getElementById('config-gemini-key').value = data.aiConfig.geminiKey || '';
+                    if (document.getElementById('config-ollama-url')) document.getElementById('config-ollama-url').value = data.aiConfig.ollamaUrl || 'http://127.0.0.1:11434';
+                    if (document.getElementById('skill-pdf-api-key') && data.aiConfig.geminiKey && !document.getElementById('skill-pdf-api-key').value) {
+                        document.getElementById('skill-pdf-api-key').value = data.aiConfig.geminiKey;
+                    }
+                }
+
                 // Carrega dados do Banco Firebird
                 const resDb = await fetch('/api/configuracoes/db');
                 if (resDb.ok) {
@@ -2671,13 +2704,18 @@
             const nomeRecebedorPix = document.getElementById('input-nome-pix')?.value || '';
             const cidadeRecebedorPix = document.getElementById('input-cidade-pix')?.value || '';
             
+            const provedorAi = document.getElementById('config-provedor-ai')?.value || 'auto';
+            const geminiKey = document.getElementById('config-gemini-key')?.value || '';
+            const ollamaUrl = document.getElementById('config-ollama-url')?.value || 'http://127.0.0.1:11434';
+            const aiConfig = { provedor: provedorAi, geminiKey, ollamaUrl };
+
             await fetch('/api/configuracoes', { 
                 method: 'POST', 
                 headers: {'Content-Type': 'application/json'}, 
                 body: JSON.stringify({ 
                     caminho, qtdVideos: parseInt(qtdVideos), intervaloMinutos: parseInt(intervaloMinutos), 
                     dataInicial, dataFinal, buscarVideos, buscarShorts, buscarLives,
-                    chavePix, nomeRecebedorPix, cidadeRecebedorPix
+                    chavePix, nomeRecebedorPix, cidadeRecebedorPix, aiConfig
                 }) 
             });
 

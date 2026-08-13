@@ -235,6 +235,30 @@ app.get('/api/videos/baixados', (req, res) => {
     });
 });
 
+// Persistência de Configurações de IA em ai_config.json
+const AI_CONFIG_FILE = path.join(__dirname, 'ai_config.json');
+
+function carregarAiConfig() {
+    try {
+        if (fs.existsSync(AI_CONFIG_FILE)) {
+            return JSON.parse(fs.readFileSync(AI_CONFIG_FILE, 'utf8'));
+        }
+    } catch(e) {}
+    return { provedor: 'auto', geminiKey: '', ollamaUrl: 'http://127.0.0.1:11434' };
+}
+
+function salvarAiConfig(config) {
+    try {
+        if (config && typeof config === 'object') {
+            fs.writeFileSync(AI_CONFIG_FILE, JSON.stringify(config, null, 2), 'utf8');
+        }
+        return true;
+    } catch(e) {
+        console.error('Erro ao salvar ai_config.json:', e);
+        return false;
+    }
+}
+
 // Rota 07: para buscar as configurações atuais
 app.get('/api/configuracoes', (req, res) => {
     Firebird.attach(dbOptions, (err, db) => {
@@ -251,8 +275,9 @@ app.get('/api/configuracoes', (req, res) => {
 
         db.query(query, (err, result) => {
             db.detach();
+            const ai = carregarAiConfig();
             if (err || !result || result.length === 0) {
-                return res.json({ caminho: path.join(__dirname, 'downloads'), qtdVideos: 5, intervaloMinutos: 60, dataInicial: '', dataFinal: '', buscarVideos: 1, buscarShorts: 1, buscarLives: 1 });
+                return res.json({ caminho: path.join(__dirname, 'downloads'), qtdVideos: 5, intervaloMinutos: 60, dataInicial: '', dataFinal: '', buscarVideos: 1, buscarShorts: 1, buscarLives: 1, aiConfig: ai });
             }
             
             const formataData = (d) => d ? d.toISOString().split('T')[0] : '';
@@ -265,7 +290,8 @@ app.get('/api/configuracoes', (req, res) => {
                 dataFinal: formataData(result[0].DATA_FINAL),
                 buscarVideos: result[0].BUSCAR_VIDEOS,
                 buscarShorts: result[0].BUSCAR_SHORTS,
-                buscarLives: result[0].BUSCAR_LIVES
+                buscarLives: result[0].BUSCAR_LIVES,
+                aiConfig: ai
             });
         });
     });
@@ -273,9 +299,13 @@ app.get('/api/configuracoes', (req, res) => {
 
 // Rota 08: para salvar configurações
 app.post('/api/configuracoes', (req, res) => {
-    const { caminho, qtdVideos, intervaloMinutos, dataInicial, dataFinal, buscarVideos, buscarShorts, buscarLives } = req.body;
+    const { caminho, qtdVideos, intervaloMinutos, dataInicial, dataFinal, buscarVideos, buscarShorts, buscarLives, aiConfig } = req.body;
 
     if (!caminho) return res.status(400).json({ error: 'O caminho é obrigatório.' });
+
+    if (aiConfig) {
+        salvarAiConfig(aiConfig);
+    }
 
     Firebird.attach(dbOptions, (err, db) => {
         if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
@@ -758,7 +788,9 @@ ${textoLimpo}
 
         // 🤖 Motor de Síntese e Interpretação via Inteligência Artificial
         async function sintetizarSkillComIA(rawText, tituloDoc, nomeArquivo, totalPaginas, userApiKey = '', objetivoAgente = '') {
-            const apiKey = userApiKey.trim() || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
+            const aiSaved = carregarAiConfig();
+            const apiKey = userApiKey.trim() || aiSaved.geminiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
+            const ollamaEndpoint = (aiSaved.ollamaUrl || 'http://127.0.0.1:11434').replace(/\/$/, '') + '/api/generate';
             const slug = slugify(tituloDoc);
             const dataHoje = new Date().toLocaleString('pt-BR');
             const foco = objetivoAgente && objetivoAgente.trim() ? objetivoAgente.trim() : 'Análise, arquitetura e aplicação de boas práticas no projeto';
@@ -853,10 +885,10 @@ Sua tarefa é analisar o projeto e executar com precisão: **"${foco}"**.
                 }
             }
 
-            // 2. Tenta via Ollama Local (http://localhost:11434)
+            // 2. Tenta via Ollama Local
             try {
-                console.log('[AI Synthesis] Checando Ollama Local para interpretação do PDF...');
-                const resOllama = await fetch('http://127.0.0.1:11434/api/generate', {
+                console.log(`[AI Synthesis] Checando Ollama Local (${ollamaEndpoint})...`);
+                const resOllama = await fetch(ollamaEndpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -887,21 +919,23 @@ Sua tarefa é analisar o projeto e executar com precisão: **"${foco}"**.
 
         fs.writeFileSync(targetFilePath, skillContent, 'utf8');
 
-        // Opcional: Registra também no Banco de Dados Firebird para a Loja de Prompts
-        Firebird.attach(dbOptions, (err, db) => {
-            if (!err && db) {
-                db.query('INSERT INTO TB_PROMPTS_LOJA (TITULO, CATEGORIA, DESCRICAO, CONTEUDO, PRECO, TIPO) VALUES (?, ?, ?, ?, ?, ?)', [
-                    `Agente: ${tituloSkill} - ${objetivoAgente.substring(0, 30) || 'Metodologia'}`,
-                    'Engenharia de Software & IA',
-                    `Prompt & Skill gerado a partir do livro "${nomeDoc}" para ${objetivoAgente || 'atuação no projeto'}`,
-                    skillContent,
-                    0.00,
-                    'PROMPT'
-                ], (qErr) => {
-                    db.detach();
-                });
-            }
-        });
+        // Registra também no Banco de Dados Firebird para a Loja de Prompts
+        try {
+            Firebird.attach(dbOptions, (err, db) => {
+                if (!err && db) {
+                    db.query('INSERT INTO TB_PROMPTS_LOJA (TITULO, CATEGORIA, DETALHES, PRECO, TIPO) VALUES (?, ?, ?, ?, ?)', [
+                        `Agente: ${tituloSkill} - ${(objetivoAgente || 'Metodologia').substring(0, 30)}`,
+                        'Engenharia de Software & IA',
+                        skillContent,
+                        0.00,
+                        'PROMPT'
+                    ], (qErr) => {
+                        if (qErr) console.log('Aviso banco prompts:', qErr.message);
+                        db.detach();
+                    });
+                }
+            });
+        } catch(e) {}
 
         console.log(`[PDF Skill] Gerada com sucesso e interpretada (${aiResult.provedor}): ${targetFilePath} (${numPages} páginas)`);
         
