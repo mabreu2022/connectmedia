@@ -654,45 +654,115 @@ app.post('/api/gerar-skill-pdf', async (req, res) => {
 
         const targetFilePath = path.join(targetDir, 'SKILL.md');
 
-        // Processa e limpa o texto do PDF
-        let rawText = pdfData.text || '';
-        let cleanedText = rawText
-            .replace(/\r\n/g, '\n')
-            .replace(/\n{3,}/g, '\n\n')
-            .trim();
+        // 🧠 Estruturador de Conhecimento para Antigravity Skill
+        function estruturarConhecimentoParaSkill(rawText, tituloDoc, nomeArquivo, totalPaginas) {
+            let linhas = (rawText || '').split(/\r?\n/)
+                .map(l => l.trim())
+                .filter(l => {
+                    if (!l) return false;
+                    if (/^--\s*\d+\s*of\s*\d+\s*--$/i.test(l)) return false;
+                    if (/^\d+\s*\/\s*\d+$/i.test(l)) return false;
+                    if (/^página\s*\d+/i.test(l)) return false;
+                    if (/^page\s*\d+/i.test(l)) return false;
+                    if (/^\d+$/.test(l) && l.length < 4) return false;
+                    return true;
+                });
 
-        if (cleanedText.length > 250000) {
-            cleanedText = cleanedText.substring(0, 250000) + '\n\n... [Conteúdo resumido/truncado após 250k caracteres para otimização da Skill] ...';
-        }
+            const topicos = [];
+            const diretrizes = [];
+            const codigos = [];
+            const parágrafos = [];
+            let bloco = [];
 
-        const nowFormatted = new Date().toLocaleString('pt-BR');
-        
-        const skillContent = `---
-name: ${tituloSkill}
+            for (let i = 0; i < linhas.length; i++) {
+                const l = linhas[i];
+
+                const ehCapitulo = /^(cap[íi]tulo|chapter|padr[ãa]o|pattern|[0-9]+\.|\b[A-ZÁÉÍÓÚÀÃÕÇ\s]{4,50}\b)/.test(l) && l.length < 80;
+
+                if (ehCapitulo) {
+                    if (bloco.length > 0) { parágrafos.push(bloco.join(' ')); bloco = []; }
+                    topicos.push(l);
+                } else if (l.includes('class ') || l.includes('function ') || l.includes('def ') || l.includes('CREATE TABLE') || l.includes('SELECT ') || l.includes('{') || l.includes('}')) {
+                    codigos.push(l);
+                    bloco.push(l);
+                } else if (l.toLowerCase().includes('deve') || l.toLowerCase().includes('regra') || l.toLowerCase().includes('importante') || l.toLowerCase().includes('recomenda')) {
+                    diretrizes.push(l);
+                    bloco.push(l);
+                } else {
+                    bloco.push(l);
+                }
+            }
+
+            if (bloco.length > 0) parágrafos.push(bloco.join(' '));
+
+            const topicosUnicos = Array.from(new Set(topicos)).slice(0, 30);
+            const diretrizesUnicas = Array.from(new Set(diretrizes)).slice(0, 15);
+            const codigosUnicos = Array.from(new Set(codigos)).slice(0, 25);
+
+            let textoLimpo = parágrafos.join('\n\n');
+            if (textoLimpo.length > 150000) {
+                textoLimpo = textoLimpo.substring(0, 150000) + '\n\n... [Conhecimento compilado e otimizado para a Skill Antigravity] ...';
+            }
+
+            const dataHoje = new Date().toLocaleString('pt-BR');
+
+            return `---
+name: ${slug}
 description: >
-  Skill técnica extraída do livro PDF "${nomeDoc}" (${numPages} páginas). Contém conhecimentos, conceitos e instruções compiladas para orientação da IA.
-source: ${nomeDoc}
-generated_at: ${nowFormatted}
+  Skill técnica e guia de arquitetura extraído do livro PDF "${nomeArquivo}" (${totalPaginas} páginas). Fornece diretrizes de código, padrões de projeto e boas práticas compiladas para uso no Antigravity IDE.
+source: ${nomeArquivo}
+generated_at: ${dataHoje}
 ---
 
-# 📚 ${tituloSkill}
+# 🧠 Skill: ${tituloDoc}
 
-> [!NOTE]
-> **Skill extraída de documento PDF**: \`${nomeDoc}\`
-> - **Total de Páginas**: ${numPages}
-> - **Data de Extração**: ${nowFormatted}
-> - **Origem**: Livro/Documento Técnico PDF
+> [!IMPORTANT]
+> **Antigravity Skill Specification** — Conhecimento extraído do documento técnico: \`${nomeArquivo}\`
+> - **Total de Páginas**: ${totalPaginas}
+> - **Data de Geramento**: ${dataHoje}
+> - **Formato**: Markdown Otimizado para Antigravity AI
 
-## 🧠 Conteúdo e Conhecimento Técnico Extraído
+---
 
-${cleanedText}
+## 📌 1. Visão Geral & Objetivos da Skill
+
+Esta Skill foi compilada a partir do livro **"${tituloDoc}"** e serve como guia de referência técnica para tomada de decisões arquiteturais, padrões de design e padrões de implementação no projeto.
+
+---
+
+## 📐 2. Principais Tópicos & Padrões Extraídos
+
+${topicosUnicos.length > 0 ? topicosUnicos.map(t => `- **${t}**`).join('\n') : '- Padrões e conceitos fundamentais do documento.'}
+
+---
+
+## ⚙️ 3. Regras & Diretrizes Técnicas
+
+${diretrizesUnicas.length > 0 ? diretrizesUnicas.map(d => `> 💡 ${d}`).join('\n\n') : '> 💡 Aplique arquitetura limpa, separação de responsabilidades e reutilização de código.'}
+
+---
+
+${codigosUnicos.length > 0 ? `## 💻 4. Estruturas & Exemplos de Código de Referência
+
+\`\`\`javascript
+${codigosUnicos.join('\n')}
+\`\`\`
+
+---` : ''}
+
+## 📖 5. Corpo Completo de Conhecimento
+
+${textoLimpo}
 `;
+        }
+
+        const skillContent = estruturarConhecimentoParaSkill(pdfData.text, tituloSkill, nomeDoc, numPages);
 
         fs.writeFileSync(targetFilePath, skillContent, 'utf8');
 
-        console.log(`[PDF Skill] Gerada com sucesso: ${targetFilePath} (${numPages} páginas)`);
+        console.log(`[PDF Skill] Gerada com sucesso e estruturada: ${targetFilePath} (${numPages} páginas)`);
         
-        const log = `✅ Skill "${tituloSkill}" extraída do livro PDF "${nomeDoc}" com sucesso!\n• Total de Páginas: ${numPages}\n• Caracteres Extraídos: ${pdfData.text ? pdfData.text.length : 0}\n• Salvo em: ${targetFilePath}`;
+        const log = `✅ Skill "${tituloSkill}" extraída e ESTRUTURADA para o Antigravity com sucesso!\n• Total de Páginas: ${numPages}\n• Tópicos & Padrões Mapeados automaticamente\n• Caracteres Extraídos: ${pdfData.text ? pdfData.text.length : 0}\n• Arquivo Final: ${targetFilePath}`;
 
         res.json({
             sucesso: true,
