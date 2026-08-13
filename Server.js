@@ -722,7 +722,7 @@ app.get('/api/prompts', (req, res) => {
     Firebird.attach(dbOptions, (err, db) => {
         if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
 
-        const query = 'SELECT ID_PROMPT, TITULO, CATEGORIA, DESCRICAO_CURTA, PRECO_REAIS, TAGS, AUTOR, DATA_CADASTRO FROM TB_PROMPTS_LOJA WHERE ATIVO = 1 ORDER BY ID_PROMPT DESC';
+        const query = 'SELECT ID_PROMPT, TITULO, CATEGORIA, DESCRICAO_CURTA, PRECO_REAIS, TAGS, AUTOR, DATA_CADASTRO, CAPA_URL, TIPO_ITEM FROM TB_PROMPTS_LOJA WHERE ATIVO = 1 ORDER BY ID_PROMPT DESC';
         db.query(query, (err, result) => {
             if (err) {
                 db.detach();
@@ -742,6 +742,8 @@ app.get('/api/prompts', (req, res) => {
                     preco: parseFloat(p.PRECO_REAIS || 0),
                     tags: p.TAGS ? p.TAGS.split(',').map(t => t.trim()) : [],
                     autor: p.AUTOR,
+                    capaUrl: p.CAPA_URL ? p.CAPA_URL.toString('utf8') : null,
+                    tipoItem: p.TIPO_ITEM || 'PROMPT',
                     comprado: compradosSet.has(p.ID_PROMPT)
                 }));
 
@@ -1181,7 +1183,6 @@ app.post('/api/admin/config-pix', (req, res) => {
     Firebird.attach(dbOptions, (err, db) => {
         if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
 
-        // Atualiza a tabela mestre do SaaS e também a configuração padrão
         db.query('UPDATE TB_CONFIGURACOES SET CHAVE_PIX = ?, NOME_RECEBEDOR_PIX = ?, CIDADE_RECEBEDOR_PIX = ? WHERE ID_CONFIG = 1', [
             chavePixMestre, nomeRecebedor || 'Connect Media Solucoes', cidadeRecebedor || 'Sao Paulo'
         ], (err) => {
@@ -1189,6 +1190,202 @@ app.post('/api/admin/config-pix', (req, res) => {
             if (err) return res.status(500).json({ error: 'Erro ao salvar Chave Pix Mestre.' });
             logger.success('ADMIN SAAS', `❖ Chave Pix Mestre do SaaS atualizada para: ${chavePixMestre}`);
             res.json({ success: true, message: 'Chave Pix Mestre do SaaS salva com sucesso!' });
+        });
+    });
+});
+
+// Rota Admin: Aprovar Venda Pix e Liberar Prompts Manualmente
+app.post('/api/admin/vendas/:id/aprovar', (req, res) => {
+    const sessao = obterUsuarioSessao(req);
+    if (!sessao || sessao.perfil !== 'ADMIN') {
+        return res.status(403).json({ error: 'Acesso negado. Requer perfil de Administrador.' });
+    }
+
+    const idVenda = req.params.id;
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        db.query('SELECT ID_VENDA, ITENS_JSON FROM TB_VENDAS_PIX WHERE ID_VENDA = ?', [idVenda], (err, resVenda) => {
+            if (err || !resVenda || resVenda.length === 0) {
+                db.detach();
+                return res.status(404).json({ error: 'Venda não encontrada.' });
+            }
+
+            const venda = resVenda[0];
+            let itens = [];
+            try { itens = JSON.parse(venda.ITENS_JSON || '[]'); } catch (_) {}
+
+            db.query("UPDATE TB_VENDAS_PIX SET STATUS = 'PAGO' WHERE ID_VENDA = ?", [idVenda], () => {
+                let idx = 0;
+                function insereProximo() {
+                    if (idx >= itens.length) {
+                        db.detach();
+                        logger.success('ADMIN SAAS', `✅ Venda #${idVenda} aprovada manualmente pelo Admin! Prompts liberados.`);
+                        return res.json({ success: true, message: `Pagamento da Venda #${idVenda} aprovado com sucesso!` });
+                    }
+                    const item = itens[idx++];
+                    db.query('INSERT INTO TB_MINHAS_COMPRAS (ID_PROMPT, ID_VENDA) VALUES (?, ?)', [item.id, idVenda], () => {
+                        insereProximo();
+                    });
+                }
+                insereProximo();
+            });
+        });
+    });
+});
+
+// Rota Admin: CRUD Listar Todos os Prompts (incluindo desativados)
+app.get('/api/admin/prompts', (req, res) => {
+    const sessao = obterUsuarioSessao(req);
+    if (!sessao || sessao.perfil !== 'ADMIN') {
+        return res.status(403).json({ error: 'Acesso negado. Requer perfil de Administrador.' });
+    }
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        const query = 'SELECT ID_PROMPT, TITULO, CATEGORIA, DESCRICAO_CURTA, PROMPT_SISTEMA, PRECO_REAIS, TAGS, AUTOR, CAPA_URL, TIPO_ITEM, ATIVO, DATA_CADASTRO FROM TB_PROMPTS_LOJA ORDER BY ID_PROMPT DESC';
+        db.query(query, (err, result) => {
+            db.detach();
+            if (err) return res.status(500).json({ error: 'Erro ao buscar catálogo completo.' });
+
+            const prompts = (result || []).map(p => ({
+                id: p.ID_PROMPT,
+                titulo: p.TITULO,
+                categoria: p.CATEGORIA,
+                descricao: p.DESCRICAO_CURTA,
+                promptSistema: p.PROMPT_SISTEMA ? p.PROMPT_SISTEMA.toString('utf8') : '',
+                preco: parseFloat(p.PRECO_REAIS || 0),
+                tags: p.TAGS || '',
+                autor: p.AUTOR,
+                capaUrl: p.CAPA_URL ? p.CAPA_URL.toString('utf8') : '',
+                tipoItem: p.TIPO_ITEM || 'PROMPT',
+                ativo: p.ATIVO
+            }));
+            res.json(prompts);
+        });
+    });
+});
+
+// Rota Admin: CRUD Criar Novo Prompt / Módulo
+app.post('/api/admin/prompts', (req, res) => {
+    const sessao = obterUsuarioSessao(req);
+    if (!sessao || sessao.perfil !== 'ADMIN') {
+        return res.status(403).json({ error: 'Acesso negado. Requer perfil de Administrador.' });
+    }
+
+    const { titulo, categoria, descricao, promptSistema, preco, tags, autor, capaUrl, tipoItem } = req.body;
+    if (!titulo) return res.status(400).json({ error: 'Título é obrigatório.' });
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        const queryInsert = `
+            INSERT INTO TB_PROMPTS_LOJA (TITULO, CATEGORIA, DESCRICAO_CURTA, PROMPT_SISTEMA, PRECO_REAIS, TAGS, AUTOR, CAPA_URL, TIPO_ITEM, ATIVO)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+        `;
+
+        db.query(queryInsert, [
+            titulo.trim(),
+            categoria || 'GERAL',
+            descricao || '',
+            promptSistema || '',
+            parseFloat(preco || 0),
+            tags || '',
+            autor || 'Connect Media AI',
+            capaUrl || '',
+            tipoItem || 'PROMPT'
+        ], (errIns) => {
+            db.detach();
+            if (errIns) return res.status(500).json({ error: 'Erro ao cadastrar prompt.' });
+
+            logger.success('ADMIN SAAS', `✨ Novo Prompt/Módulo cadastrado: "${titulo}"`);
+            res.json({ success: true, message: 'Prompt cadastrado com sucesso!' });
+        });
+    });
+});
+
+// Rota Admin: CRUD Atualizar Prompt
+app.put('/api/admin/prompts/:id', (req, res) => {
+    const sessao = obterUsuarioSessao(req);
+    if (!sessao || sessao.perfil !== 'ADMIN') {
+        return res.status(403).json({ error: 'Acesso negado. Requer perfil de Administrador.' });
+    }
+
+    const idPrompt = req.params.id;
+    const { titulo, categoria, descricao, promptSistema, preco, tags, autor, capaUrl, tipoItem, ativo } = req.body;
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        const queryUpdate = `
+            UPDATE TB_PROMPTS_LOJA
+            SET TITULO = ?, CATEGORIA = ?, DESCRICAO_CURTA = ?, PROMPT_SISTEMA = ?, PRECO_REAIS = ?, TAGS = ?, AUTOR = ?, CAPA_URL = ?, TIPO_ITEM = ?, ATIVO = ?
+            WHERE ID_PROMPT = ?
+        `;
+
+        db.query(queryUpdate, [
+            titulo, categoria, descricao, promptSistema, parseFloat(preco || 0), tags, autor, capaUrl, tipoItem, ativo !== undefined ? ativo : 1, idPrompt
+        ], (errUp) => {
+            db.detach();
+            if (errUp) return res.status(500).json({ error: 'Erro ao atualizar prompt.' });
+
+            logger.info('ADMIN SAAS', `✏️ Prompt #${idPrompt} atualizado com sucesso.`);
+            res.json({ success: true, message: 'Prompt atualizado com sucesso!' });
+        });
+    });
+});
+
+// Rota Admin: CRUD Excluir Prompt (Soft Delete)
+app.delete('/api/admin/prompts/:id', (req, res) => {
+    const sessao = obterUsuarioSessao(req);
+    if (!sessao || sessao.perfil !== 'ADMIN') {
+        return res.status(403).json({ error: 'Acesso negado. Requer perfil de Administrador.' });
+    }
+
+    const idPrompt = req.params.id;
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        db.query('UPDATE TB_PROMPTS_LOJA SET ATIVO = 0 WHERE ID_PROMPT = ?', [idPrompt], (errDel) => {
+            db.detach();
+            if (errDel) return res.status(500).json({ error: 'Erro ao desativar prompt.' });
+
+            logger.info('ADMIN SAAS', `🗑️ Prompt #${idPrompt} desativado.`);
+            res.json({ success: true, message: 'Prompt desativado com sucesso!' });
+        });
+    });
+});
+
+// Rota: Consulta Configuração de Banco de Dados Firebird
+app.get('/api/configuracoes/db', (req, res) => {
+    res.json({
+        host: dbOptions.host,
+        port: dbOptions.port,
+        database: dbOptions.database,
+        user: dbOptions.user,
+        password: dbOptions.password
+    });
+});
+
+// Rota: Salva Configuração de Banco de Dados Firebird
+app.post('/api/configuracoes/db', (req, res) => {
+    const { host, port, database, user, password } = req.body;
+    if (!host || !database) return res.status(400).json({ error: 'Host e caminho do banco são obrigatórios.' });
+
+    dbOptions.atualizarConfiguracao({ host, port, database, user, password });
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro ao conectar com as novas configurações do banco de dados.' });
+
+        db.query('UPDATE TB_CONFIGURACOES SET DB_HOST = ?, DB_PORT = ?, DB_DATABASE = ?, DB_USER = ?, DB_PASSWORD = ? WHERE ID_CONFIG = 1', [
+            host, parseInt(port || 3050, 10), database, user || 'SYSDBA', password || 'masterkey'
+        ], (errUp) => {
+            db.detach();
+            logger.success('CONFIG', `⚙️ Configuração do Banco Firebird atualizada: ${host}:${port} (${database})`);
+            res.json({ success: true, message: 'Configurações de conexão do Banco Firebird salvas com sucesso!' });
         });
     });
 });

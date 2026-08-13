@@ -335,6 +335,37 @@
                             </div>
                         </div>
 
+                        <!-- Configuração do Banco de Dados Firebird -->
+                        <div class="border-t border-outline-variant pt-4 mt-4 space-y-3 bg-surface-variant/10 p-4 rounded-xl border">
+                            <h3 class="text-xs font-bold text-primary uppercase flex items-center space-x-2">
+                                <span>⚙️ Configuração de Conexão com o Banco de Dados Firebird 5.0</span>
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Host / IP</label>
+                                    <input type="text" id="input-db-host" placeholder="Ex: 127.0.0.1 ou localhost" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Porta Firebird</label>
+                                    <input type="number" id="input-db-port" placeholder="Ex: 3050" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Usuário DBA</label>
+                                    <input type="text" id="input-db-user" placeholder="Ex: SYSDBA" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Caminho do Arquivo (.FDB)</label>
+                                    <input type="text" id="input-db-database" placeholder="Ex: D:\Projetos AntiGravity\Connect Media\Database\BIBLIOTECA_YT.FDB" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Senha DBA</label>
+                                    <input type="password" id="input-db-password" placeholder="Ex: masterkey" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+                                </div>
+                            </div>
+                        </div>
+
                         <button type="submit" class="bg-primary hover:bg-[#d8e2ff] text-on-primary px-5 py-2 rounded text-[14px] font-medium transition-colors mt-6">Salvar Configurações</button>
                     </form>
                 </div>
@@ -908,11 +939,43 @@
                         </div>
                     </div>
 
+                    <!-- Gestão do Catálogo de Prompts & Módulos Premium (CRUD) -->
+                    <div class="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-xl">
+                        <div class="bg-surface-variant/20 px-6 py-4 border-b border-outline-variant flex justify-between items-center">
+                            <div>
+                                <h2 class="text-sm font-bold text-on-surface uppercase">Gestão do Catálogo de Prompts &amp; Módulos Premium</h2>
+                                <p class="text-xs text-outline">Cadastre, edite ou altere a foto de capa e preços dos itens da loja</p>
+                            </div>
+                            <button onclick="abrirModalCrudPrompt()" class="bg-amber-500 hover:bg-amber-400 text-black px-4 py-2 rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5">
+                                <span>➕ Novo Prompt / Módulo</span>
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-background border-b border-outline-variant text-outline uppercase font-mono">
+                                        <th class="p-3">Capa</th>
+                                        <th class="p-3">ID</th>
+                                        <th class="p-3">Título</th>
+                                        <th class="p-3">Categoria</th>
+                                        <th class="p-3">Tipo</th>
+                                        <th class="p-3">Preço</th>
+                                        <th class="p-3">Status</th>
+                                        <th class="p-3 text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-tabela-prompts">
+                                    <!-- Prompts inseridos via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <!-- Extrato Global de Vendas Pix -->
                     <div class="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-xl">
                         <div class="bg-surface-variant/20 px-6 py-4 border-b border-outline-variant flex justify-between items-center">
                             <h2 class="text-sm font-bold text-on-surface uppercase">Extrato Global de Vendas Pix</h2>
-                            <span class="text-xs text-outline">Histórico completo de ordens</span>
+                            <span class="text-xs text-outline">Histórico completo e liberação de ordens</span>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse text-xs">
@@ -924,6 +987,7 @@
                                         <th class="p-3">Data</th>
                                         <th class="p-3">Itens Comprados</th>
                                         <th class="p-3 text-center">Comprovante</th>
+                                        <th class="p-3 text-right">Ação Admin</th>
                                     </tr>
                                 </thead>
                                 <tbody id="admin-tabela-vendas">
@@ -1060,6 +1124,84 @@
             <div class="p-4 border-t border-outline-variant bg-surface flex justify-end">
                 <button onclick="fecharModalComprovanteAdmin()" class="bg-surface-variant/40 hover:bg-surface-variant/60 text-on-surface px-4 py-2 rounded-xl text-xs font-bold transition-colors">Fechar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL CRUD DE PROMPTS (ADMIN) -->
+    <div id="modal-crud-prompt" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="bg-surface border border-outline-variant rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="p-5 border-b border-outline-variant flex justify-between items-center bg-surface">
+                <h3 id="modal-crud-prompt-titulo" class="text-base font-bold text-on-surface">Cadastro de Prompt / Módulo Premium</h3>
+                <button onclick="fecharModalCrudPrompt()" class="text-outline hover:text-on-surface p-1.5 rounded-lg hover:bg-surface-variant/30 transition-colors">✕</button>
+            </div>
+            <form onsubmit="salvarPromptCrudAdmin(event)" class="p-6 overflow-y-auto space-y-4 bg-background text-xs">
+                <input type="hidden" id="modal-crud-prompt-id">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-bold text-outline uppercase mb-1">Título do Prompt / Módulo *</label>
+                        <input type="text" id="modal-crud-prompt-nome" required placeholder="Ex: Desenvolvedor Sênior React" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-on-surface focus:border-amber-400 outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-outline uppercase mb-1">Categoria *</label>
+                        <input type="text" id="modal-crud-prompt-categoria" required placeholder="Ex: Frontend, Backend, DevOps" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-on-surface focus:border-amber-400 outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block font-bold text-outline uppercase mb-1">Preço (R$) *</label>
+                        <input type="number" step="0.01" id="modal-crud-prompt-preco" required placeholder="9.90" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-on-surface focus:border-amber-400 outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-outline uppercase mb-1">Tipo de Item</label>
+                        <select id="modal-crud-prompt-tipo" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-on-surface focus:border-amber-400 outline-none">
+                            <option value="PROMPT">System Prompt</option>
+                            <option value="FEATURE_SKILLS_GERAR">Módulo: Gerar Skills AI</option>
+                            <option value="FEATURE_SKILLS_APRENDIDAS">Módulo: Skills Aprendidas</option>
+                            <option value="FEATURE_DOWNLOAD_MP3">Módulo: Download em MP3</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-outline uppercase mb-1">Autor</label>
+                        <input type="text" id="modal-crud-prompt-autor" placeholder="Connect Media AI" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-on-surface focus:border-amber-400 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-outline uppercase mb-1">Descrição Curta *</label>
+                    <textarea id="modal-crud-prompt-descricao" rows="2" required placeholder="Resumo do valor e aplicabilidade deste prompt..." class="w-full bg-surface border border-outline-variant rounded-lg p-3 text-on-surface focus:border-amber-400 outline-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-outline uppercase mb-1">System Prompt Completo (Instruções da IA)</label>
+                    <textarea id="modal-crud-prompt-sistema" rows="5" placeholder="Você é um especialista em..." class="w-full bg-surface border border-outline-variant rounded-lg p-3 font-mono text-on-surface focus:border-amber-400 outline-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-outline uppercase mb-1">Tags (Separadas por vírgula)</label>
+                    <input type="text" id="modal-crud-prompt-tags" placeholder="React, Node.js, AI, DevOps" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-on-surface focus:border-amber-400 outline-none">
+                </div>
+
+                <!-- Foto de Capa Upload -->
+                <div>
+                    <label class="block font-bold text-outline uppercase mb-1">Foto de Capa do Prompt</label>
+                    <div class="flex items-center gap-4">
+                        <input type="file" id="modal-crud-prompt-capa-file" accept="image/*" class="hidden" onchange="processarCapaPromptFile(this)">
+                        <button type="button" onclick="document.getElementById('modal-crud-prompt-capa-file').click()" class="bg-surface-variant/40 hover:bg-surface-variant/60 text-amber-300 border border-dashed border-amber-500/40 px-4 py-2 rounded-xl text-xs font-bold transition-all">
+                            📷 Selecionar Foto de Capa
+                        </button>
+                        <div id="modal-crud-prompt-capa-box" class="hidden w-20 h-14 rounded-lg overflow-hidden border border-outline-variant bg-background">
+                            <img id="modal-crud-prompt-capa-img" src="" alt="Capa" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-outline-variant flex justify-end space-x-3">
+                    <button type="button" onclick="fecharModalCrudPrompt()" class="bg-surface-variant/30 hover:bg-surface-variant/50 text-outline hover:text-on-surface px-4 py-2 rounded-xl text-xs font-bold transition-colors">Cancelar</button>
+                    <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-black px-6 py-2 rounded-xl text-xs font-bold shadow-md transition-all">💾 Salvar Prompt</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -2077,6 +2219,17 @@
                 if(document.getElementById('input-chave-pix')) document.getElementById('input-chave-pix').value = data.chavePix || '';
                 if(document.getElementById('input-nome-pix')) document.getElementById('input-nome-pix').value = data.nomeRecebedorPix || '';
                 if(document.getElementById('input-cidade-pix')) document.getElementById('input-cidade-pix').value = data.cidadeRecebedorPix || '';
+
+                // Carrega dados do Banco Firebird
+                const resDb = await fetch('/api/configuracoes/db');
+                if (resDb.ok) {
+                    const dbData = await resDb.json();
+                    if(document.getElementById('input-db-host')) document.getElementById('input-db-host').value = dbData.host || '127.0.0.1';
+                    if(document.getElementById('input-db-port')) document.getElementById('input-db-port').value = dbData.port || 3050;
+                    if(document.getElementById('input-db-database')) document.getElementById('input-db-database').value = dbData.database || '';
+                    if(document.getElementById('input-db-user')) document.getElementById('input-db-user').value = dbData.user || 'SYSDBA';
+                    if(document.getElementById('input-db-password')) document.getElementById('input-db-password').value = dbData.password || 'masterkey';
+                }
             } catch(e) { console.error(e); }
         }
 
@@ -2105,7 +2258,23 @@
                     chavePix, nomeRecebedorPix, cidadeRecebedorPix
                 }) 
             });
-            alert('Configurações salvas com sucesso!');
+
+            // Salva dados do Banco Firebird
+            const dbHost = document.getElementById('input-db-host')?.value;
+            const dbPort = document.getElementById('input-db-port')?.value;
+            const dbDatabase = document.getElementById('input-db-database')?.value;
+            const dbUser = document.getElementById('input-db-user')?.value;
+            const dbPassword = document.getElementById('input-db-password')?.value;
+
+            if (dbHost && dbDatabase) {
+                await fetch('/api/configuracoes/db', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ host: dbHost, port: dbPort, database: dbDatabase, user: dbUser, password: dbPassword })
+                });
+            }
+
+            alert('Configurações do sistema e do Banco Firebird salvas com sucesso!');
         }
 
         async function agendarDownload(idVideo, formato = 'MP4') {
@@ -2246,6 +2415,9 @@
                 card.className = "bg-surface border border-outline-variant hover:border-amber-500/50 rounded-2xl p-6 flex flex-col justify-between transition-all duration-200 shadow-sm hover:shadow-xl group";
 
                 const tagsHtml = p.tags ? p.tags.map(t => `<span class="bg-surface-variant/30 text-outline text-[10px] px-2 py-0.5 rounded">${t}</span>`).join(' ') : '';
+                const capaImgHtml = p.capaUrl 
+                    ? `<div class="w-full h-36 rounded-xl overflow-hidden mb-3 border border-outline-variant/60 bg-background"><img src="${p.capaUrl}" alt="${p.titulo}" class="w-full h-full object-cover"></div>`
+                    : '';
                 
                 let btnAcao = '';
                 if (p.comprado) {
@@ -2270,6 +2442,7 @@
 
                 card.innerHTML = `
                     <div>
+                        ${capaImgHtml}
                         <div class="flex items-center justify-between gap-2 mb-3">
                             <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-bold uppercase">${p.categoria}</span>
                             <span class="text-lg font-extrabold text-amber-400">R$ ${p.preco.toFixed(2).replace('.', ',')}</span>
@@ -2880,7 +3053,10 @@
                     renderizarTabelaVendasAdmin(vendas);
                 }
 
-                // 4. Carregar Configuração Pix Mestre
+                // 4. Carregar Prompts para CRUD Admin
+                carregarPromptsAdmin();
+
+                // 5. Carregar Configuração Pix Mestre
                 const resCfg = await fetch('/api/configuracoes');
                 if (resCfg.ok) {
                     const cfg = await resCfg.json();
@@ -2892,6 +3068,246 @@
             } catch(e) {
                 console.error('Erro ao carregar Painel Admin:', e);
             }
+        }
+
+        let adminPromptsCache = [];
+
+        async function carregarPromptsAdmin() {
+            const token = obterTokenAuth();
+            if (!token) return;
+            try {
+                const res = await fetch('/api/admin/prompts', { headers: { 'Authorization': 'Bearer ' + token } });
+                if (res.ok) {
+                    adminPromptsCache = await res.json();
+                    renderizarTabelaPromptsAdmin(adminPromptsCache);
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        function renderizarTabelaPromptsAdmin(prompts) {
+            const tbody = document.getElementById('admin-tabela-prompts');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            prompts.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-outline-variant/40 hover:bg-surface-variant/20 transition-colors';
+
+                const isAct = p.ativo === 1;
+                const statusBadge = isAct 
+                    ? '<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-bold">ATIVO</span>'
+                    : '<span class="bg-red-500/10 text-red-400 border border-red-500/30 px-2 py-0.5 rounded text-[10px] font-bold">INATIVO</span>';
+
+                const capaThumb = p.capaUrl
+                    ? `<img src="${p.capaUrl}" class="w-10 h-10 object-cover rounded-lg border border-outline-variant">`
+                    : '<span class="text-outline text-[10px]">Sem capa</span>';
+
+                tr.innerHTML = `
+                    <td class="p-3">${capaThumb}</td>
+                    <td class="p-3 font-mono font-bold">#${p.id}</td>
+                    <td class="p-3 font-bold text-on-surface max-w-xs truncate">${escaparHtml(p.titulo)}</td>
+                    <td class="p-3"><span class="bg-surface-variant/40 text-outline px-2 py-0.5 rounded text-[10px] font-semibold">${p.categoria}</span></td>
+                    <td class="p-3 font-mono text-[10px] text-amber-300">${p.tipoItem || 'PROMPT'}</td>
+                    <td class="p-3 font-extrabold text-amber-400">R$ ${p.preco.toFixed(2).replace('.', ',')}</td>
+                    <td class="p-3">${statusBadge}</td>
+                    <td class="p-3 text-right space-x-1">
+                        <button onclick="abrirModalCrudPrompt(${p.id})" class="bg-primary/20 hover:bg-primary/30 text-primary px-2.5 py-1 rounded text-[10px] font-bold transition-colors">✏️ Editar</button>
+                        <button onclick="excluirPromptAdmin(${p.id})" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-2.5 py-1 rounded text-[10px] font-bold transition-colors">🗑️ Excluir</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        let capaBase64Temp = '';
+
+        function abrirModalCrudPrompt(idPrompt = null) {
+            capaBase64Temp = '';
+            document.getElementById('modal-crud-prompt-id').value = idPrompt || '';
+            document.getElementById('modal-crud-prompt-nome').value = '';
+            document.getElementById('modal-crud-prompt-categoria').value = '';
+            document.getElementById('modal-crud-prompt-preco').value = '9.90';
+            document.getElementById('modal-crud-prompt-descricao').value = '';
+            document.getElementById('modal-crud-prompt-sistema').value = '';
+            document.getElementById('modal-crud-prompt-tags').value = '';
+            document.getElementById('modal-crud-prompt-autor').value = 'Connect Media AI';
+            document.getElementById('modal-crud-prompt-tipo').value = 'PROMPT';
+
+            const boxCapa = document.getElementById('modal-crud-prompt-capa-box');
+            const imgCapa = document.getElementById('modal-crud-prompt-capa-img');
+            if (boxCapa) boxCapa.classList.add('hidden');
+            if (imgCapa) imgCapa.src = '';
+
+            if (idPrompt) {
+                const item = adminPromptsCache.find(p => p.id === idPrompt);
+                if (item) {
+                    document.getElementById('modal-crud-prompt-titulo').innerText = `Editar Prompt #${item.id}`;
+                    document.getElementById('modal-crud-prompt-nome').value = item.titulo || '';
+                    document.getElementById('modal-crud-prompt-categoria').value = item.categoria || '';
+                    document.getElementById('modal-crud-prompt-preco').value = item.preco || 0;
+                    document.getElementById('modal-crud-prompt-descricao').value = item.descricao || '';
+                    document.getElementById('modal-crud-prompt-sistema').value = item.promptSistema || '';
+                    document.getElementById('modal-crud-prompt-tags').value = item.tags || '';
+                    document.getElementById('modal-crud-prompt-autor').value = item.autor || '';
+                    document.getElementById('modal-crud-prompt-tipo').value = item.tipoItem || 'PROMPT';
+                    if (item.capaUrl) {
+                        capaBase64Temp = item.capaUrl;
+                        if (imgCapa) imgCapa.src = item.capaUrl;
+                        if (boxCapa) boxCapa.classList.remove('hidden');
+                    }
+                }
+            } else {
+                document.getElementById('modal-crud-prompt-titulo').innerText = 'Cadastro de Prompt / Módulo Premium';
+            }
+
+            const modal = document.getElementById('modal-crud-prompt');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function fecharModalCrudPrompt() {
+            const modal = document.getElementById('modal-crud-prompt');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function processarCapaPromptFile(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                capaBase64Temp = e.target.result;
+                const imgCapa = document.getElementById('modal-crud-prompt-capa-img');
+                const boxCapa = document.getElementById('modal-crud-prompt-capa-box');
+                if (imgCapa) imgCapa.src = capaBase64Temp;
+                if (boxCapa) boxCapa.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function salvarPromptCrudAdmin(e) {
+            e.preventDefault();
+            const token = obterTokenAuth();
+            const idPrompt = document.getElementById('modal-crud-prompt-id').value;
+
+            const payload = {
+                titulo: document.getElementById('modal-crud-prompt-nome').value,
+                categoria: document.getElementById('modal-crud-prompt-categoria').value,
+                preco: parseFloat(document.getElementById('modal-crud-prompt-preco').value || 0),
+                descricao: document.getElementById('modal-crud-prompt-descricao').value,
+                promptSistema: document.getElementById('modal-crud-prompt-sistema').value,
+                tags: document.getElementById('modal-crud-prompt-tags').value,
+                autor: document.getElementById('modal-crud-prompt-autor').value,
+                tipoItem: document.getElementById('modal-crud-prompt-tipo').value,
+                capaUrl: capaBase64Temp
+            };
+
+            const url = idPrompt ? `/api/admin/prompts/${idPrompt}` : '/api/admin/prompts';
+            const method = idPrompt ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    alert(idPrompt ? 'Prompt atualizado com sucesso!' : 'Novo prompt cadastrado com sucesso!');
+                    fecharModalCrudPrompt();
+                    carregarAdminDashboard();
+                    carregarLojaPrompts();
+                } else {
+                    alert('Erro ao salvar prompt.');
+                }
+            } catch(err) { console.error(err); }
+        }
+
+        async function excluirPromptAdmin(idPrompt) {
+            if (!confirm(`Deseja realmente desativar o prompt #${idPrompt}?`)) return;
+            const token = obterTokenAuth();
+            try {
+                const res = await fetch(`/api/admin/prompts/${idPrompt}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.ok) {
+                    carregarAdminDashboard();
+                    carregarLojaPrompts();
+                } else {
+                    alert('Erro ao excluir prompt.');
+                }
+            } catch(err) { console.error(err); }
+        }
+
+        async function aprovarVendaAdmin(idVenda) {
+            if (!confirm(`Deseja aprovar o pagamento da Venda #${idVenda} e liberar os prompts para o cliente?`)) return;
+            const token = obterTokenAuth();
+            try {
+                const res = await fetch(`/api/admin/vendas/${idVenda}/aprovar`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.ok) {
+                    alert(`✅ Pagamento da Venda #${idVenda} APROVADO com sucesso! Prompts liberados.`);
+                    carregarAdminDashboard();
+                } else {
+                    alert('Erro ao aprovar pagamento.');
+                }
+            } catch(err) { console.error(err); }
+        }
+
+        function renderizarTabelaVendasAdmin(vendas) {
+            const tbody = document.getElementById('admin-tabela-vendas');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (vendas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-outline">Nenhuma ordem de pagamento registrada ainda.</td></tr>';
+                return;
+            }
+
+            vendas.forEach(v => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-outline-variant/40 hover:bg-surface-variant/20 transition-colors';
+
+                const isPago = v.STATUS === 'PAGO';
+                const statusBadge = isPago
+                    ? '<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-bold">✓ PAGO</span>'
+                    : '<span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded text-[10px] font-bold">⏳ PENDENTE</span>';
+
+                let itensResumo = '-';
+                try {
+                    const parsed = JSON.parse(v.ITENS_JSON);
+                    if (Array.isArray(parsed)) itensResumo = parsed.map(i => i.titulo).join(', ');
+                } catch(_) {}
+
+                if (!window._vendasAdminComprovantes) window._vendasAdminComprovantes = {};
+                window._vendasAdminComprovantes[v.ID_VENDA] = v.COMPROVANTE;
+
+                let btnComprovante = '<span class="text-outline text-[11px]">Sem anexo</span>';
+                if (v.COMPROVANTE) {
+                    btnComprovante = `<button onclick="visualizarComprovanteAdmin('${v.ID_VENDA}', window._vendasAdminComprovantes['${v.ID_VENDA}'])" class="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all inline-flex items-center gap-1">📄 Ver Comprovante</button>`;
+                }
+
+                let btnAcaoAprovar = isPago
+                    ? '<span class="text-emerald-400 text-[10px] font-bold">✓ Aprovado</span>'
+                    : `<button onclick="aprovarVendaAdmin(${v.ID_VENDA})" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all">✅ Aprovar & Liberar</button>`;
+
+                tr.innerHTML = `
+                    <td class="p-3 font-mono font-bold">#${v.ID_VENDA}</td>
+                    <td class="p-3 font-bold text-amber-400">R$ ${parseFloat(v.VALOR_TOTAL || 0).toFixed(2).replace('.', ',')}</td>
+                    <td class="p-3">${statusBadge}</td>
+                    <td class="p-3 font-mono text-outline">${v.DATA_CRIACAO ? new Date(v.DATA_CRIACAO).toLocaleString('pt-BR') : '-'}</td>
+                    <td class="p-3 text-outline truncate max-w-xs" title="${escaparHtml(itensResumo)}">${escaparHtml(itensResumo)}</td>
+                    <td class="p-3 text-center">${btnComprovante}</td>
+                    <td class="p-3 text-right">${btnAcaoAprovar}</td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
         function renderizarTabelaUsuariosAdmin(users) {

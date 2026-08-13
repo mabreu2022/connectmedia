@@ -19,7 +19,14 @@ const dbOptions = {
     lowercase_keys: false,
     role: null,
     pageSize: 4096,
-    pluginName: 'Srp256'
+    pluginName: 'Srp256',
+    atualizarConfiguracao: function(novosDados) {
+        if (novosDados.host) dbOptions.host = novosDados.host;
+        if (novosDados.port) dbOptions.port = parseInt(novosDados.port, 10);
+        if (novosDados.database) dbOptions.database = novosDados.database;
+        if (novosDados.user) dbOptions.user = novosDados.user;
+        if (novosDados.password) dbOptions.password = novosDados.password;
+    }
 };
 
 /**
