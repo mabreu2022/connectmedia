@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Connect Media SPA Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#ffdcc6",
+                        "primary-fixed": "#d8e2ff",
+                        "primary-container": "#4d8eff",
+                        "on-secondary": "#690100",
+                        "surface-tint": "#adc6ff",
+                        "outline": "#8c909f",
+                        "primary": "#adc6ff",
+                        "inverse-on-surface": "#2e3038",
+                        "surface-container-low": "#191b23",
+                        "on-surface-variant": "#c2c6d6",
+                        "tertiary-container": "#df7412",
+                        "on-surface": "#e1e2ec",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary-fixed-variant": "#004395",
+                        "background": "#10131a",
+                        "tertiary": "#ffb786",
+                        "inverse-surface": "#e1e2ec",
+                        "on-secondary-fixed": "#410000",
+                        "on-primary": "#002e6a",
+                        "secondary-fixed-dim": "#ffb4a8",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "error": "#ffb4ab",
+                        "on-tertiary-container": "#461f00",
+                        "surface": "#10131a",
+                        "on-background": "#e1e2ec",
+                        "surface-container-highest": "#32353c",
+                        "on-error-container": "#ffdad6",
+                        "outline-variant": "#424754",
+                        "surface-bright": "#363941",
+                        "secondary": "#ffb4a8",
+                        "surface-container-high": "#272a31",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "surface-container-lowest": "#0b0e15",
+                        "secondary-fixed": "#ffdad4",
+                        "on-secondary-fixed-variant": "#930100",
+                        "on-tertiary": "#502400",
+                        "error-container": "#93000a",
+                        "surface-dim": "#10131a",
+                        "on-primary-container": "#00285d",
+                        "surface-variant": "#32353c",
+                        "secondary-container": "#ff5540",
+                        "on-primary-fixed": "#001a42",
+                        "inverse-primary": "#005ac2",
+                        "on-tertiary-fixed": "#311400",
+                        "on-error": "#690005",
+                        "on-secondary-container": "#5c0000",
+                        "surface-container": "#1d2027"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px",
+                        "gutter": "16px",
+                        "stack-sm": "8px",
+                        "sidebar-width": "260px",
+                        "stack-xs": "4px",
+                        "container-margin": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Geist"],
+                        "body-sm": ["Geist"],
+                        "label-caps": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "mono-data": ["Geist"],
+                        "display-md": ["Geist"],
+                        "body-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["18px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "body-sm": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "label-caps": ["11px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "display-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "mono-data": ["13px", { "lineHeight": "1", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "display-md": ["24px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Geist', sans-serif; background-color: #020617; color: #e1e2ec; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .icon-fill { font-variation-settings: 'FILL' 1; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Component Outlines */
+        .ui-card { border: 1px solid #334155; }
+        .ui-input { border: 1px solid #334155; background-color: #020617; }
+        .ui-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px #3b82f633; outline: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased flex h-screen overflow-hidden">
+<!-- Sidebar Navigation Drawer -->
+<aside class="w-sidebar-width bg-surface-container-low border-r border-outline-variant h-full flex flex-col py-stack-lg z-[60] flex-shrink-0">
+<div class="px-container-margin mb-stack-lg flex items-center gap-stack-sm">
+<span class="material-symbols-outlined icon-fill text-primary text-2xl">movie</span>
+<h1 class="font-display-md text-display-md font-bold text-primary tracking-tight">Connect Media</h1>
+</div>
+<nav class="flex-1 flex flex-col gap-unit px-2" id="mainNav">
+<!-- Biblioteca (Active) -->
+<button class="w-full flex items-center gap-stack-md bg-secondary-container text-on-secondary-container rounded-full px-4 py-2 hover:bg-surface-container-high transition-colors text-left nav-item" onclick="switchTab('biblioteca', this)">
+<span class="material-symbols-outlined icon-fill">video_library</span>
+<span class="font-body-md text-body-md font-medium">Biblioteca</span>
+</button>
+<!-- Canais Monitorados -->
+<button class="w-full flex items-center gap-stack-md text-on-surface-variant px-4 py-2 hover:bg-surface-container-high transition-colors rounded-full text-left nav-item" onclick="switchTab('canais', this)">
+<span class="material-symbols-outlined">subscriptions</span>
+<span class="font-body-md text-body-md font-medium">Canais Monitorados</span>
+</button>
+<!-- Fila de Downloads -->
+<button class="w-full flex items-center gap-stack-md text-on-surface-variant px-4 py-2 hover:bg-surface-container-high transition-colors rounded-full text-left nav-item" onclick="switchTab('fila', this)">
+<span class="material-symbols-outlined">download_for_offline</span>
+<span class="font-body-md text-body-md font-medium">Fila de Downloads</span>
+<span class="ml-auto bg-primary-container text-on-primary-container font-mono-data text-xs px-2 py-0.5 rounded-full">3</span>
+</button>
+</nav>
+<div class="mt-auto px-2">
+<button class="w-full flex items-center gap-stack-md text-on-surface-variant px-4 py-2 hover:bg-surface-container-high transition-colors rounded-full text-left">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md font-medium">Configurações</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full overflow-hidden bg-background">
+<!-- Top App Bar -->
+<header class="h-14 bg-surface border-b border-outline-variant flex justify-between items-center px-container-margin flex-shrink-0 sticky top-0 z-50">
+<div class="flex items-center gap-stack-md flex-1">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors hidden md:block">menu</span>
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+<input class="ui-input w-full h-9 pl-9 pr-4 rounded-full text-body-sm text-on-surface placeholder:text-outline focus:ring-0" placeholder="Buscar vídeos, canais ou tags..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-stack-sm">
+<button class="w-9 h-9 rounded-full hover:bg-surface-container-highest flex items-center justify-center transition-colors text-outline hover:text-on-surface">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-9 h-9 rounded-full bg-surface-container-high border border-outline-variant overflow-hidden ml-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-outline">person</span>
+</button>
+</div>
+</header>
+<!-- Dynamic Content Canvas -->
+<div class="flex-1 overflow-y-auto p-container-margin" id="contentArea">
+<!-- Section 1: Biblioteca -->
+<section class="content-section" id="sec-biblioteca">
+<div class="flex justify-between items-end mb-stack-lg">
+<div>
+<h2 class="font-display-lg text-display-lg text-primary">Acervo Local</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Gerencie seus vídeos baixados e categorizados.</p>
+</div>
+<div class="flex gap-2">
+<button class="ui-card bg-surface-container hover:bg-surface-container-high px-4 py-2 rounded-lg text-body-sm font-medium flex items-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-sm">filter_list</span> Filtrar
+                        </button>
+<button class="ui-card bg-surface-container hover:bg-surface-container-high px-4 py-2 rounded-lg text-body-sm font-medium flex items-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-sm">sort</span> Ordenar
+                        </button>
+</div>
+</div>
+<!-- Bento Grid for Videos -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-gutter">
+<!-- Video Card 1 -->
+<div class="ui-card bg-surface rounded-xl overflow-hidden group flex flex-col transition-all hover:border-primary/50">
+<div class="relative aspect-video bg-surface-container-high">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="A dark cinematic thumbnail showing a futuristic server room with glowing blue lights and rack servers, high contrast, sleek modern tech aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfoVzfyeVifnS_664muv0R3tbVy0B59PfoxyD2ZdAKt7L7oksR1dYZPM3jdn_esuHPohk6T9nbFSwaUm2R8l_5GxBV5EqL8M9WHgPjcP2BAYsVNGUEs2YWLGzvisw3JrNSmAkvU89mbRhxGJRIA4V6-L1lZrn-Hl5FUbqG6d86pKE3lE08maeSFh7g0tuTAHKUpVM7E6d7NKDK1b_t24zM3AYYM0I7rpwq2tvoFblybP6J9xoIREid"/>
+<div class="absolute bottom-2 right-2 bg-black/80 px-1.5 py-0.5 rounded text-white font-mono-data text-[10px] backdrop-blur-sm">14:23</div>
+<div class="absolute bottom-0 left-0 h-1 bg-surface-container-highest w-full">
+<div class="h-full bg-primary w-full"></div>
+</div>
+</div>
+<div class="p-3 flex flex-col flex-1">
+<h3 class="font-headline-sm text-body-md font-semibold text-on-surface line-clamp-2 leading-tight mb-1">Introdução à Arquitetura de Microserviços Escalonáveis</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">account_circle</span> Tech Academy Brasil
+                            </p>
+<div class="flex gap-1 flex-wrap mb-3 mt-auto">
+<span class="bg-surface-container-highest text-on-surface-variant text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider">DevOps</span>
+<span class="bg-surface-container-highest text-on-surface-variant text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider">Node.js</span>
+</div>
+<button class="w-full py-1.5 bg-[#3b82f6] hover:bg-blue-400 text-white rounded font-body-sm font-medium transition-colors flex items-center justify-center gap-2 mt-auto shadow-sm">
+<span class="material-symbols-outlined text-[16px]">folder_open</span> Abrir Local
+                            </button>
+</div>
+</div>
+<!-- Video Card 2 -->
+<div class="ui-card bg-surface rounded-xl overflow-hidden group flex flex-col transition-all hover:border-primary/50">
+<div class="relative aspect-video bg-surface-container-high">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="A clean, minimalist workspace with a sleek mechanical keyboard, glowing monitor showing dark mode code, soft ambient lighting, high resolution tech workspace aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDv5bcbZhpyTUwi1qiZlpQ2wMSdGFtfA4ChEpQUPSh5NgB4ODW5BEK2NHn_U2iLARlgfmeGwnnAgv85Xx62sCpeidGOqbROSuzHF2p6Qa7wlPWXl4PCp8cuCTs9k1qF16NOa921Wb17EM-IEL1jR6u1fZ0caTSo6zi3csZf7jT4qCtEDf3aR84shGcOmNkg83YiZx0YQeKCxQnkCJgDXP3oq6DTmj8pMP6fBx71pWGe-YvzTNBgVx7r"/>
+<div class="absolute bottom-2 right-2 bg-black/80 px-1.5 py-0.5 rounded text-white font-mono-data text-[10px] backdrop-blur-sm">45:10</div>
+</div>
+<div class="p-3 flex flex-col flex-1">
+<h3 class="font-headline-sm text-body-md font-semibold text-on-surface line-clamp-2 leading-tight mb-1">Curso Completo de Tailwind CSS v3 para UI Designers</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">account_circle</span> Design &amp; Code
+                            </p>
+<div class="flex gap-1 flex-wrap mb-3 mt-auto">
+<span class="bg-surface-container-highest text-on-surface-variant text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider">Frontend</span>
+<span class="bg-surface-container-highest text-on-surface-variant text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider">CSS</span>
+</div>
+<button class="w-full py-1.5 bg-[#3b82f6] hover:bg-blue-400 text-white rounded font-body-sm font-medium transition-colors flex items-center justify-center gap-2 mt-auto shadow-sm">
+<span class="material-symbols-outlined text-[16px]">folder_open</span> Abrir Local
+                            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Canais Monitorados (Hidden by default) -->
+<section class="content-section hidden" id="sec-canais">
+<div class="flex justify-between items-end mb-stack-lg">
+<div>
+<h2 class="font-display-lg text-display-lg text-primary">Canais Monitorados</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Configuração de scraping e monitoramento ativo.</p>
+</div>
+<button class="bg-[#3b82f6] hover:bg-blue-400 text-white px-4 py-2 rounded-lg font-body-sm font-medium flex items-center gap-2 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-sm">add</span> Adicionar Canal
+                    </button>
+</div>
+<div class="ui-card bg-surface rounded-xl overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant bg-surface-container-lowest">
+<th class="p-3 font-label-caps text-label-caps text-on-surface-variant tracking-wider uppercase">Canal</th>
+<th class="p-3 font-label-caps text-label-caps text-on-surface-variant tracking-wider uppercase hidden sm:table-cell">URL / ID</th>
+<th class="p-3 font-label-caps text-label-caps text-on-surface-variant tracking-wider uppercase hidden md:table-cell">Palavras-chave</th>
+<th class="p-3 font-label-caps text-label-caps text-on-surface-variant tracking-wider uppercase">Status</th>
+<th class="p-3 font-label-caps text-label-caps text-on-surface-variant tracking-wider uppercase text-right">Ações</th>
+</tr>
+</thead>
+<tbody class="font-body-sm">
+<tr class="border-b border-outline-variant/50 hover:bg-surface-container-high transition-colors">
+<td class="p-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-xs">TA</div>
+<span class="font-medium text-on-surface">Tech Academy Brasil</span>
+</div>
+</td>
+<td class="p-3 text-on-surface-variant font-mono-data text-xs hidden sm:table-cell">@TechAcademyBR</td>
+<td class="p-3 hidden md:table-cell">
+<span class="inline-block px-2 py-0.5 rounded bg-surface-container-highest text-xs text-on-surface-variant mr-1">node</span>
+<span class="inline-block px-2 py-0.5 rounded bg-surface-container-highest text-xs text-on-surface-variant">arquitetura</span>
+</td>
+<td class="p-3">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[11px] font-semibold border border-emerald-500/20">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Ativo
+                                    </span>
+</td>
+<td class="p-3 text-right">
+<button class="p-1.5 text-outline hover:text-primary transition-colors rounded-full hover:bg-surface-container-highest"><span class="material-symbols-outlined text-[20px]">edit</span></button>
+<button class="p-1.5 text-outline hover:text-error transition-colors rounded-full hover:bg-surface-container-highest"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Section 3: Fila de Downloads (Hidden by default) -->
+<section class="content-section hidden" id="sec-fila">
+<div class="flex justify-between items-end mb-stack-lg">
+<div>
+<h2 class="font-display-lg text-display-lg text-primary">Fila de Processamento</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Status de downloads e conversão em tempo real.</p>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Downloading Item -->
+<div class="ui-card bg-surface rounded-lg p-4 flex items-center gap-4 relative overflow-hidden">
+<div class="absolute bottom-0 left-0 h-1 bg-surface-container-highest w-full">
+<div class="h-full bg-[#3b82f6] w-[45%] transition-all duration-1000"></div>
+</div>
+<div class="w-12 h-12 bg-surface-container-high rounded flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-outline">downloading</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-headline-sm text-body-md font-semibold text-on-surface truncate">Setup Completo Docker + Postgres 2024</h4>
+<p class="font-body-sm text-xs text-on-surface-variant mt-0.5">Dev Master Class • 450 MB / 1.2 GB (45%)</p>
+</div>
+<div class="flex-shrink-0">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 text-[11px] font-semibold border border-blue-500/20">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span> Baixando
+                            </span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<script>
+        function switchTab(tabId, btnElement) {
+            // Update Navigation Styles
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.className = el.className.replace('bg-secondary-container', 'text-on-surface-variant');
+                el.className = el.className.replace('text-on-secondary-container', '');
+                el.classList.add('text-on-surface-variant');
+                el.classList.remove('bg-secondary-container', 'text-on-secondary-container');
+                
+                // Adjust icon fill based on active state if needed
+                let icon = el.querySelector('.material-symbols-outlined');
+                if(icon) icon.classList.remove('icon-fill');
+            });
+
+            btnElement.classList.remove('text-on-surface-variant');
+            btnElement.classList.add('bg-secondary-container', 'text-on-secondary-container');
+            let activeIcon = btnElement.querySelector('.material-symbols-outlined');
+            if(activeIcon) activeIcon.classList.add('icon-fill');
+
+            // Switch Content Sections
+            document.querySelectorAll('.content-section').forEach(sec => {
+                sec.classList.add('hidden');
+            });
+            document.getElementById('sec-' + tabId).classList.remove('hidden');
+        }
+    </script>
+</body></html>

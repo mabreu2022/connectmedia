@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Connect Media - Fila de Downloads</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary": "#690100",
+                      "on-secondary-container": "#5c0000",
+                      "surface-container": "#1d2027",
+                      "inverse-primary": "#005ac2",
+                      "primary-fixed": "#d8e2ff",
+                      "on-tertiary-fixed": "#311400",
+                      "on-secondary-fixed-variant": "#930100",
+                      "primary": "#adc6ff",
+                      "outline": "#8c909f",
+                      "secondary-fixed": "#ffdad4",
+                      "error": "#ffb4ab",
+                      "surface-container-highest": "#32353c",
+                      "on-surface": "#e1e2ec",
+                      "on-primary-container": "#00285d",
+                      "surface-variant": "#32353c",
+                      "error-container": "#93000a",
+                      "on-primary-fixed": "#001a42",
+                      "on-tertiary-container": "#461f00",
+                      "surface-tint": "#adc6ff",
+                      "surface-container-high": "#272a31",
+                      "surface-bright": "#363941",
+                      "on-background": "#e1e2ec",
+                      "tertiary-container": "#df7412",
+                      "surface": "#10131a",
+                      "on-tertiary": "#502400",
+                      "outline-variant": "#424754",
+                      "primary-fixed-dim": "#adc6ff",
+                      "surface-dim": "#10131a",
+                      "tertiary-fixed": "#ffdcc6",
+                      "tertiary-fixed-dim": "#ffb786",
+                      "on-error": "#690005",
+                      "background": "#10131a",
+                      "tertiary": "#ffb786",
+                      "secondary-container": "#ff5540",
+                      "on-tertiary-fixed-variant": "#723600",
+                      "on-error-container": "#ffdad6",
+                      "on-surface-variant": "#c2c6d6",
+                      "on-primary": "#002e6a",
+                      "secondary-fixed-dim": "#ffb4a8",
+                      "on-secondary-fixed": "#410000",
+                      "surface-container-lowest": "#0b0e15",
+                      "primary-container": "#4d8eff",
+                      "inverse-on-surface": "#2e3038",
+                      "inverse-surface": "#e1e2ec",
+                      "on-primary-fixed-variant": "#004395",
+                      "secondary": "#ffb4a8",
+                      "surface-container-low": "#191b23"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "container-margin": "24px",
+                      "stack-sm": "8px",
+                      "unit": "4px",
+                      "stack-lg": "24px",
+                      "stack-md": "16px",
+                      "sidebar-width": "260px",
+                      "gutter": "16px",
+                      "stack-xs": "4px"
+              },
+              "fontFamily": {
+                      "body-md": ["Geist"],
+                      "display-lg": ["Geist"],
+                      "label-caps": ["Geist"],
+                      "body-sm": ["Geist"],
+                      "display-md": ["Geist"],
+                      "headline-sm": ["Geist"],
+                      "mono-data": ["Geist"]
+              },
+              "fontSize": {
+                      "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "display-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-caps": ["11px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "body-sm": ["13px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "display-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "headline-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "mono-data": ["13px", {"lineHeight": "1", "letterSpacing": "-0.01em", "fontWeight": "500"}]
+              }
+            }
+          }
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        .status-pulse {
+            animation: pulse-blue 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation (Mobile/Tablet Hidden) -->
+<header class="flex justify-between items-center h-14 px-container-margin w-full fixed top-0 z-50 bg-surface border-b border-outline-variant md:hidden">
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-primary text-xl cursor-pointer" data-icon="menu">menu</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">Connect Media</span>
+</div>
+<div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-highest transition-colors p-2 rounded-full" data-icon="search">search</span>
+</div>
+</header>
+<!-- Side Navigation (Desktop) -->
+<aside class="fixed inset-y-0 left-0 z-[60] hidden md:flex flex-col py-stack-lg bg-surface-container-low border-r border-outline-variant h-full w-sidebar-width rounded-r-xl">
+<div class="px-container-margin mb-stack-lg flex items-center gap-stack-sm">
+<div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container text-lg icon-fill" data-icon="play_circle">play_circle</span>
+</div>
+<h1 class="font-display-md text-display-md font-bold text-primary">Connect Media</h1>
+</div>
+<nav class="flex-1 flex flex-col gap-stack-xs px-2">
+<a class="flex items-center gap-stack-md text-on-surface-variant px-4 py-2 mx-2 hover:bg-surface-container-high transition-colors rounded-lg active:opacity-80" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="dashboard">dashboard</span>
+<span class="font-body-sm text-body-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-stack-md text-on-surface-variant px-4 py-2 mx-2 hover:bg-surface-container-high transition-colors rounded-lg active:opacity-80" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="video_library">video_library</span>
+<span class="font-body-sm text-body-sm">Library</span>
+</a>
+<a class="flex items-center gap-stack-md bg-secondary-container text-on-secondary-container rounded-full px-4 py-2 mx-2 active:opacity-80" href="#">
+<span class="material-symbols-outlined text-lg icon-fill" data-icon="download_for_offline">download_for_offline</span>
+<span class="font-body-sm text-body-sm font-medium">Queue</span>
+</a>
+<a class="flex items-center gap-stack-md text-on-surface-variant px-4 py-2 mx-2 hover:bg-surface-container-high transition-colors rounded-lg active:opacity-80" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="history">history</span>
+<span class="font-body-sm text-body-sm">History</span>
+</a>
+</nav>
+<div class="mt-auto px-4 pb-4">
+<a class="flex items-center gap-stack-md text-on-surface-variant px-4 py-2 hover:bg-surface-container-high transition-colors rounded-lg active:opacity-80" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="settings">settings</span>
+<span class="font-body-sm text-body-sm">Settings</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-sidebar-width pt-14 md:pt-0 min-h-screen flex flex-col bg-background">
+<!-- Desktop Top Bar -->
+<div class="hidden md:flex justify-between items-center px-container-margin py-stack-md border-b border-outline-variant/30 sticky top-0 bg-background/80 backdrop-blur-md z-40">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Fila de Downloads</h2>
+<div class="flex items-center gap-stack-md">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm" data-icon="search">search</span>
+<input class="bg-surface border border-outline-variant rounded-lg pl-9 pr-4 py-1.5 text-body-sm font-body-sm text-on-surface placeholder:text-outline-variant focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-64 transition-all" placeholder="Buscar na fila..." type="text"/>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant hover:bg-surface-container-high transition-colors relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A macro photography style close up of a glowing abstract geometric avatar icon against a dark background. High contrast, vibrant blue and purple neon rim lighting, minimal corporate dark mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGlmu90Yoai-oeSjKiz4q6p3iotUdjmGi9Jm_8lJ1NGLqot4xXfDQiIoTTuyfFAj6tBcFaiWMfs6c2SOIOffUZmmW37NWTWPZ8Evs_ag361yRfcMzCPXWr8bGyZnFLrgLjP1yx0PndiSJUv9xACXL0Io0w2_9wsQhxoFD6p8E3SOPY7sd06qkNmekmtHq860Vfr2WpbWHGRo_011N94Cy6SmScIYJ3uL1eC5eTSd_p3UjPx2tO3aaf"/>
+</button>
+</div>
+</div>
+<!-- Content Canvas -->
+<div class="p-container-margin flex-1">
+<div class="mb-stack-lg flex justify-between items-end md:hidden">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Fila de Downloads</h2>
+</div>
+<!-- Stats/Controls Bento -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-stack-lg">
+<div class="bg-surface rounded-xl p-stack-md border border-outline-variant flex flex-col justify-between h-24">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Ativos</span>
+<div class="flex items-center justify-between">
+<span class="font-display-md text-display-md text-primary">1</span>
+<span class="material-symbols-outlined text-primary text-xl" data-icon="sync">sync</span>
+</div>
+</div>
+<div class="bg-surface rounded-xl p-stack-md border border-outline-variant flex flex-col justify-between h-24">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Pendentes</span>
+<div class="flex items-center justify-between">
+<span class="font-display-md text-display-md text-tertiary">2</span>
+<span class="material-symbols-outlined text-tertiary text-xl" data-icon="hourglass_empty">hourglass_empty</span>
+</div>
+</div>
+<div class="bg-surface rounded-xl p-stack-md border border-outline-variant flex flex-col justify-between h-24">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Taxa Média</span>
+<div class="flex items-center justify-between">
+<span class="font-display-md text-display-md text-on-surface">12.4 <span class="text-body-sm text-outline">MB/s</span></span>
+<span class="material-symbols-outlined text-outline text-xl" data-icon="speed">speed</span>
+</div>
+</div>
+<div class="bg-surface rounded-xl p-stack-md border border-outline-variant flex items-center justify-center gap-stack-sm hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95 h-24">
+<span class="material-symbols-outlined text-error" data-icon="cancel">cancel</span>
+<span class="font-body-sm text-body-sm text-error font-medium">Pausar Todos</span>
+</div>
+</div>
+<!-- Table Container -->
+<div class="bg-surface rounded-xl border border-outline-variant overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant bg-surface-container-low">
+<th class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider p-stack-md font-semibold">Título</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider p-stack-md font-semibold">Canal</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider p-stack-md font-semibold text-center">Status</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider p-stack-md font-semibold">Progresso</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider p-stack-md font-semibold text-right">Ações</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/50">
+<!-- Downloading -->
+<tr class="hover:bg-surface-container-high/50 transition-colors group">
+<td class="p-stack-md">
+<div class="flex items-center gap-stack-md">
+<div class="w-16 h-9 bg-surface-container rounded-md overflow-hidden flex-shrink-0 relative">
+<img class="w-full h-full object-cover" data-alt="A dark, abstract cinematic landscape with glowing neon teal geometric structures scattered across a vast black desert. High contrast, precise lighting, highly detailed corporate technology aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_F37nS5Zuo1mUGO_XWk7cG2QDCl3ulGnDQ49iYL29TuWbi5d_iD7rRVGhvLEJsycBk8qJ8fKwolKPZa2J5iAEiVT5hJERUNGYEg0xAu-p5L92b3N6nf0dsQpOWQITrlsMJ5xicsA3EWmhqdgPLMh1reOYWnqgJFIoJ1XPgPaePE8G8D_OJPvTHubCDkBrkkyPb5Y4733M2unRqPDEzMPuS-A8lIrKo3fn_xMeAEgEW7TxZxH9nCfW"/>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface font-medium truncate max-w-[200px] md:max-w-[300px]" title="The Complete Guide to Next.js App Router">The Complete Guide to Next.js App Router</span>
+</div>
+</td>
+<td class="p-stack-md font-body-sm text-body-sm text-on-surface-variant">Vercel</td>
+<td class="p-stack-md text-center">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+<div class="w-2 h-2 rounded-full bg-primary status-pulse"></div>
+<span class="font-mono-data text-mono-data text-primary">Baixando</span>
+</div>
+</td>
+<td class="p-stack-md w-1/4">
+<div class="flex flex-col gap-1 w-full">
+<div class="flex justify-between font-mono-data text-[10px] text-on-surface-variant">
+<span>45%</span>
+<span>1.2 GB / 2.6 GB</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full transition-all duration-300" style="width: 45%;"></div>
+</div>
+</div>
+</td>
+<td class="p-stack-md text-right">
+<button class="text-outline-variant hover:text-on-surface transition-colors p-1 rounded hover:bg-surface-container">
+<span class="material-symbols-outlined text-sm" data-icon="pause">pause</span>
+</button>
+</td>
+</tr>
+<!-- Pending 1 -->
+<tr class="hover:bg-surface-container-high/50 transition-colors group opacity-80">
+<td class="p-stack-md">
+<div class="flex items-center gap-stack-md">
+<div class="w-16 h-9 bg-surface-container rounded-md overflow-hidden flex-shrink-0 relative">
+<img class="w-full h-full object-cover grayscale opacity-70" data-alt="A minimalist tech setup featuring a mechanical keyboard and a glowing monitor screen displaying lines of complex code in a dark room. Sharp focus, cool blue tones, professional developer atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfOxD828w02fzPVqzZDB0JXVH-gC7D7zLSawBBgD1JT2IKm5K0tVfc2Nytk3qE1cH2QnJKZyPgFkhQW0JigQwzd8XxJ6eU1Jak0Y4iA3B3B00Gid3VJC_S4eELxma7cA_VhAPdfkMY6uInZ6l8EwOn-9DBiGCwDJQaxB84NrbltjzGFg__v7bZOPIpe8EQxm2JxxHtlhX3R0Mix0OGZXMZAcoGUk_JteJQG1S1i-sgfWECIoxKGUbj"/>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface font-medium truncate max-w-[200px] md:max-w-[300px]">Advanced CSS Grid Techniques (2024)</span>
+</div>
+</td>
+<td class="p-stack-md font-body-sm text-body-sm text-on-surface-variant">Kevin Powell</td>
+<td class="p-stack-md text-center">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-tertiary-container/10 border border-tertiary-container/20">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div>
+<span class="font-mono-data text-mono-data text-tertiary">Pendente</span>
+</div>
+</td>
+<td class="p-stack-md">
+<div class="font-mono-data text-mono-data text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+                                        Aguardando
+                                    </div>
+</td>
+<td class="p-stack-md text-right">
+<button class="text-outline-variant hover:text-error transition-colors p-1 rounded hover:bg-surface-container">
+<span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+</button>
+</td>
+</tr>
+<!-- Pending 2 -->
+<tr class="hover:bg-surface-container-high/50 transition-colors group opacity-80">
+<td class="p-stack-md">
+<div class="flex items-center gap-stack-md">
+<div class="w-16 h-9 bg-surface-container rounded-md overflow-hidden flex-shrink-0 relative">
+<img class="w-full h-full object-cover grayscale opacity-70" data-alt="Abstract rendering of data flow in a dark environment. Glowing orange and amber lines pulsing across a grid structure, representing network queues and data processing. High technical precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFHHoahH4WOE8LZQGMCf9gPzXZsszH3HjSE-WrUMjxlxtIbSkUJQLUvFQXqySxW8EqcWZS-phg_dxpJPdr50L5VGJIv0e5ASe8KaGMOLiZ9knwzEFAkt7RQDcZRIbvVDdlHWdaFFAbP6n0tiMOtxbu0S5prcOSHSavDWm4fNpIEd1fdbDVV3scoSb6IC8ndST105kJaeeHGNLsGukZvZ8NTPBnvAjYQ5kfPZVspcg6MvffsttGYWsQ"/>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface font-medium truncate max-w-[200px] md:max-w-[300px]">Understanding React Server Components</span>
+</div>
+</td>
+<td class="p-stack-md font-body-sm text-body-sm text-on-surface-variant">Fireship</td>
+<td class="p-stack-md text-center">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-tertiary-container/10 border border-tertiary-container/20">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div>
+<span class="font-mono-data text-mono-data text-tertiary">Pendente</span>
+</div>
+</td>
+<td class="p-stack-md">
+<div class="font-mono-data text-mono-data text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+                                        Aguardando
+                                    </div>
+</td>
+<td class="p-stack-md text-right">
+<button class="text-outline-variant hover:text-error transition-colors p-1 rounded hover:bg-surface-container">
+<span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+</button>
+</td>
+</tr>
+<!-- Completed -->
+<tr class="hover:bg-surface-container-high/50 transition-colors group">
+<td class="p-stack-md">
+<div class="flex items-center gap-stack-md">
+<div class="w-16 h-9 bg-surface-container rounded-md overflow-hidden flex-shrink-0 relative border border-outline-variant/30">
+<img class="w-full h-full object-cover" data-alt="A serene workspace showing a completed data transfer dashboard on an ultra-wide monitor. Crisp, high-contrast UI elements, soft ambient lighting in a premium dark home office setup." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiNcmSYA-P4l5TqDw7-vsl-pUikuhXag1Y3VQb6CgyPJTDaeDSNvg5MDgvmpNp_PZRVuKDTbVFzJPxL7HZ-2UaP5XMdxYKCIpFBncU1rwpVFC2TZpNQEX_1xK8Kjlb4xEOLenEEWehjou4vgBzPdMfxH3V5pxh1KgQmfte8P_FfRVUWkDAQvnVecjKtbwrw-l5R6pHvs9lUKvTA-vRZWwQ6f8CQuIgKMbDXNWIHkkxUUNkG8CMlqSB"/>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface font-medium truncate max-w-[200px] md:max-w-[300px]">Tailwind CSS v4 Feature Review</span>
+</div>
+</td>
+<td class="p-stack-md font-body-sm text-body-sm text-on-surface-variant">Tailwind Labs</td>
+<td class="p-stack-md text-center">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#166534]/20 border border-[#166534]/40">
+<div class="w-2 h-2 rounded-full bg-[#4ade80]"></div>
+<span class="font-mono-data text-mono-data text-[#4ade80]">Concluído</span>
+</div>
+</td>
+<td class="p-stack-md w-1/4">
+<div class="flex flex-col gap-1 w-full">
+<div class="flex justify-between font-mono-data text-[10px] text-on-surface-variant">
+<span>100%</span>
+<span>850 MB / 850 MB</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-[#4ade80] rounded-full" style="width: 100%;"></div>
+</div>
+</div>
+</td>
+<td class="p-stack-md text-right">
+<button class="text-outline-variant hover:text-on-surface transition-colors p-1 rounded hover:bg-surface-container" title="Abrir pasta">
+<span class="material-symbols-outlined text-sm" data-icon="folder_open">folder_open</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 px-stack-md bg-surface-container border-t border-outline-variant md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-bright transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="video_library">video_library</span>
+<span class="font-label-caps text-label-caps mt-1">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1" href="#">
+<span class="material-symbols-outlined text-lg icon-fill" data-icon="download_for_offline">download_for_offline</span>
+<span class="font-label-caps text-label-caps mt-1 font-medium">Queue</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-bright transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="subscriptions">subscriptions</span>
+<span class="font-label-caps text-label-caps mt-1">Monitored</span>
+</a>
+</nav>
+</body></html>

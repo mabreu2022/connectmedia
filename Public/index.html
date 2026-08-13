@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Media - Gerenciador de Mídia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#b4c5ff',
+                        'on-primary': '#002a78',
+                        background: '#111318',
+                        surface: '#191c20',
+                        'surface-variant': '#43474e',
+                        outline: '#8d9199',
+                        'outline-variant': '#43474e',
+                        'on-surface': '#e2e2e6'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-sans antialiased h-screen flex overflow-hidden">
+
+    <!-- Sidebar (Fixa) -->
+    <aside class="w-64 bg-surface border-r border-outline-variant flex flex-col justify-between shrink-0 h-full">
+        <div>
+            <!-- Logo / Header -->
+            <div class="p-6 border-b border-outline-variant flex items-center space-x-3">
+                <div class="bg-primary text-on-primary p-2 rounded-lg font-bold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <span class="text-lg font-bold text-on-surface tracking-wide">Connect Media</span>
+            </div>
+
+            <!-- Navegação -->
+            <nav class="p-4 space-y-2">
+                <button onclick="mudarSecao('descoberta')" id="nav-descoberta" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors bg-primary text-on-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                    <span>Descoberta / Pendentes</span>
+                </button>
+                <button onclick="mudarSecao('acervo')" id="nav-acervo" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-variant/20 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                    <span>Acervo Baixado</span>
+                </button>
+                <button onclick="mudarSecao('canais')" id="nav-canais" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-variant/20 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                    <span>Canais Monitorados</span>
+                </button>
+                <button onclick="mudarSecao('fila')" id="nav-fila" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-variant/20 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    <span>Fila de Downloads</span>
+                </button>
+                <button onclick="mudarSecao('configuracoes')" id="nav-configuracoes" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-variant/20 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    <span>Configurações</span>
+                </button>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-outline-variant text-xs text-outline text-center">
+            Connect Media v2.0 • Firebird 5.0
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        
+        <!-- Header Superior (Fixo) -->
+        <header class="h-20 border-b border-outline-variant px-8 flex items-center justify-between shrink-0 bg-surface/50 backdrop-blur z-30">
+            <div class="relative w-96">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-outline">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </span>
+                <input type="text" id="input-busca" oninput="filtrarConteudo(this.value)" placeholder="Buscar vídeos, canais ou tags..." class="w-full bg-background border border-outline-variant rounded-lg pl-10 pr-4 py-2 text-sm text-on-surface focus:border-primary outline-none transition-colors">
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface font-bold border border-outline-variant">
+                    MA
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Sections -->
+        <div class="p-8 flex-1 flex flex-col min-h-0 overflow-hidden">
+
+            <!-- 1. SEÇÃO: DESCOBERTA / PENDENTES -->
+            <section class="content-section flex flex-col h-full overflow-hidden" id="sec-descoberta">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4 shrink-0">
+                    <div>
+                        <h1 class="text-2xl font-bold text-on-surface">Descoberta de Vídeos</h1>
+                        <p class="text-xs text-outline mt-1">Novos vídeos encontrados aguardando agendamento para download.</p>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button onclick="selecionarTodos()" class="text-sm font-medium text-primary hover:underline px-2">Marcar Todos</button>
+                        
+                        <!-- Seletor de formato para download em massa -->
+                        <div class="flex items-center bg-surface-variant/30 border border-outline-variant rounded-lg overflow-hidden">
+                            <label class="text-xs text-outline pl-3 pr-1 whitespace-nowrap">Formato:</label>
+                            <select id="formato-download-massa" class="bg-transparent text-on-surface text-xs py-2 pl-1 pr-3 border-none outline-none cursor-pointer font-medium">
+                                <option value="MP4">🎥 MP4 (Vídeo)</option>
+                                <option value="MP3">🎵 MP3 (Áudio)</option>
+                            </select>
+                        </div>
+
+                        <button id="btn-agendar-selecionados" onclick="agendarSelecionados()" class="bg-primary hover:bg-[#d8e2ff] text-on-primary px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            <span>Baixar Marcados</span>
+                        </button>
+                        
+                        <button onclick="limparDescoberta()" class="bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2" title="Apagar todos os vídeos desta tela">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            <span>Limpar Tudo</span>
+                        </button>
+
+                        <div class="w-px h-6 bg-outline-variant mx-1"></div>
+
+                        <select id="filtro-canal" onchange="carregarDescoberta()" class="bg-surface border border-outline-variant rounded-lg px-3 py-2 text-sm text-on-surface focus:border-primary outline-none transition-colors">
+                            <option value="todos">📺 Todos os Canais</option>
+                        </select>
+                        <button onclick="atualizarCanaisManual()" class="bg-surface-variant hover:bg-outline-variant text-on-surface px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            <span>Varredura Manual</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- WRAPPER COM SCROLL ISOLADO E GRID NORMAL -->
+                <div class="flex-1 overflow-y-auto pr-2 pb-6 min-h-0">
+                    <div id="grid-descoberta" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- Cards injetados via JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. SEÇÃO: ACERVO BAIXADO -->
+            <section class="content-section hidden flex flex-col h-full overflow-hidden" id="sec-acervo">
+                <div class="mb-6 shrink-0">
+                    <h1 class="text-2xl font-bold text-on-surface">Acervo Baixado</h1>
+                    <p class="text-xs text-outline mt-1">Biblioteca física de mídias baixadas prontas para reprodução offline.</p>
+                </div>
+                <!-- WRAPPER COM SCROLL ISOLADO E GRID NORMAL -->
+                <div class="flex-1 overflow-y-auto pr-2 pb-6 min-h-0">
+                    <div id="grid-acervo" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- Cards injetados via JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. SEÇÃO: CANAIS MONITORADOS -->
+            <section class="content-section hidden flex flex-col h-full overflow-hidden" id="sec-canais">
+                <div class="flex justify-between items-center mb-6 shrink-0">
+                    <div>
+                        <h1 class="text-2xl font-bold text-on-surface">Canais Monitorados</h1>
+                        <p class="text-xs text-outline mt-1">Fontes do YouTube cadastradas para varredura automática.</p>
+                    </div>
+                    <button onclick="abrirModalCanal()" class="bg-primary hover:bg-[#d8e2ff] text-on-primary px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        <span>Adicionar Canal</span>
+                    </button>
+                </div>
+                <div class="bg-surface rounded-xl border border-outline-variant overflow-y-auto flex-1">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-outline-variant text-xs font-bold text-outline uppercase bg-surface-variant/10 sticky top-0 bg-surface z-10">
+                                <th class="p-4">Nome do Canal</th>
+                                <th class="p-4">URL do YouTube</th>
+                                <th class="p-4 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-canais" class="divide-y divide-outline-variant text-sm">
+                            <!-- Linhas injetadas via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 4. SEÇÃO: FILA DE DOWNLOADS -->
+            <section class="content-section hidden flex flex-col h-full overflow-hidden" id="sec-fila">
+                <div class="mb-6 shrink-0">
+                    <h1 class="text-2xl font-bold text-on-surface">Fila de Downloads</h1>
+                    <p class="text-xs text-outline mt-1">Acompanhamento em tempo real das transferências ativas e pendentes.</p>
+                </div>
+
+                <div class="bg-surface p-4 rounded-xl border border-outline-variant mb-6 flex flex-col sm:flex-row items-center gap-3 shrink-0">
+                    <div class="flex-1 w-full relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-outline">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                        </span>
+                        <input type="text" id="input-url-avulsa" placeholder="Cole o link de um vídeo único ou playlist do YouTube..." class="w-full bg-background border border-outline-variant rounded-lg pl-10 pr-3 py-2 text-sm text-on-surface focus:border-primary outline-none transition-colors">
+                    </div>
+                    <button id="btn-baixar-avulso" onclick="baixarUrlAvulsa()" class="w-full sm:w-auto bg-primary hover:bg-[#d8e2ff] text-on-primary px-5 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
+                        Extrair para Fila
+                    </button>
+                </div>
+
+                <div id="lista-fila" class="bg-surface rounded-xl border border-outline-variant divide-y divide-outline-variant overflow-y-auto flex-1">
+                    <!-- Fila injetada via JS -->
+                </div>
+            </section>
+
+            <!-- 5. SEÇÃO: CONFIGURAÇÕES -->
+            <section class="content-section hidden flex flex-col h-full overflow-hidden" id="sec-configuracoes">
+                <div class="mb-6 shrink-0">
+                    <h1 class="text-2xl font-bold text-on-surface">Configurações do Sistema</h1>
+                    <p class="text-xs text-outline mt-1">Parâmetros de diretórios, limites e filtros globais.</p>
+                </div>
+                <div class="bg-surface rounded-xl border border-outline-variant p-6 max-w-2xl overflow-y-auto flex-1">
+                    <form onsubmit="salvarConfiguracoes(event)" class="space-y-6">
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase mb-2">Pasta de Destino</label>
+                            <input type="text" id="input-caminho-download" required class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+                            <p class="text-[11px] text-outline mt-1">Caminho absoluto onde os vídeos serão armazenados.</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase mb-2">Quantidade de vídeos por varredura</label>
+                            <input type="number" id="input-qtd-videos" min="1" max="500" required class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+                            <p class="text-[11px] text-outline mt-1">Quantos vídeos novos ler de cada canal a cada verificação.</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase mb-2">Intervalo de Varredura Automática (em minutos)</label>
+                            <input type="number" id="input-intervalo" min="5" max="1440" required class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+                            <p class="text-[11px] text-outline mt-1">Tempo de espera entre um ciclo de varredura e outro.</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-outline-variant pt-4 mt-4">
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase mb-2">Data Inicial (Opcional)</label>
+                                <input type="date" id="input-data-inicial" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none [color-scheme:dark]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase mb-2">Data Final (Opcional)</label>
+                                <input type="date" id="input-data-final" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none [color-scheme:dark]">
+                            </div>
+                            <p class="text-[11px] text-outline mt-1 col-span-full">Deixe em branco para não filtrar por data.</p>
+                        </div>
+
+                        <div class="border-t border-outline-variant pt-4 mt-4">
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase mb-3">Tipos de Conteúdo para Varrer</label>
+                            <div class="flex flex-wrap gap-4">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" id="check-videos" class="w-4 h-4 text-primary bg-background border-outline-variant rounded focus:ring-primary">
+                                    <span class="text-sm text-on-surface">Vídeos Normais</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" id="check-shorts" class="w-4 h-4 text-primary bg-background border-outline-variant rounded focus:ring-primary">
+                                    <span class="text-sm text-on-surface">YouTube Shorts</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" id="check-lives" class="w-4 h-4 text-primary bg-background border-outline-variant rounded focus:ring-primary">
+                                    <span class="text-sm text-on-surface">Transmissões (Lives)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="bg-primary hover:bg-[#d8e2ff] text-on-primary px-5 py-2 rounded text-[14px] font-medium transition-colors mt-6">Salvar Configurações</button>
+                    </form>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Modal Novo Canal -->
+    <div id="modal-canal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-surface border border-outline-variant rounded-xl p-6 w-full max-w-md shadow-2xl">
+            <h2 class="text-lg font-bold text-on-surface mb-4">Adicionar Novo Canal</h2>
+            <form onsubmit="salvarNovoCanal(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Nome do Canal</label>
+                    <input type="text" id="modal-nome" required placeholder="Ex: Canal Tech" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">URL do YouTube</label>
+                    <input type="text" id="modal-url" required placeholder="Ex: https://www.youtube.com/@CanalTech" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" onclick="fecharModalCanal()" class="bg-surface-variant/30 hover:bg-surface-variant/50 text-on-surface px-4 py-2 rounded text-sm transition-colors">Cancelar</button>
+                    <button type="submit" class="bg-primary hover:bg-[#d8e2ff] text-on-primary px-4 py-2 rounded text-sm font-medium transition-colors">Salvar Canal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL PLAYER DE VÍDEO -->
+    <div id="modal-player" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden items-center justify-center z-50 p-4 sm:p-8">
+        <div class="bg-surface border border-outline-variant rounded-xl overflow-hidden w-full max-w-5xl shadow-2xl flex flex-col max-h-full">
+            <div class="flex justify-between items-center p-4 border-b border-outline-variant bg-surface shrink-0">
+                <h2 id="player-titulo" class="text-sm font-bold text-on-surface truncate pr-4">Assistir Vídeo</h2>
+                <button onclick="fecharPlayer()" class="text-outline hover:text-white transition-colors bg-surface-variant/30 p-2 rounded-lg" title="Fechar player">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="bg-black w-full relative flex-1 min-h-[50vh] flex items-center justify-center">
+                <video id="video-element" controls controlsList="nodownload" class="w-full max-h-[75vh] outline-none">
+                    Seu navegador não suporta a reprodução de vídeos em HTML5.
+                </video>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de Gerenciamento da Interface -->
+    <script>
+        let intervaloFila = null;
+        let intervaloDescoberta = null;
+
+        function filtrarConteudo(termo) {
+            const texto = termo.toLowerCase().trim();
+
+            document.querySelectorAll('#grid-descoberta > div').forEach(card => {
+                const conteudo = card.innerText.toLowerCase();
+                card.style.display = conteudo.includes(texto) ? '' : 'none';
+            });
+
+            document.querySelectorAll('#grid-acervo > div').forEach(card => {
+                const conteudo = card.innerText.toLowerCase();
+                card.style.display = conteudo.includes(texto) ? '' : 'none';
+            });
+
+            document.querySelectorAll('#tabela-canais > tr').forEach(linha => {
+                const conteudo = linha.innerText.toLowerCase();
+                linha.style.display = conteudo.includes(texto) ? '' : 'none';
+            });
+
+            document.querySelectorAll('#lista-fila > div').forEach(linha => {
+                const conteudo = linha.innerText.toLowerCase();
+                linha.style.display = conteudo.includes(texto) ? '' : 'none';
+            });
+        }
+
+        function aplicarFiltroAtual() {
+            const inputPesquisa = document.getElementById('input-busca');
+            if (inputPesquisa && inputPesquisa.value) {
+                filtrarConteudo(inputPesquisa.value);
+            }
+        }
+
+        function mudarSecao(secao) {
+            document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`sec-${secao}`).classList.remove('hidden');
+
+            document.querySelectorAll('aside nav button').forEach(btn => {
+                btn.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-variant/20 transition-colors";
+            });
+            document.getElementById(`nav-${secao}`).className = "w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors bg-primary text-on-primary";
+
+            if (intervaloFila && secao !== 'fila') {
+                clearInterval(intervaloFila);
+                intervaloFila = null;
+            }
+            if (intervaloDescoberta && secao !== 'descoberta') {
+                clearInterval(intervaloDescoberta);
+                intervaloDescoberta = null;
+            }
+
+            if(secao === 'descoberta') {
+                carregarComboCanais();
+                carregarDescoberta();
+                if (!intervaloDescoberta) intervaloDescoberta = setInterval(carregarDescoberta, 15000);
+            }
+            if(secao === 'acervo') carregarAcervo();
+            if(secao === 'canais') carregarCanais();
+            if(secao === 'fila') {
+                carregarFila();
+                if (!intervaloFila) intervaloFila = setInterval(carregarFila, 3000);
+            }
+            if(secao === 'configuracoes') carregarConfiguracoes();
+            
+            aplicarFiltroAtual();
+        }
+
+        async function carregarComboCanais() {
+            try {
+                const res = await fetch('/api/canais');
+                const canais = await res.json();
+                const select = document.getElementById('filtro-canal');
+                const valorAtual = select.value;
+
+                select.innerHTML = '<option value="todos">📺 Todos os Canais</option>';
+                
+                canais.forEach(c => {
+                    const option = document.createElement('option');
+                    option.value = c.ID_CANAL;
+                    option.textContent = c.NOME_CANAL;
+                    select.appendChild(option);
+                });
+
+                if(valorAtual) select.value = valorAtual;
+            } catch(e) { console.error(e); }
+        }
+
+        async function carregarDescoberta() {
+            try {
+                const selectFiltro = document.getElementById('filtro-canal');
+                const idCanal = selectFiltro ? selectFiltro.value : 'todos';
+                const url = idCanal && idCanal !== 'todos' ? `/api/videos?canal=${idCanal}` : '/api/videos';
+                
+                const res = await fetch(url);
+                const videos = await res.json();
+                
+                const checkboxesAtuais = document.querySelectorAll('.check-video:checked');
+                const idsMarcados = Array.from(checkboxesAtuais).map(cb => String(cb.value));
+
+                const grid = document.getElementById('grid-descoberta');
+                grid.innerHTML = '';
+
+                if(videos.length === 0) {
+                    grid.innerHTML = '<p class="text-outline text-sm col-span-full">Nenhum vídeo pendente de descoberta no momento.</p>';
+                } else {
+                    videos.forEach(v => {
+                        const idString = String(v.ID_VIDEO);
+                        const isChecked = idsMarcados.includes(idString);
+                        const checkedAttr = isChecked ? 'checked' : '';
+                        const borderClass = isChecked ? 'ring-2 ring-primary' : 'border border-outline-variant';
+
+                        const card = document.createElement('div');
+                        card.id = `card-video-${v.ID_VIDEO}`;
+                        card.className = `bg-surface rounded-xl overflow-hidden flex flex-col justify-between transition-all duration-200 ${borderClass}`;
+                        
+                        card.innerHTML = `
+                            <div class="relative cursor-pointer group" onclick="toggleCheck(${v.ID_VIDEO})">
+                                <div class="absolute top-2 left-2 z-10 bg-black/60 p-1 rounded backdrop-blur-sm">
+                                    <input type="checkbox" id="check-${v.ID_VIDEO}" value="${v.ID_VIDEO}" class="check-video w-5 h-5 cursor-pointer accent-primary rounded" ${checkedAttr} onclick="event.stopPropagation(); atualizarVisualCard(${v.ID_VIDEO}, this.checked)">
+                                </div>
+                                <div class="aspect-video bg-background relative overflow-hidden">
+                                    <img src="${v.THUMBNAIL_URL}" alt="Thumb" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'640\' height=\'360\' viewBox=\'0 0 640 360\'><rect width=\'640\' height=\'360\' fill=\'%23191c20\'/><text x=\'50%\' y=\'50%\' fill=\'%238d9199\' font-family=\'sans-serif\' font-size=\'18\' text-anchor=\'middle\' dominant-baseline=\'middle\'>Connect Media</text></svg>';">
+                                </div>
+                                <div class="p-4">
+                                    <span class="text-[10px] bg-surface-variant/30 text-outline px-2 py-0.5 rounded font-mono uppercase">${v.NOME_CANAL || 'Canal'}</span>
+                                    <h3 class="text-sm font-bold text-on-surface mt-2 line-clamp-2">${v.TITULO_VIDEO}</h3>
+                                </div>
+                            </div>
+                            <div class="p-4 pt-0 border-t border-outline-variant pt-3 mt-1">
+                                <div class="flex space-x-2">
+                                    <button onclick="agendarDownload(${v.ID_VIDEO}, 'MP4')" class="flex-1 bg-surface-variant/30 hover:bg-[#d8e2ff] hover:text-[#001a41] text-on-surface py-2 rounded text-xs font-semibold transition-colors flex items-center justify-center gap-1" title="Baixar como vídeo MP4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.868v6.264a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                        MP4
+                                    </button>
+                                    <button onclick="agendarDownload(${v.ID_VIDEO}, 'MP3')" class="flex-1 bg-[#1a1040]/60 hover:bg-[#7c4dff]/20 border border-[#7c4dff]/30 hover:border-[#7c4dff]/60 text-[#bb86fc] py-2 rounded text-xs font-semibold transition-all flex items-center justify-center gap-1" title="Extrair áudio como MP3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>
+                                        MP3
+                                    </button>
+                                    <button onclick="deletarVideo(${v.ID_VIDEO})" class="bg-surface-variant/30 hover:bg-red-500/20 hover:text-red-400 text-outline p-2 rounded transition-colors" title="Excluir da descoberta">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                }
+                
+                aplicarFiltroAtual(); 
+
+            } catch(e) { console.error(e); }
+        }
+        
+        function toggleCheck(id) {
+            const check = document.getElementById(`check-${id}`);
+            if(check) {
+                check.checked = !check.checked;
+                atualizarVisualCard(id, check.checked);
+            }
+        }
+
+        function atualizarVisualCard(id, isChecked) {
+            const card = document.getElementById(`card-video-${id}`);
+            if(card) {
+                if(isChecked) {
+                    card.classList.remove('border', 'border-outline-variant');
+                    card.classList.add('ring-2', 'ring-primary');
+                } else {
+                    card.classList.remove('ring-2', 'ring-primary');
+                    card.classList.add('border', 'border-outline-variant');
+                }
+            }
+        }
+
+        let todosSelecionados = false;
+        function selecionarTodos() {
+            todosSelecionados = !todosSelecionados;
+            const caixinhas = document.querySelectorAll('.check-video');
+            caixinhas.forEach(c => {
+                const cardElement = document.getElementById(`card-video-${c.value}`);
+                if (cardElement && cardElement.style.display !== 'none') {
+                    c.checked = todosSelecionados;
+                    atualizarVisualCard(c.value, todosSelecionados);
+                }
+            });
+        }
+
+        async function agendarSelecionados() {
+            const checkboxes = document.querySelectorAll('.check-video:checked');
+            if(checkboxes.length === 0) {
+                alert('Por favor, marque pelo menos um vídeo.');
+                return;
+            }
+            
+            const formato = document.getElementById('formato-download-massa')?.value || 'MP4';
+            const labelFormato = formato === 'MP3' ? '🎵 MP3 (áudio)' : '🎥 MP4 (vídeo)';
+            if(!confirm(`Deseja enviar ${checkboxes.length} vídeo(s) marcado(s) para a Fila de Downloads como ${labelFormato}?`)) return;
+
+            const btn = document.getElementById('btn-agendar-selecionados');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<span>⏳ Agendando...</span>';
+            btn.disabled = true;
+
+            try {
+                for (let check of checkboxes) {
+                    await fetch('/api/videos/agendar', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ idVideo: check.value, formato })
+                    });
+                }
+                alert(`${checkboxes.length} vídeo(s) agendado(s) como ${formato} com sucesso!`);
+            } catch(e) {
+                console.error(e);
+                alert('Ocorreu um erro ao agendar alguns vídeos.');
+            }
+
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            todosSelecionados = false;
+            carregarDescoberta(); 
+        }
+
+        async function limparDescoberta() {
+            if(!confirm('CUIDADO: Tem certeza que deseja apagar TODOS os vídeos pendentes desta tela?')) return;
+
+            try {
+                const res = await fetch('/api/videos/limpar-descoberta', { method: 'DELETE' });
+                if(res.ok) {
+                    alert('A lista de Descoberta foi limpa com sucesso!');
+                    carregarDescoberta();
+                } else {
+                    alert('Erro ao tentar limpar a lista.');
+                }
+            } catch(e) {
+                console.error(e);
+                alert('Erro de comunicação com o servidor.');
+            }
+        }
+
+        async function carregarAcervo() {
+            try {
+                const res = await fetch('/api/videos/baixados');
+                const videos = await res.json();
+                const grid = document.getElementById('grid-acervo');
+                grid.innerHTML = '';
+
+                if(videos.length === 0) {
+                    grid.innerHTML = '<p class="text-outline text-sm">Nenhum vídeo baixado no acervo ainda.</p>';
+                } else {
+                    videos.forEach(v => {
+                        const card = document.createElement('div');
+                        card.className = "bg-surface rounded-xl border border-outline-variant overflow-hidden flex flex-col justify-between hover:border-primary/50 transition-colors";
+                        
+                        const safeTitle = v.TITULO_VIDEO.replace(/"/g, '&quot;');
+
+                        card.innerHTML = `
+                            <div>
+                                <div class="aspect-video bg-background relative overflow-hidden group cursor-pointer" data-title="${safeTitle}" onclick="abrirPlayer(${v.ID_VIDEO}, this.getAttribute('data-title'))">
+                                    <img src="${v.THUMBNAIL_URL}" alt="Thumb" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90 group-hover:opacity-100" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'640\' height=\'360\' viewBox=\'0 0 640 360\'><rect width=\'640\' height=\'360\' fill=\'%23191c20\'/><text x=\'50%\' y=\'50%\' fill=\'%238d9199\' font-family=\'sans-serif\' font-size=\'18\' text-anchor=\'middle\' dominant-baseline=\'middle\'>Connect Media</text></svg>';">
+                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                                        <div class="bg-primary text-on-primary rounded-full p-3 shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-4 pb-2">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded font-mono uppercase">${v.NOME_ASSUNTO || 'Geral'}</span>
+                                        <span class="text-[10px] text-outline truncate max-w-[120px]">${v.NOME_CANAL || ''}</span>
+                                    </div>
+                                    <h3 class="text-sm font-bold text-on-surface line-clamp-2 mt-1 leading-snug">${v.TITULO_VIDEO}</h3>
+                                </div>
+                            </div>
+                            <div class="p-4 pt-2 flex space-x-2">
+                                <button data-title="${safeTitle}" onclick="abrirPlayer(${v.ID_VIDEO}, this.getAttribute('data-title'))" class="flex-1 bg-primary hover:bg-[#d8e2ff] text-on-primary py-2 rounded text-xs font-bold transition-colors flex items-center justify-center space-x-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
+                                    <span>Play Local</span>
+                                </button>
+                                <a href="${v.URL_VIDEO}" target="_blank" class="bg-surface-variant/40 hover:bg-surface-variant text-on-surface p-2 rounded transition-colors flex items-center justify-center" title="Ver original no YouTube">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                </a>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                }
+                aplicarFiltroAtual();
+            } catch(e) { console.error(e); }
+        }
+
+        function abrirPlayer(idVideo, titulo) {
+            document.getElementById('player-titulo').textContent = titulo;
+            const videoEl = document.getElementById('video-element');
+            videoEl.src = `/api/stream/${idVideo}`;
+            
+            const modal = document.getElementById('modal-player');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            videoEl.play().catch(e => console.log('Autoplay do navegador foi bloqueado.'));
+        }
+
+        function fecharPlayer() {
+            const videoEl = document.getElementById('video-element');
+            videoEl.pause();
+            videoEl.removeAttribute('src');
+            videoEl.load();
+            
+            const modal = document.getElementById('modal-player');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        async function carregarCanais() {
+            try {
+                const res = await fetch('/api/canais');
+                const canais = await res.json();
+                const tbody = document.getElementById('tabela-canais');
+                tbody.innerHTML = '';
+
+                if(canais.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-outline">Nenhum canal monitorado cadastrado.</td></tr>';
+                } else {
+                    canais.forEach(c => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-surface-variant/10 transition-colors";
+                        const ativo = c.ATIVO == 1;
+                        
+                        tr.innerHTML = `
+                            <td class="p-4 font-medium text-on-surface">${c.NOME_CANAL}</td>
+                            <td class="p-4 text-outline truncate max-w-xs"><a href="${c.URL_YOUTUBE}" target="_blank" class="hover:underline">${c.URL_YOUTUBE}</a></td>
+                            <td class="p-4 text-center">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" ${ativo ? 'checked' : ''} onchange="alternarStatusCanal(${c.ID_CANAL}, this)" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-outline after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                    <span class="ml-2 text-xs font-medium ${ativo ? 'text-primary' : 'text-outline'} status-label">${ativo ? 'Monitorando' : 'Inativo'}</span>
+                                </label>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+                aplicarFiltroAtual();
+            } catch(e) { console.error(e); }
+        }
+
+        async function alternarStatusCanal(idCanal, checkbox) {
+            const ativo = checkbox.checked;
+            const labelSpan = checkbox.parentElement.querySelector('.status-label');
+            if (ativo) {
+                labelSpan.textContent = 'Monitorando';
+                labelSpan.className = 'ml-2 text-xs font-medium text-primary status-label';
+            } else {
+                labelSpan.textContent = 'Inativo';
+                labelSpan.className = 'ml-2 text-xs font-medium text-outline status-label';
+            }
+            try {
+                await fetch(`/api/canais/${idCanal}/status`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ ativo: ativo ? 1 : 0 })
+                });
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function carregarFila() {
+            try {
+                const res = await fetch('/api/videos/fila');
+                const videos = await res.json();
+                const container = document.getElementById('lista-fila');
+                container.innerHTML = '';
+
+                if(videos.length === 0) {
+                    container.innerHTML = '<div class="p-6 text-outline text-sm">Nenhum download na fila ou em andamento.</div>';
+                } else {
+                    videos.forEach(v => {
+                        const statusText = v.STATUS_DOWNLOAD === 'BAIXANDO' ? `Baixando (${v.PROGRESSO}%)` : 'Na Fila';
+                        const progresso = v.PROGRESSO || 0;
+
+                        const div = document.createElement('div');
+                        div.className = "flex items-center justify-between p-4 hover:bg-surface-variant/20 transition-colors";
+                        
+                        div.innerHTML = `
+                            <div class="flex-1 pr-4">
+                                <h3 class="text-sm font-bold text-on-surface mb-2">${v.TITULO_VIDEO}</h3>
+                                <div class="w-full bg-surface-variant rounded-full h-2">
+                                    <div class="bg-primary h-2 rounded-full transition-all duration-500" style="width: ${progresso}%"></div>
+                                </div>
+                            </div>
+                            <div class="text-sm text-primary font-medium w-32 text-center shrink-0">
+                                ${statusText}
+                            </div>
+                            <div class="text-xs text-outline w-32 text-right shrink-0">
+                                ${v.NOME_CANAL || ''}
+                            </div>
+                            <div class="ml-6 shrink-0">
+                                <button onclick="deletarDaFila(${v.ID_VIDEO})" class="text-outline hover:text-red-500 p-2 rounded transition-colors" title="Excluir vídeo da fila">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
+                }
+                aplicarFiltroAtual();
+            } catch(e) { console.error(e); }
+        }
+
+        async function deletarDaFila(idVideo) {
+            if(!confirm('Tem certeza que deseja remover este vídeo? Ele será apagado do banco de dados.')) return;
+            try {
+                const res = await fetch(`/api/videos/${idVideo}`, { method: 'DELETE' });
+                if(res.ok) carregarFila();
+            } catch(e) { console.error(e); }
+        }
+
+        async function carregarConfiguracoes() {
+            try {
+                const res = await fetch('/api/configuracoes');
+                const data = await res.json();
+                
+                if(document.getElementById('input-caminho-download') && data.caminho) document.getElementById('input-caminho-download').value = data.caminho;
+                if(document.getElementById('input-qtd-videos') && data.qtdVideos) document.getElementById('input-qtd-videos').value = data.qtdVideos;
+                if(document.getElementById('input-intervalo') && data.intervaloMinutos) document.getElementById('input-intervalo').value = data.intervaloMinutos;
+                
+                if(document.getElementById('input-data-inicial')) document.getElementById('input-data-inicial').value = data.dataInicial || '';
+                if(document.getElementById('input-data-final')) document.getElementById('input-data-final').value = data.dataFinal || '';
+                
+                if(document.getElementById('check-videos')) document.getElementById('check-videos').checked = data.buscarVideos === 1;
+                if(document.getElementById('check-shorts')) document.getElementById('check-shorts').checked = data.buscarShorts === 1;
+                if(document.getElementById('check-lives')) document.getElementById('check-lives').checked = data.buscarLives === 1;
+            } catch(e) { console.error(e); }
+        }
+
+        async function salvarConfiguracoes(event) {
+            event.preventDefault();
+            const caminho = document.getElementById('input-caminho-download').value;
+            const qtdVideos = document.getElementById('input-qtd-videos').value;
+            const intervaloMinutos = document.getElementById('input-intervalo').value;
+            const dataInicial = document.getElementById('input-data-inicial').value;
+            const dataFinal = document.getElementById('input-data-final').value;
+            
+            const buscarVideos = document.getElementById('check-videos').checked ? 1 : 0;
+            const buscarShorts = document.getElementById('check-shorts').checked ? 1 : 0;
+            const buscarLives = document.getElementById('check-lives').checked ? 1 : 0;
+            
+            await fetch('/api/configuracoes', { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ 
+                    caminho, qtdVideos: parseInt(qtdVideos), intervaloMinutos: parseInt(intervaloMinutos), 
+                    dataInicial, dataFinal, buscarVideos, buscarShorts, buscarLives
+                }) 
+            });
+            alert('Configurações salvas com sucesso!');
+        }
+
+        async function agendarDownload(idVideo, formato = 'MP4') {
+            const labelFormato = formato === 'MP3' ? '🎵 MP3 (áudio)' : '🎥 MP4 (vídeo)';
+            await fetch('/api/videos/agendar', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ idVideo, formato })
+            });
+            carregarDescoberta();
+            alert(`Vídeo enviado para a Fila de Downloads como ${labelFormato}!`);
+        }
+
+        async function deletarVideo(idVideo) {
+            if(!confirm('Deseja excluir este vídeo?')) return;
+            await fetch(`/api/videos/${idVideo}`, { method: 'DELETE' });
+            carregarDescoberta();
+        }
+
+        function abrirModalCanal() {
+            document.getElementById('modal-canal').classList.remove('hidden');
+            document.getElementById('modal-canal').classList.add('flex');
+        }
+
+        function fecharModalCanal() {
+            document.getElementById('modal-canal').classList.remove('flex');
+            document.getElementById('modal-canal').classList.add('hidden');
+        }
+
+        async function salvarNovoCanal(event) {
+            event.preventDefault();
+            const nome = document.getElementById('modal-nome').value;
+            const url = document.getElementById('modal-url').value;
+
+            try {
+                const res = await fetch('/api/canais', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ nome, url })
+                });
+                const data = await res.json();
+                if(res.ok) {
+                    fecharModalCanal();
+                    document.getElementById('modal-nome').value = '';
+                    document.getElementById('modal-url').value = '';
+                    carregarCanais();
+                    carregarComboCanais();
+                    alert(data.message || 'Canal cadastrado com sucesso!');
+                } else {
+                    alert(data.error || 'Erro ao cadastrar canal.');
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function atualizarCanaisManual() {
+            alert('Executando varredura manual de canais em segundo plano...');
+            await fetch('/api/canais/atualizar', { method: 'POST' });
+            carregarDescoberta();
+        }
+
+        async function baixarUrlAvulsa() {
+            const url = document.getElementById('input-url-avulsa').value;
+            if(!url) { alert('Cole uma URL válida do YouTube.'); return; }
+
+            const btn = document.getElementById('btn-baixar-avulso');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = 'Extraindo...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/baixar-avulso', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ url })
+                });
+                if(res.ok) {
+                    document.getElementById('input-url-avulsa').value = '';
+                    alert('A URL foi processada e enviada para a Descoberta! Vá para a aba inicial para conferir.');
+                } else {
+                    alert('Erro ao processar a URL. O link pode ser inválido.');
+                }
+            } catch(e) { console.error(e); }
+            
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        }
+
+        // Inicialização
+        carregarComboCanais();
+        carregarDescoberta();
+        if (!intervaloDescoberta) intervaloDescoberta = setInterval(carregarDescoberta, 15000);
+    </script>
+</body>
+</html>

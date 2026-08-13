@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual do Usuário - Connect Media</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#b4c5ff',
+                        'on-primary': '#002a78',
+                        background: '#111318',
+                        surface: '#191c20',
+                        'surface-variant': '#43474e',
+                        outline: '#8d9199',
+                        'outline-variant': '#43474e',
+                        'on-surface': '#e2e2e6'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-sans antialiased min-h-screen p-8 lg:p-16">
+
+    <div class="max-w-4xl mx-auto space-y-10">
+        
+        <!-- Cabeçalho do Manual -->
+        <header class="border-b border-outline-variant pb-6 flex items-center justify-between">
+            <div>
+                <span class="text-xs font-mono bg-primary/20 text-primary px-3 py-1 rounded uppercase tracking-wider">Documentação Oficial</span>
+                <h1 class="text-3xl font-bold text-on-surface mt-2">Connect Media v2.0</h1>
+                <p class="text-sm text-outline mt-1">Manual completo de utilização do sistema de gerenciamento e varredura de mídias.</p>
+            </div>
+            <div class="hidden sm:block text-right">
+                <span class="text-xs text-outline block">Banco de Dados</span>
+                <span class="text-sm font-bold text-on-surface">Firebird 5.0</span>
+            </div>
+        </header>
+
+        <!-- Seções do Manual -->
+        <main class="space-y-8">
+
+            <!-- 1. Visão Geral -->
+            <section class="bg-surface border border-outline-variant rounded-xl p-6 space-y-4">
+                <h2 class="text-xl font-bold text-on-surface flex items-center space-x-2">
+                    <span class="bg-primary text-on-primary w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold">1</span>
+                    <span>Visão Geral do Sistema</span>
+                </h2>
+                <p class="text-sm text-on-surface/90 leading-relaxed">
+                    O <strong>Connect Media</strong> é um ecossistema integrado desenvolvido para monitorar canais do YouTube, descobrir novos lançamentos de vídeos longos, Shorts e transmissões ao vivo (Lives), gerenciar filas de download e organizar seu acervo de mídias de forma totalmente automatizada.
+                </p>
+            </section>
+
+            <!-- 2. Descoberta / Pendentes -->
+            <section class="bg-surface border border-outline-variant rounded-xl p-6 space-y-4">
+                <h2 class="text-xl font-bold text-on-surface flex items-center space-x-2">
+                    <span class="bg-primary text-on-primary w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold">2</span>
+                    <span>Descoberta e Filtro por Canal</span>
+                </h2>
+                <p class="text-sm text-on-surface/90 leading-relaxed">
+                    Na tela inicial (Descoberta / Pendentes), o sistema exibe os vídeos recém-encontrados pelas varreduras automáticas ou manuais.
+                </p>
+                <ul class="list-disc list-inside text-sm text-outline space-y-2 pl-2">
+                    <li><strong class="text-on-surface">Filtro por Canal (Combobox):</strong> No topo superior direito da seção, utilize o seletor para alternar entre visualizar todos os canais ou focar em um canal específico.</li>
+                    <li><strong class="text-on-surface">Agendar Download:</strong> Clique no botão correspondente para enviar o vídeo escolhido para a Fila de Downloads.</li>
+                    <li><strong class="text-on-surface">Excluir Vídeo:</strong> Utilize o ícone de lixeira no card caso não tenha interesse naquele conteúdo específico.</li>
+                </ul>
+            </section>
+
+            <!-- 3. Canais Monitorados -->
+            <section class="bg-surface border border-outline-variant rounded-xl p-6 space-y-4">
+                <h2 class="text-xl font-bold text-on-surface flex items-center space-x-2">
+                    <span class="bg-primary text-on-primary w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold">3</span>
+                    <span>Canais Monitorados</span>
+                </h2>
+                <p class="text-sm text-on-surface/90 leading-relaxed">
+                    Gerencie as fontes de onde o robô buscará os conteúdos.
+                </p>
+                <ul class="list-disc list-inside text-sm text-outline space-y-2 pl-2">
+                    <li><strong class="text-on-surface">Adicionar Canal:</strong> Clique em "Adicionar Canal", informe o nome e a URL completa do YouTube. O sistema valida automaticamente se o canal já foi cadastrado para evitar duplicidade.</li>
+                    <li><strong class="text-on-surface">Varredura Imediata:</strong> Ao cadastrar um novo canal ou clicar em "Varredura Manual", o robô executa a varredura nas abas de <em>Vídeos</em>, <em>Shorts</em> e <em>Lives</em> simultaneamente.</li>
+                </ul>
+            </section>
+
+            <!-- 4. Fila de Downloads -->
+            <section class="bg-surface border border-outline-variant rounded-xl p-6 space-y-4">
+                <h2 class="text-xl font-bold text-on-surface flex items-center space-x-2">
+                    <span class="bg-primary text-on-primary w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold">4</span>
+                    <span>Fila de Downloads</span>
+                </h2>
+                <p class="text-sm text-on-surface/90 leading-relaxed">
+                    Acompanha em tempo real o progresso das transferências ativas.
+                </p>
+                <ul class="list-disc list-inside text-sm text-outline space-y-2 pl-2">
+                    <li><strong class="text-on-surface">Limpeza Automática:</strong> Vídeos que já tiveram o download concluído somem automaticamente desta tela para não acumular registros desnecessários, migrando direto para o acervo.</li>
+                    <li><strong class="text-on-surface">Botão Lixeira:</strong> Cada item possui um botão de exclusão dedicado para remover itens travados ou testes antigos diretamente do banco de dados[cite: 1].</li>
+                </ul>
+            </section>
+
+            <!-- 5. Configurações e Filtros de Data -->
+            <section class="bg-surface border border-outline-variant rounded-xl p-6 space-y-4">
+                <h2 class="text-xl font-bold text-on-surface flex items-center space-x-2">
+                    <span class="bg-primary text-on-primary w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold">5</span>
+                    <span>Configurações Globais e Filtro de Datas</span>
+                </h2>
+                <p class="text-sm text-on-surface/90 leading-relaxed">
+                    Acesse a aba de Configurações para personalizar o comportamento do motor de busca:
+                </p>
+                <ul class="list-disc list-inside text-sm text-outline space-y-2 pl-2">
+                    <li><strong class="text-on-surface">Pasta de Destino:</strong> Diretório onde as mídias baixadas serão armazenadas.</li>
+                    <li><strong class="text-on-surface">Quantidade de Vídeos por Varredura:</strong> Limite de itens buscados por canal a cada ciclo.</li>
+                    <li><strong class="text-on-surface">Calendário (Data Inicial e Data Final):</strong> Filtro retroativo opcional. Se preenchidos, o sistema instrui o motor de busca a ignorar publicações fora do período estipulado. Deixe em branco para buscar sem restrição de data.</li>
+                </ul>
+            </section>
+
+        </main>
+
+        <!-- Rodapé -->
+        <footer class="border-t border-outline-variant pt-6 text-center text-xs text-outline">
+            Connect Media • Desenvolvido com Node.js, Express, Tailwind CSS e Firebird 5.0[cite: 1].
+        </footer>
+
+    </div>
+
+</body>
+</html>

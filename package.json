@@ -1,0 +1,20 @@
+{
+  "name": "connect-media",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Server.js",
+  "scripts": {
+    "setup-db": "node init_db.js",
+    "test": "node testar_canais.js",
+    "start": "node init_db.js && node Server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "node-firebird": "^2.14.3"
+  }
+}
