@@ -3450,61 +3450,67 @@
 </body>
 
 <!-- MODAL ADICIONAR CANAL - fora do body para evitar overflow:hidden -->
-<div id="modal-canal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index:2147483647; padding:1rem;">
+<div id="canal-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index:2147483647; padding:1rem;">
     <div style="background:#1e2128; border:1px solid #5c6370; border-radius:14px; padding:2rem; width:100%; max-width:30rem; box-shadow:0 30px 60px rgba(0,0,0,0.7);">
         <h2 style="font-size:1.2rem; font-weight:700; color:#e8eaf0; margin:0 0 1.5rem 0;">➕ Adicionar Novo Canal</h2>
-        <form id="form-canal-modal">
-            <div style="margin-bottom:1rem;">
-                <label style="display:block; font-size:0.72rem; font-weight:700; color:#adb5c8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">Nome do Canal</label>
-                <input type="text" id="modal-nome" placeholder="Ex: Canal Tech Brasil"
-                    style="display:block; width:100%; background:#111418; border:1px solid #5c6370; border-radius:8px; padding:0.6rem 0.8rem; color:#e8eaf0; font-size:0.9rem; outline:none; box-sizing:border-box;">
-            </div>
-            <div style="margin-bottom:1.5rem;">
-                <label style="display:block; font-size:0.72rem; font-weight:700; color:#adb5c8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">URL do YouTube</label>
-                <input type="text" id="modal-url" placeholder="Ex: https://www.youtube.com/@CanalTech"
-                    style="display:block; width:100%; background:#111418; border:1px solid #5c6370; border-radius:8px; padding:0.6rem 0.8rem; color:#e8eaf0; font-size:0.9rem; outline:none; box-sizing:border-box;">
-            </div>
-            <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
-                <button type="button" id="btn-fechar-modal-canal"
-                    style="background:#2c3140; color:#c8ccda; padding:0.55rem 1.2rem; border-radius:8px; border:1px solid #5c6370; font-size:0.875rem; cursor:pointer; font-weight:500;">Cancelar</button>
-                <button type="button" id="btn-salvar-canal"
-                    style="background:#adc6ff; color:#002a78; padding:0.55rem 1.2rem; border-radius:8px; border:none; font-size:0.875rem; font-weight:700; cursor:pointer;">Salvar Canal</button>
-            </div>
-        </form>
+        <div style="margin-bottom:1rem;">
+            <label style="display:block; font-size:0.72rem; font-weight:700; color:#adb5c8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">Nome do Canal</label>
+            <input type="text" id="canal-input-nome" placeholder="Ex: Canal Tech Brasil"
+                style="display:block; width:100%; background:#111418; border:1px solid #5c6370; border-radius:8px; padding:0.6rem 0.8rem; color:#e8eaf0; font-size:0.9rem; outline:none; box-sizing:border-box;">
+        </div>
+        <div style="margin-bottom:1.5rem;">
+            <label style="display:block; font-size:0.72rem; font-weight:700; color:#adb5c8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">URL do YouTube</label>
+            <input type="text" id="canal-input-url" placeholder="Ex: https://www.youtube.com/@CanalTech"
+                style="display:block; width:100%; background:#111418; border:1px solid #5c6370; border-radius:8px; padding:0.6rem 0.8rem; color:#e8eaf0; font-size:0.9rem; outline:none; box-sizing:border-box;">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+            <button type="button" id="canal-btn-cancelar"
+                style="background:#2c3140; color:#c8ccda; padding:0.55rem 1.2rem; border-radius:8px; border:1px solid #5c6370; font-size:0.875rem; cursor:pointer; font-weight:500;">Cancelar</button>
+            <button type="button" id="canal-btn-salvar"
+                style="background:#adc6ff; color:#002a78; padding:0.55rem 1.2rem; border-radius:8px; border:none; font-size:0.875rem; font-weight:700; cursor:pointer;">Salvar Canal</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // Controle do modal de canal - script isolado no final
     (function() {
+        var overlay = document.getElementById('canal-modal-overlay');
+        var inpNome = document.getElementById('canal-input-nome');
+        var inpUrl  = document.getElementById('canal-input-url');
+
         function abrirCanal() {
-            var m = document.getElementById('modal-canal');
-            var n = document.getElementById('modal-nome');
-            var u = document.getElementById('modal-url');
-            if (m) { m.style.display = 'flex'; }
-            if (n) n.value = '';
-            if (u) u.value = '';
+            if (!overlay) return;
+            overlay.style.display = 'flex';
+            if (inpNome) inpNome.value = '';
+            if (inpUrl)  inpUrl.value  = '';
+            if (inpNome) setTimeout(function(){ inpNome.focus(); }, 100);
         }
 
         function fecharCanal() {
-            var m = document.getElementById('modal-canal');
-            if (m) m.style.display = 'none';
+            if (overlay) overlay.style.display = 'none';
         }
 
-        // Registra globalmente
-        window.abrirModalCanal = abrirCanal;
+        // Exporta globalmente
+        window.abrirModalCanal  = abrirCanal;
         window.fecharModalCanal = fecharCanal;
 
-        // Botao fechar
-        var btnFechar = document.getElementById('btn-fechar-modal-canal');
-        if (btnFechar) btnFechar.onclick = fecharCanal;
+        // Botao cancelar
+        var btnCancelar = document.getElementById('canal-btn-cancelar');
+        if (btnCancelar) btnCancelar.onclick = fecharCanal;
+
+        // Fechar no fundo
+        if (overlay) overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) fecharCanal();
+        });
 
         // Botao salvar
-        var btnSalvar = document.getElementById('btn-salvar-canal');
+        var btnSalvar = document.getElementById('canal-btn-salvar');
         if (btnSalvar) btnSalvar.onclick = async function() {
-            var nome = (document.getElementById('modal-nome').value || '').trim();
-            var url = (document.getElementById('modal-url').value || '').trim();
+            var nome = (inpNome ? inpNome.value : '').trim();
+            var url  = (inpUrl  ? inpUrl.value  : '').trim();
             if (!nome || !url) { alert('Preencha o Nome e a URL do canal.'); return; }
+            btnSalvar.disabled = true;
+            btnSalvar.textContent = 'Salvando...';
             try {
                 var res = await fetch('/api/canais', {
                     method: 'POST',
@@ -3514,7 +3520,7 @@
                 var data = await res.json();
                 if (res.ok) {
                     fecharCanal();
-                    if (typeof carregarCanais === 'function') carregarCanais();
+                    if (typeof carregarCanais      === 'function') carregarCanais();
                     if (typeof carregarComboCanais === 'function') carregarComboCanais();
                     alert(data.message || 'Canal cadastrado com sucesso!');
                 } else {
@@ -3522,23 +3528,20 @@
                 }
             } catch(e) {
                 alert('Erro de conexão. Tente novamente.');
+            } finally {
+                btnSalvar.disabled = false;
+                btnSalvar.textContent = 'Salvar Canal';
             }
         };
 
-        // Tambem vincula o botao do HTML (onclick="abrirModalCanal()")
-        var btnAdicionar = document.getElementById('btn-adicionar-canal');
-        if (btnAdicionar) {
-            btnAdicionar.onclick = null;
-            btnAdicionar.addEventListener('click', abrirCanal);
-        }
+        // Vincula TODOS os botoes com id btn-adicionar-canal
+        var botoesAdicionar = document.querySelectorAll('#btn-adicionar-canal, [onclick*="abrirModalCanal"]');
+        botoesAdicionar.forEach(function(btn) {
+            btn.onclick = null; // remove inline onclick
+            btn.addEventListener('click', abrirCanal);
+        });
 
-        // Fechar clicando no fundo
-        var modal = document.getElementById('modal-canal');
-        if (modal) {
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) fecharCanal();
-            });
-        }
+        console.log('[Canal Modal] Inicializado. Botoes vinculados:', botoesAdicionar.length, '| Overlay:', !!overlay);
     })();
 </script>
 
