@@ -1622,10 +1622,11 @@
 
         async function carregarComboCanais() {
             try {
+                const select = document.getElementById('filtro-canal');
+                if (!select) return;
                 const res = await fetch('/api/canais');
                 const canais = await res.json();
-                const select = document.getElementById('filtro-canal');
-                const valorAtual = select.value;
+                const valorAtual = select.value || 'todos';
 
                 select.innerHTML = '<option value="todos">📺 Todos os Canais</option>';
                 
@@ -1905,6 +1906,7 @@
                 if (res.ok) {
                     fecharModalCanal();
                     carregarCanais();
+                    carregarComboCanais();
                     alert(data.message || 'Canal cadastrado com sucesso!');
                 } else {
                     alert(data.error || 'Erro ao salvar canal.');
@@ -2345,43 +2347,6 @@
             if(!confirm('Deseja excluir este vídeo?')) return;
             await fetch(`/api/videos/${idVideo}`, { method: 'DELETE' });
             carregarDescoberta();
-        }
-
-        function abrirModalCanal() {
-            document.getElementById('modal-canal').classList.remove('hidden');
-            document.getElementById('modal-canal').classList.add('flex');
-        }
-
-        function fecharModalCanal() {
-            document.getElementById('modal-canal').classList.remove('flex');
-            document.getElementById('modal-canal').classList.add('hidden');
-        }
-
-        async function salvarNovoCanal(event) {
-            event.preventDefault();
-            const nome = document.getElementById('modal-nome').value;
-            const url = document.getElementById('modal-url').value;
-
-            try {
-                const res = await fetch('/api/canais', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ nome, url })
-                });
-                const data = await res.json();
-                if(res.ok) {
-                    fecharModalCanal();
-                    document.getElementById('modal-nome').value = '';
-                    document.getElementById('modal-url').value = '';
-                    carregarCanais();
-                    carregarComboCanais();
-                    alert(data.message || 'Canal cadastrado com sucesso!');
-                } else {
-                    alert(data.error || 'Erro ao cadastrar canal.');
-                }
-            } catch(e) {
-                console.error(e);
-            }
         }
 
         async function atualizarCanaisManual() {
