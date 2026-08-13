@@ -15,8 +15,8 @@ app.use((req, res, next) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     next();
 });
-app.use(express.json({ limit: '15mb' }));
-app.use(express.urlencoded({ limit: '15mb', extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public'), { etag: false, lastModified: false }));
 
 // Configuração de Conexão com o Firebird 5.0
@@ -589,6 +589,107 @@ app.post('/api/gerar-skill', (req, res) => {
 
         res.json({ sucesso: true, log, caminho, total: listaUrls.length });
     });
+});
+
+// Rota: Gerador de Skill a partir de arquivo PDF (Livros / Documentos Técnicos)
+const pdfParse = require('pdf-parse');
+
+app.post('/api/gerar-skill-pdf', async (req, res) => {
+    try {
+        let { pdfBase64, pdfPath, filename, titulo } = req.body;
+        let pdfBuffer = null;
+
+        if (pdfPath && fs.existsSync(pdfPath)) {
+            pdfBuffer = fs.readFileSync(pdfPath);
+            if (!filename) filename = path.basename(pdfPath);
+        } else if (pdfBase64) {
+            const base64Data = pdfBase64.replace(/^data:application\/pdf;base64,/, '');
+            pdfBuffer = Buffer.from(base64Data, 'base64');
+        }
+
+        if (!pdfBuffer || pdfBuffer.length === 0) {
+            return res.status(400).json({ sucesso: false, error: 'Forneça um arquivo PDF ou o caminho local de um PDF válido.' });
+        }
+
+        // Parse do PDF
+        const pdfData = await pdfParse(pdfBuffer);
+
+        const numPages = pdfData.numpages || 0;
+        const metaTitle = (pdfData.info && pdfData.info.Title) ? pdfData.info.Title.trim() : '';
+        const nomeDoc = filename || 'livro_pdf';
+        
+        let tituloSkill = titulo && titulo.trim() ? titulo.trim() : (metaTitle || nomeDoc.replace(/\.pdf$/i, '').replace(/[-_]/g, ' '));
+        
+        function slugify(str) {
+            return str.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9\s-]/g, '')
+                .trim()
+                .replace(/\s+/g, '_')
+                .substring(0, 60);
+        }
+
+        const slug = slugify(tituloSkill);
+        const targetDir = path.join(__dirname, '.agents', 'skills', slug);
+        if (!fs.existsSync(targetDir)) {
+            fs.mkdirSync(targetDir, { recursive: true });
+        }
+
+        const targetFilePath = path.join(targetDir, 'SKILL.md');
+
+        // Processa e limpa o texto do PDF
+        let rawText = pdfData.text || '';
+        let cleanedText = rawText
+            .replace(/\r\n/g, '\n')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+
+        if (cleanedText.length > 250000) {
+            cleanedText = cleanedText.substring(0, 250000) + '\n\n... [Conteúdo resumido/truncado após 250k caracteres para otimização da Skill] ...';
+        }
+
+        const nowFormatted = new Date().toLocaleString('pt-BR');
+        
+        const skillContent = `---
+name: ${tituloSkill}
+description: >
+  Skill técnica extraída do livro PDF "${nomeDoc}" (${numPages} páginas). Contém conhecimentos, conceitos e instruções compiladas para orientação da IA.
+source: ${nomeDoc}
+generated_at: ${nowFormatted}
+---
+
+# 📚 ${tituloSkill}
+
+> [!NOTE]
+> **Skill extraída de documento PDF**: \`${nomeDoc}\`
+> - **Total de Páginas**: ${numPages}
+> - **Data de Extração**: ${nowFormatted}
+> - **Origem**: Livro/Documento Técnico PDF
+
+## 🧠 Conteúdo e Conhecimento Técnico Extraído
+
+${cleanedText}
+`;
+
+        fs.writeFileSync(targetFilePath, skillContent, 'utf8');
+
+        console.log(`[PDF Skill] Gerada com sucesso: ${targetFilePath} (${numPages} páginas)`);
+        
+        const log = `✅ Skill "${tituloSkill}" extraída do livro PDF "${nomeDoc}" com sucesso!\n• Total de Páginas: ${numPages}\n• Caracteres Extraídos: ${pdfData.text ? pdfData.text.length : 0}\n• Salvo em: ${targetFilePath}`;
+
+        res.json({
+            sucesso: true,
+            log,
+            caminho: targetFilePath,
+            slug,
+            titulo: tituloSkill,
+            paginas: numPages
+        });
+
+    } catch (e) {
+        console.error('[PDF Skill Error]:', e);
+        res.status(500).json({ sucesso: false, error: 'Erro ao processar o arquivo PDF: ' + e.message });
+    }
 });
 
 // Rota: Listagem de Skills aprendidas (.agents/skills/*)

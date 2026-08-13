@@ -457,15 +457,19 @@
                         <p class="text-sm text-outline mt-2">Extraia o conhecimento de vídeos do YouTube e gere arquivos <code class="bg-surface-variant/30 px-1 rounded text-primary">.md</code> prontos para uso como Skills no Antigravity IDE.</p>
                     </div>
 
-                    <!-- Selector de Modo: Único / Lote -->
-                    <div class="flex items-center space-x-2 mb-6 bg-surface p-1 border border-outline-variant rounded-xl w-fit">
+                    <!-- Selector de Modo: Único / Lote / PDF -->
+                    <div class="flex items-center space-x-2 mb-6 bg-surface p-1 border border-outline-variant rounded-xl w-fit flex-wrap gap-y-1">
                         <button id="tab-skill-unico" onclick="alternarModoSkill('unico')" class="px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-on-primary transition-all flex items-center gap-1.5">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                            Vídeo Único
+                            Vídeo Único (YouTube)
                         </button>
                         <button id="tab-skill-lote" onclick="alternarModoSkill('lote')" class="px-4 py-2 text-xs font-medium rounded-lg text-outline hover:text-on-surface transition-all flex items-center gap-1.5">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                            📋 Processar em Lote (Vários Links)
+                            📋 Processar em Lote
+                        </button>
+                        <button id="tab-skill-pdf" onclick="alternarModoSkill('pdf')" class="px-4 py-2 text-xs font-medium rounded-lg text-outline hover:text-on-surface transition-all flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                            📄 Livro / Documento PDF
                         </button>
                     </div>
 
@@ -513,6 +517,30 @@
                                     <option value="en">🇺🇸 Inglês</option>
                                     <option value="">🌐 Automático</option>
                                 </select>
+                            </div>
+                        </div>
+
+                        <!-- MODO 3: EXTRAÇÃO DE LIVRO PDF -->
+                        <div id="box-skill-pdf" class="hidden space-y-4">
+                            <div class="border-2 border-dashed border-amber-500/30 hover:border-amber-400/60 rounded-xl p-6 text-center bg-amber-500/5 transition-all cursor-pointer group" onclick="document.getElementById('skill-file-pdf').click()">
+                                <input type="file" id="skill-file-pdf" accept=".pdf" class="hidden" onchange="atualizarNomePdfSelecionado(this)">
+                                <div class="w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                                    <span class="material-symbols-outlined text-2xl">picture_as_pdf</span>
+                                </div>
+                                <p class="text-sm font-bold text-on-surface">Selecione ou Arraste o Livro PDF aqui</p>
+                                <p class="text-xs text-outline mt-1">Extrai textos, capítulos e conhecimentos do livro para a Skill</p>
+                                <div id="skill-pdf-filename" class="mt-3 text-xs font-mono font-bold text-amber-400 bg-black/40 py-1.5 px-3 rounded-lg border border-white/10 inline-block hidden"></div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-outline uppercase mb-2">Título Personalizado da Skill (Opcional)</label>
+                                    <input type="text" id="skill-pdf-titulo" placeholder="Ex: Manual Firebird 5.0" class="w-full bg-background border border-outline-variant rounded-lg px-4 py-2.5 text-on-surface focus:border-primary outline-none transition-colors text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-outline uppercase mb-2">OU Caminho Absoluto no Computador</label>
+                                    <input type="text" id="skill-pdf-caminho-local" placeholder="C:\Livros\Manual.pdf" class="w-full bg-background border border-outline-variant rounded-lg px-4 py-2.5 text-on-surface focus:border-primary outline-none transition-colors text-sm font-mono">
+                                </div>
                             </div>
                         </div>
 
@@ -2199,20 +2227,105 @@
             modoSkillAtual = modo;
             const tabUnico = document.getElementById('tab-skill-unico');
             const tabLote = document.getElementById('tab-skill-lote');
+            const tabPdf = document.getElementById('tab-skill-pdf');
+            
             const boxUnico = document.getElementById('box-skill-unico');
             const boxLote = document.getElementById('box-skill-lote');
+            const boxPdf = document.getElementById('box-skill-pdf');
 
-            if (modo === 'lote') {
-                tabLote.className = "px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-on-primary transition-all flex items-center gap-1.5";
-                tabUnico.className = "px-4 py-2 text-xs font-medium rounded-lg text-outline hover:text-on-surface transition-all flex items-center gap-1.5";
-                boxLote.classList.remove('hidden');
-                boxUnico.classList.add('hidden');
-            } else {
-                tabUnico.className = "px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-on-primary transition-all flex items-center gap-1.5";
-                tabLote.className = "px-4 py-2 text-xs font-medium rounded-lg text-outline hover:text-on-surface transition-all flex items-center gap-1.5";
-                boxUnico.classList.remove('hidden');
-                boxLote.classList.add('hidden');
+            const activeClass = "px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-on-primary transition-all flex items-center gap-1.5";
+            const inactiveClass = "px-4 py-2 text-xs font-medium rounded-lg text-outline hover:text-on-surface transition-all flex items-center gap-1.5";
+
+            if (tabUnico) tabUnico.className = modo === 'unico' ? activeClass : inactiveClass;
+            if (tabLote) tabLote.className = modo === 'lote' ? activeClass : inactiveClass;
+            if (tabPdf) tabPdf.className = modo === 'pdf' ? activeClass : inactiveClass;
+
+            if (boxUnico) boxUnico.classList.toggle('hidden', modo !== 'unico');
+            if (boxLote) boxLote.classList.toggle('hidden', modo !== 'lote');
+            if (boxPdf) boxPdf.classList.toggle('hidden', modo !== 'pdf');
+        }
+
+        function atualizarNomePdfSelecionado(input) {
+            const filenameEl = document.getElementById('skill-pdf-filename');
+            if (input && input.files && input.files[0]) {
+                const f = input.files[0];
+                filenameEl.textContent = `📄 ${f.name} (${(f.size / (1024 * 1024)).toFixed(2)} MB)`;
+                filenameEl.classList.remove('hidden');
+            } else if (filenameEl) {
+                filenameEl.classList.add('hidden');
             }
+        }
+
+        async function gerarSkillPdf() {
+            const inputPdfFile = document.getElementById('skill-file-pdf');
+            const caminhoLocal = document.getElementById('skill-pdf-caminho-local')?.value.trim();
+            const titulo = document.getElementById('skill-pdf-titulo')?.value.trim();
+
+            const file = (inputPdfFile && inputPdfFile.files) ? inputPdfFile.files[0] : null;
+
+            if (!file && !caminhoLocal) {
+                alert('Por favor, selecione um arquivo PDF ou informe o caminho do arquivo no computador.');
+                return;
+            }
+
+            const btn = document.getElementById('btn-gerar-skill');
+            const logContainer = document.getElementById('skill-log-container');
+            const logEl = document.getElementById('skill-log');
+            const badge = document.getElementById('skill-status-badge');
+            const resultado = document.getElementById('skill-resultado');
+            const resultadoPath = document.getElementById('skill-resultado-path');
+
+            btn.disabled = true;
+            btn.innerHTML = `<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Extraindo Livro PDF...`;
+            logContainer.classList.remove('hidden');
+            logEl.textContent = '⏳ Lendo e extraindo conteúdo do livro PDF...\n';
+            badge.textContent = 'Extraindo...';
+            badge.className = 'text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400';
+            resultado.classList.add('hidden');
+
+            try {
+                let payload = { titulo, pdfPath: caminhoLocal };
+
+                if (file) {
+                    logEl.textContent += '⏳ Processando bytes do arquivo PDF...\n';
+                    const base64 = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+                    payload.pdfBase64 = base64;
+                    payload.filename = file.name;
+                }
+
+                const res = await fetch('/api/gerar-skill-pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.sucesso) {
+                    logEl.textContent = data.log || '✅ Skill do livro PDF criada com sucesso!';
+                    badge.textContent = '✅ Concluído';
+                    badge.className = 'text-xs px-2 py-0.5 rounded-full bg-green-700/30 text-green-400';
+                    resultado.classList.remove('hidden');
+                    resultadoPath.textContent = data.caminho;
+                    if (typeof carregarSkillsAprendidas === 'function') carregarSkillsAprendidas();
+                } else {
+                    logEl.textContent = data.error || 'Erro no processamento do PDF.';
+                    badge.textContent = '❌ Erro';
+                    badge.className = 'text-xs px-2 py-0.5 rounded-full bg-red-700/30 text-red-400';
+                }
+            } catch(e) {
+                logEl.textContent = '❌ Erro de comunicação: ' + e.message;
+                badge.textContent = '❌ Erro';
+                badge.className = 'text-xs px-2 py-0.5 rounded-full bg-red-700/30 text-red-400';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg> <span>Gerar Skill .md</span>`;
         }
 
         let debounceTitulo = null;
@@ -2245,6 +2358,10 @@
         }
 
         async function gerarSkill() {
+            if (modoSkillAtual === 'pdf') {
+                return gerarSkillPdf();
+            }
+
             let bodyData = {};
 
             if (modoSkillAtual === 'lote') {
