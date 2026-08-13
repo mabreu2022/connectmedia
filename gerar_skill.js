@@ -378,6 +378,44 @@ async function processarVideo(url, index, total) {
     console.log(`   📁 Salvo em: ${destFile}`);
     console.log(`   📏 Tamanho: ${(conteudoMD.length / 1024).toFixed(1)} KB`);
 
+    // Tenta registrar automaticamente o Prompt Especialista Sênior na TB_PROMPTS_LOJA
+    try {
+        const Firebird = require('node-firebird');
+        const dbOptions = require('./dbConfig');
+        const comandosEncontrados = extrairComandosEFormatar(transcricao);
+
+        const promptSenior = `Você é um Analista de Sistemas Sênior e Especialista Principal em "${titulo}".
+
+SUA MISSÃO:
+Atuar como consultor técnico sênior, arquiteto de software e par de programação, orientando a implementação prática das melhores soluções aprendidas no treinamento oficial.
+
+DIRETIVAS RÍGIDAS DE RESPOSTA E CÓDIGO:
+1. Responda com clareza técnica, dividindo a solução em arquitetura, código e boas práticas.
+2. Todo snippet de código deve ser legível, seguro, desacoplado e pronto para produção.
+3. Tratamento de erros e exceções deve ser incluído por padrão em todas as funções.
+4. Utilize as ferramentas de terminal e comandos de referência sempre que aplicável.
+
+CONHECIMENTO TÉCNICO DE REFERÊNCIA:
+${comandosEncontrados.length > 0 ? 'Comandos e utilitários chave:\n' + comandosEncontrados.join('\n') : 'Princípios aprendidos no vídeo original.'}
+
+RESUMO E CONTEXTO DE EXECUÇÃO:
+${transcricao.substring(0, 800)}...`;
+
+        Firebird.attach(dbOptions, (err, db) => {
+            if (!err && db) {
+                const query = `
+                    INSERT INTO TB_PROMPTS_LOJA (TITULO, CATEGORIA, DESCRICAO_CURTA, PROMPT_SISTEMA, PRECO_REAIS, TAGS)
+                    VALUES (?, 'Treinamentos Video', ?, ?, 14.90, 'Especialista, Video, Antigravity')
+                `;
+                const desc = `Prompt especialista sênior gerado a partir do treinamento "${titulo}".`;
+                db.query(query, [titulo, desc, promptSenior], () => {
+                    console.log('   🛒 Prompt Especialista Sênior publicado automaticamente na Loja de Prompts!');
+                    db.detach();
+                });
+            }
+        });
+    } catch (_) {}
+
     return destFile;
 }
 

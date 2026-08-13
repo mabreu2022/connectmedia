@@ -77,6 +77,18 @@
                 <!-- Divisor -->
                 <div class="border-t border-outline-variant/40 my-2"></div>
 
+                <button onclick="mudarSecao('loja')" id="nav-loja" class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-variant/20 transition-colors">
+                    <div class="flex items-center space-x-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" /></svg>
+                        <span>🛒 Loja de Prompts</span>
+                    </div>
+                    <span id="badge-carrinho-count" class="hidden bg-amber-500 text-black text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+                </button>
+                <button onclick="mudarSecao('meus-prompts')" id="nav-meus-prompts" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-variant/20 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span>⭐ Meus Prompts</span>
+                </button>
+
                 <button onclick="mudarSecao('skill')" id="nav-skill" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-variant/20 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
                     <span>Gerador de Skills</span>
@@ -283,6 +295,27 @@
                                     <input type="checkbox" id="check-lives" class="w-4 h-4 text-primary bg-background border-outline-variant rounded focus:ring-primary">
                                     <span class="text-sm text-on-surface">Transmissões (Lives)</span>
                                 </label>
+                            </div>
+                        </div>
+
+                        <!-- Configuração Pix para Venda de Prompts -->
+                        <div class="border-t border-outline-variant pt-4 mt-4 space-y-3 bg-surface-variant/10 p-4 rounded-xl border">
+                            <h3 class="text-xs font-bold text-amber-400 uppercase flex items-center space-x-2">
+                                <span>❖ Configuração de Recebimento PIX (Loja de Prompts)</span>
+                            </h3>
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Chave PIX (CPF/CNPJ/E-mail/EVP)</label>
+                                <input type="text" id="input-chave-pix" placeholder="Ex: connectmedia@pix.com.br ou 12345678900" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-amber-400 outline-none">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Nome do Recebedor</label>
+                                    <input type="text" id="input-nome-pix" placeholder="Ex: Connect Media Solucoes" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-amber-400 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Cidade do Recebedor</label>
+                                    <input type="text" id="input-cidade-pix" placeholder="Ex: Sao Paulo" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-amber-400 outline-none">
+                                </div>
                             </div>
                         </div>
 
@@ -712,8 +745,160 @@
                 </div>
             </section>
 
+            <!-- 9. SEÇÃO: LOJA DE PROMPTS ESPECIALISTAS -->
+            <section class="content-section hidden flex flex-col h-full overflow-hidden" id="sec-loja">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4 shrink-0 border-b border-outline-variant/40 pb-4">
+                    <div>
+                        <div class="flex items-center space-x-3">
+                            <h1 class="text-2xl font-bold text-on-surface">🛒 Loja de Prompts Especialistas Sênior</h1>
+                            <span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold px-2.5 py-0.5 rounded-full">Pix QR Code</span>
+                        </div>
+                        <p class="text-xs text-outline mt-1">Adquira System Prompts avançados de Engenheiros/Analistas Sênior para usar no ChatGPT, Claude, Gemini, DeepSeek ou Cursor.</p>
+                    </div>
+                    <button onclick="abrirDrawerCarrinho()" class="bg-amber-500 hover:bg-amber-400 text-black px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-amber-500/10 flex items-center space-x-2 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" /></svg>
+                        <span>Carrinho (<span id="btn-carrinho-qtd">0</span>)</span>
+                        <span id="btn-carrinho-total" class="bg-black/20 px-2 py-0.5 rounded text-xs">R$ 0,00</span>
+                    </button>
+                </div>
+
+                <!-- Filtro de Categorias da Loja -->
+                <div class="flex items-center space-x-2 overflow-x-auto pb-3 mb-4 shrink-0">
+                    <button onclick="filtrarCategoriaLoja('TODOS')" class="btn-cat-loja bg-primary text-on-primary px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap">Todos os Prompts</button>
+                    <button onclick="filtrarCategoriaLoja('DevOps & Cloud')" class="btn-cat-loja bg-surface-variant/30 text-outline hover:text-on-surface px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap">DevOps & Cloud</button>
+                    <button onclick="filtrarCategoriaLoja('Banco de Dados')" class="btn-cat-loja bg-surface-variant/30 text-outline hover:text-on-surface px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap">Banco de Dados</button>
+                    <button onclick="filtrarCategoriaLoja('Frontend & UI')" class="btn-cat-loja bg-surface-variant/30 text-outline hover:text-on-surface px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap">Frontend & UI</button>
+                    <button onclick="filtrarCategoriaLoja('Treinamentos Video')" class="btn-cat-loja bg-surface-variant/30 text-outline hover:text-on-surface px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap">Treinamentos de Vídeos</button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto pr-2">
+                    <div id="grid-prompts-loja" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <!-- Cards da loja inseridos via JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 10. SEÇÃO: MEUS PROMPTS ADQUIRIDOS -->
+            <section class="content-section hidden flex flex-col h-full overflow-hidden" id="sec-meus-prompts">
+                <div class="flex justify-between items-center mb-6 shrink-0 border-b border-outline-variant/40 pb-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-on-surface">⭐ Meus Prompts Adquiridos</h1>
+                        <p class="text-xs text-outline mt-1">Seu acervo privado de System Prompts desbloqueados. Copie o prompt completo em 1-clique.</p>
+                    </div>
+                    <button onclick="carregarMeusPrompts()" class="bg-surface-variant/30 hover:bg-surface-variant/50 text-on-surface px-4 py-2 rounded-lg text-xs font-medium transition-colors flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        <span>Atualizar</span>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto pr-2">
+                    <div id="grid-meus-prompts" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Prompts comprados são renderizados aqui -->
+                    </div>
+                </div>
+            </section>
+
         </div>
     </main>
+
+    <!-- GAVETA FLUTUANTE DO CARRINHO DE COMPRAS -->
+    <div id="drawer-carrinho" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 transition-opacity">
+        <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-surface border-l border-outline-variant flex flex-col shadow-2xl animate-slide-left">
+            <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl">🛒</span>
+                    <div>
+                        <h2 class="text-lg font-bold text-on-surface">Carrinho de Compras</h2>
+                        <p class="text-xs text-outline">Prompts selecionados para aquisição</p>
+                    </div>
+                </div>
+                <button onclick="fecharDrawerCarrinho()" class="text-outline hover:text-on-surface p-2 rounded-lg hover:bg-surface-variant/30 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div id="itens-carrinho-container" class="p-6 flex-1 overflow-y-auto space-y-4">
+                <!-- Lista de itens do carrinho renderizada via JS -->
+            </div>
+
+            <div class="p-6 border-t border-outline-variant bg-background space-y-4">
+                <div class="flex justify-between items-center text-sm font-bold text-on-surface">
+                    <span>Total a Pagar:</span>
+                    <span id="drawer-carrinho-total" class="text-xl text-amber-400 font-extrabold">R$ 0,00</span>
+                </div>
+                <button onclick="finalizarCompraPix()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2 transition-all">
+                    <span>⚡ Pagar via PIX (Liberação Instantânea)</span>
+                </button>
+                <button onclick="esvaziarCarrinho()" class="w-full text-xs text-outline hover:text-red-400 text-center transition-colors py-1">
+                    Esvaziar Carrinho
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE PAGAMENTO PIX COM QR CODE -->
+    <div id="modal-pix" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="bg-surface border border-outline-variant rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col">
+            <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-xl">
+                        ❖
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-on-surface">Pagamento via PIX</h2>
+                        <p class="text-xs text-outline">Escaneie o QR Code ou use o Copia e Cola</p>
+                    </div>
+                </div>
+                <button onclick="fecharModalPix()" class="text-outline hover:text-on-surface p-2 rounded-lg hover:bg-surface-variant/30 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-6 bg-background text-center">
+                <!-- Valor Total -->
+                <div>
+                    <span class="text-xs text-outline uppercase font-semibold">Valor Total da Ordem</span>
+                    <div id="modal-pix-valor" class="text-3xl font-extrabold text-amber-400 mt-1">R$ 0,00</div>
+                    <span id="modal-pix-id-venda" class="text-[11px] text-outline font-mono mt-0.5 block">Ordem #--</span>
+                </div>
+
+                <!-- Container do QR Code Pix -->
+                <div class="flex flex-col items-center justify-center bg-white p-4 rounded-xl border border-outline-variant max-w-[240px] mx-auto shadow-inner">
+                    <img id="modal-pix-qrcode-img" src="" alt="QR Code Pix" class="w-48 h-48 object-contain">
+                    <span class="text-[10px] text-gray-500 font-bold mt-2 uppercase tracking-wider">PIX OFICIAL BACEN</span>
+                </div>
+
+                <!-- Campo Copia e Cola -->
+                <div class="space-y-2 text-left">
+                    <label class="block text-xs font-bold text-outline uppercase">Código PIX Copia e Cola:</label>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="modal-pix-copia-cola" readonly class="flex-1 bg-surface border border-outline-variant rounded-lg px-3 py-2 text-xs font-mono text-on-surface focus:outline-none">
+                        <button onclick="copiarCodigoPixCopiaCola()" class="bg-primary hover:bg-primary/80 text-on-primary px-3 py-2 rounded-lg text-xs font-bold shrink-0 transition-colors flex items-center space-x-1">
+                            <span>📋 Copiar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dica e Cronômetro -->
+                <div class="bg-surface border border-outline-variant rounded-xl p-4 text-xs text-outline space-y-2 text-left">
+                    <div class="flex items-center justify-between font-semibold text-on-surface">
+                        <span>⏳ Válido por:</span>
+                        <span id="modal-pix-timer" class="text-amber-400 font-mono text-sm">14:59</span>
+                    </div>
+                    <p class="leading-relaxed">Abra o app do seu banco, escolha <strong>Pix</strong> &gt; <strong>Ler QR Code</strong> ou cole o código acima para concluir o pagamento.</p>
+                </div>
+            </div>
+
+            <!-- Footer do Modal com confirmação -->
+            <div class="p-6 border-t border-outline-variant bg-surface space-y-3">
+                <button id="btn-confirmar-pagamento-pix" onclick="confirmarPagamentoPixManual()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2 transition-all">
+                    <span>✅ Já Realizei o Pagamento (Liberar Prompts)</span>
+                </button>
+                <button onclick="fecharModalPix()" class="w-full text-xs text-outline hover:text-on-surface text-center py-1">
+                    Cancelar / Pagar Mais Tarde
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- MODAL VISUALIZADOR DE SKILL -->
     <div id="modal-skill-viewer" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4 sm:p-8">
@@ -852,6 +1037,8 @@
             }
             if(secao === 'configuracoes') carregarConfiguracoes();
             if(secao === 'skills-aprendidas') carregarSkillsAprendidas();
+            if(secao === 'loja') carregarLojaPrompts();
+            if(secao === 'meus-prompts') carregarMeusPrompts();
             if(secao === 'logs') {
                 iniciarStreamLogs();
                 renderizarLogsTerminal();
@@ -1639,6 +1826,10 @@
                 if(document.getElementById('check-videos')) document.getElementById('check-videos').checked = data.buscarVideos === 1;
                 if(document.getElementById('check-shorts')) document.getElementById('check-shorts').checked = data.buscarShorts === 1;
                 if(document.getElementById('check-lives')) document.getElementById('check-lives').checked = data.buscarLives === 1;
+
+                if(document.getElementById('input-chave-pix')) document.getElementById('input-chave-pix').value = data.chavePix || '';
+                if(document.getElementById('input-nome-pix')) document.getElementById('input-nome-pix').value = data.nomeRecebedorPix || '';
+                if(document.getElementById('input-cidade-pix')) document.getElementById('input-cidade-pix').value = data.cidadeRecebedorPix || '';
             } catch(e) { console.error(e); }
         }
 
@@ -1653,13 +1844,18 @@
             const buscarVideos = document.getElementById('check-videos').checked ? 1 : 0;
             const buscarShorts = document.getElementById('check-shorts').checked ? 1 : 0;
             const buscarLives = document.getElementById('check-lives').checked ? 1 : 0;
+
+            const chavePix = document.getElementById('input-chave-pix')?.value || '';
+            const nomeRecebedorPix = document.getElementById('input-nome-pix')?.value || '';
+            const cidadeRecebedorPix = document.getElementById('input-cidade-pix')?.value || '';
             
             await fetch('/api/configuracoes', { 
                 method: 'POST', 
                 headers: {'Content-Type': 'application/json'}, 
                 body: JSON.stringify({ 
                     caminho, qtdVideos: parseInt(qtdVideos), intervaloMinutos: parseInt(intervaloMinutos), 
-                    dataInicial, dataFinal, buscarVideos, buscarShorts, buscarLives
+                    dataInicial, dataFinal, buscarVideos, buscarShorts, buscarLives,
+                    chavePix, nomeRecebedorPix, cidadeRecebedorPix
                 }) 
             });
             alert('Configurações salvas com sucesso!');
@@ -1750,6 +1946,365 @@
             
             btn.innerHTML = originalHtml;
             btn.disabled = false;
+        }
+
+        // ==========================================
+        // LÓGICA DA LOJA DE PROMPTS & CHECKOUT PIX
+        // ==========================================
+        let todosOsPromptsLoja = [];
+        let categoriaLojaAtual = 'TODOS';
+        let carrinhoState = []; // [{ id, titulo, preco }]
+        let ordemPixAtual = null;
+        let pixTimerInterval = null;
+
+        async function carregarLojaPrompts() {
+            try {
+                const res = await fetch('/api/prompts');
+                todosOsPromptsLoja = await res.json();
+                renderizarLojaPrompts();
+            } catch(e) {
+                console.error('Erro ao carregar loja de prompts:', e);
+            }
+        }
+
+        function filtrarCategoriaLoja(cat) {
+            categoriaLojaAtual = cat;
+            document.querySelectorAll('.btn-cat-loja').forEach(btn => {
+                const isSelected = btn.innerText.includes(cat) || (cat === 'TODOS' && btn.innerText.includes('Todos'));
+                btn.className = isSelected 
+                    ? 'btn-cat-loja bg-primary text-on-primary px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap'
+                    : 'btn-cat-loja bg-surface-variant/30 text-outline hover:text-on-surface px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap';
+            });
+            renderizarLojaPrompts();
+        }
+
+        function renderizarLojaPrompts() {
+            const grid = document.getElementById('grid-prompts-loja');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            let lista = todosOsPromptsLoja;
+            if (categoriaLojaAtual !== 'TODOS') {
+                lista = lista.filter(p => p.categoria === categoriaLojaAtual);
+            }
+
+            if (!lista || lista.length === 0) {
+                grid.innerHTML = '<p class="text-outline text-sm col-span-full">Nenhum prompt disponível nesta categoria no momento.</p>';
+                return;
+            }
+
+            lista.forEach(p => {
+                const noCarrinho = carrinhoState.some(c => c.id === p.id);
+                const card = document.createElement('div');
+                card.className = "bg-surface border border-outline-variant hover:border-amber-500/50 rounded-2xl p-6 flex flex-col justify-between transition-all duration-200 shadow-sm hover:shadow-xl group";
+
+                const tagsHtml = p.tags ? p.tags.map(t => `<span class="bg-surface-variant/30 text-outline text-[10px] px-2 py-0.5 rounded">${t}</span>`).join(' ') : '';
+                
+                let btnAcao = '';
+                if (p.comprado) {
+                    btnAcao = `
+                        <button onclick="mudarSecao('meus-prompts')" class="w-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 py-2 rounded-xl text-xs font-bold flex items-center justify-center space-x-1">
+                            <span>✓ Já Adquirido (Ver Prompt)</span>
+                        </button>
+                    `;
+                } else if (noCarrinho) {
+                    btnAcao = `
+                        <button onclick="removerDoCarrinho(${p.id})" class="w-full bg-surface-variant/50 text-outline hover:text-red-400 py-2 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1">
+                            <span>✕ No Carrinho (Remover)</span>
+                        </button>
+                    `;
+                } else {
+                    btnAcao = `
+                        <button onclick="adicionarAoCarrinho(${p.id})" class="w-full bg-amber-500 hover:bg-amber-400 text-black py-2 rounded-xl text-xs font-bold shadow-md shadow-amber-500/10 flex items-center justify-center space-x-1 transition-all">
+                            <span>🛒 Adicionar ao Carrinho</span>
+                        </button>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-bold uppercase">${p.categoria}</span>
+                            <span class="text-lg font-extrabold text-amber-400">R$ ${p.preco.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <h3 class="text-base font-bold text-on-surface line-clamp-2 mb-2 group-hover:text-amber-300 transition-colors">${p.titulo}</h3>
+                        <p class="text-xs text-outline line-clamp-3 leading-relaxed mb-4">${p.descricao}</p>
+                        <div class="flex flex-wrap gap-1.5 mb-4">
+                            ${tagsHtml}
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-outline-variant/50">
+                        ${btnAcao}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function adicionarAoCarrinho(idPrompt) {
+            const promptObj = todosOsPromptsLoja.find(p => p.id === idPrompt);
+            if (!promptObj) return;
+            if (!carrinhoState.some(c => c.id === idPrompt)) {
+                carrinhoState.push({ id: promptObj.id, titulo: promptObj.titulo, preco: promptObj.preco });
+                atualizarVisualCarrinho();
+                renderizarLojaPrompts();
+            }
+        }
+
+        function removerDoCarrinho(idPrompt) {
+            carrinhoState = carrinhoState.filter(c => c.id !== idPrompt);
+            atualizarVisualCarrinho();
+            renderizarLojaPrompts();
+            renderizarItensDrawerCarrinho();
+        }
+
+        function esvaziarCarrinho() {
+            carrinhoState = [];
+            atualizarVisualCarrinho();
+            renderizarLojaPrompts();
+            renderizarItensDrawerCarrinho();
+        }
+
+        function atualizarVisualCarrinho() {
+            const qtd = carrinhoState.length;
+            const total = carrinhoState.reduce((acc, c) => acc + c.preco, 0);
+
+            const badgeCount = document.getElementById('badge-carrinho-count');
+            if (badgeCount) {
+                badgeCount.innerText = qtd;
+                if (qtd > 0) badgeCount.classList.remove('hidden');
+                else badgeCount.classList.add('hidden');
+            }
+
+            const btnQtd = document.getElementById('btn-carrinho-qtd');
+            if (btnQtd) btnQtd.innerText = qtd;
+
+            const btnTotal = document.getElementById('btn-carrinho-total');
+            if (btnTotal) btnTotal.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+
+            const drawerTotal = document.getElementById('drawer-carrinho-total');
+            if (drawerTotal) drawerTotal.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        }
+
+        function abrirDrawerCarrinho() {
+            renderizarItensDrawerCarrinho();
+            const drawer = document.getElementById('drawer-carrinho');
+            if (drawer) drawer.classList.remove('hidden');
+        }
+
+        function fecharDrawerCarrinho() {
+            const drawer = document.getElementById('drawer-carrinho');
+            if (drawer) drawer.classList.add('hidden');
+        }
+
+        function renderizarItensDrawerCarrinho() {
+            const container = document.getElementById('itens-carrinho-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (carrinhoState.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 space-y-3 text-outline">
+                        <div class="text-4xl">🛒</div>
+                        <p class="text-sm font-semibold text-on-surface">Seu carrinho está vazio</p>
+                        <p class="text-xs">Escolha prompts na loja para adicionar ao carrinho.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            carrinhoState.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'bg-background border border-outline-variant rounded-xl p-4 flex items-center justify-between gap-3';
+                div.innerHTML = `
+                    <div class="min-w-0">
+                        <h4 class="text-xs font-bold text-on-surface truncate">${item.titulo}</h4>
+                        <span class="text-xs font-bold text-amber-400">R$ ${item.preco.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <button onclick="removerDoCarrinho(${item.id})" class="text-outline hover:text-red-400 p-1.5 rounded hover:bg-surface-variant/30 transition-colors">
+                        ✕
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        async function finalizarCompraPix() {
+            if (carrinhoState.length === 0) {
+                alert('Seu carrinho está vazio!');
+                return;
+            }
+
+            try {
+                const promptIds = carrinhoState.map(c => c.id);
+                const res = await fetch('/api/prompts/gerar-pix', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ promptIds })
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json();
+                    alert(errData.error || 'Erro ao gerar Pix.');
+                    return;
+                }
+
+                ordemPixAtual = await res.json();
+                fecharDrawerCarrinho();
+                abrirModalPix(ordemPixAtual);
+            } catch(e) {
+                console.error(e);
+                alert('Erro de conexão ao gerar o Pix.');
+            }
+        }
+
+        function abrirModalPix(ordemPix) {
+            document.getElementById('modal-pix-valor').innerText = `R$ ${ordemPix.valorTotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById('modal-pix-id-venda').innerText = `Ordem #${ordemPix.idVenda}`;
+            document.getElementById('modal-pix-copia-cola').value = ordemPix.codigoPix;
+
+            // Renderiza QR Code visual usando serviço público seguro de QR Code SVG/PNG
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(ordemPix.codigoPix)}`;
+            document.getElementById('modal-pix-qrcode-img').src = qrUrl;
+
+            // Inicia cronômetro de 15 minutos
+            iniciarCronometroPix(15 * 60);
+
+            const modal = document.getElementById('modal-pix');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function fecharModalPix() {
+            if (pixTimerInterval) clearInterval(pixTimerInterval);
+            const modal = document.getElementById('modal-pix');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function iniciarCronometroPix(segundosTotais) {
+            if (pixTimerInterval) clearInterval(pixTimerInterval);
+            let tempoRestante = segundosTotais;
+
+            const timerEl = document.getElementById('modal-pix-timer');
+            pixTimerInterval = setInterval(() => {
+                tempoRestante--;
+                if (tempoRestante <= 0) {
+                    clearInterval(pixTimerInterval);
+                    if (timerEl) timerEl.innerText = 'EXPIRADO';
+                    alert('Tempo para pagamento Pix expirado. Por favor, gere uma nova ordem.');
+                    fecharModalPix();
+                    return;
+                }
+                const m = String(Math.floor(tempoRestante / 60)).padStart(2, '0');
+                const s = String(tempoRestante % 60).padStart(2, '0');
+                if (timerEl) timerEl.innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function copiarCodigoPixCopiaCola() {
+            const input = document.getElementById('modal-pix-copia-cola');
+            if (input && input.value) {
+                navigator.clipboard.writeText(input.value);
+                alert('Código PIX Copia e Cola copiado para a área de transferência!');
+            }
+        }
+
+        async function confirmarPagamentoPixManual() {
+            if (!ordemPixAtual || !ordemPixAtual.idVenda) return;
+            const btn = document.getElementById('btn-confirmar-pagamento-pix');
+            if (btn) btn.innerText = '⏳ Verificando Pagamento Pix...';
+
+            try {
+                const res = await fetch('/api/prompts/confirmar-pix', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idVenda: ordemPixAtual.idVenda })
+                });
+
+                if (res.ok) {
+                    fecharModalPix();
+                    esvaziarCarrinho();
+                    alert('🎉 Pagamento PIX confirmado com SUCESSO! Seus prompts foram liberados.');
+                    mudarSecao('meus-prompts');
+                } else {
+                    alert('Não foi possível confirmar o pagamento neste momento.');
+                }
+            } catch(e) {
+                console.error(e);
+            }
+            if (btn) btn.innerText = '✅ Já Realizei o Pagamento (Liberar Prompts)';
+        }
+
+        async function carregarMeusPrompts() {
+            try {
+                const res = await fetch('/api/prompts/meus');
+                const meusPrompts = await res.json();
+                const grid = document.getElementById('grid-meus-prompts');
+                if (!grid) return;
+                grid.innerHTML = '';
+
+                if (!meusPrompts || meusPrompts.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-span-full bg-surface border border-outline-variant rounded-2xl p-8 text-center space-y-3">
+                            <div class="text-4xl">⭐</div>
+                            <h3 class="text-base font-bold text-on-surface">Você ainda não adquiriu prompts</h3>
+                            <p class="text-xs text-outline max-w-md mx-auto">Navegue pela <strong>Loja de Prompts</strong> e adquira seus System Prompts de Nível Sênior para usar em qualquer IA.</p>
+                            <button onclick="mudarSecao('loja')" class="bg-amber-500 hover:bg-amber-400 text-black px-4 py-2 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-2">
+                                🛒 Ir para a Loja de Prompts
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                meusPrompts.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = "bg-surface border border-outline-variant rounded-2xl p-6 flex flex-col justify-between shadow-sm space-y-4";
+                    
+                    const promptEscapado = (p.promptSistema || '').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-3">
+                                <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold uppercase">${p.categoria}</span>
+                                <span class="text-[10px] text-outline font-mono">Adquirido em ${p.dataCompra ? new Date(p.dataCompra).toLocaleDateString('pt-BR') : 'Hoje'}</span>
+                            </div>
+                            <h3 class="text-base font-bold text-on-surface mb-2">${p.titulo}</h3>
+                            <p class="text-xs text-outline leading-relaxed mb-4">${p.descricao}</p>
+                            
+                            <!-- Prévia do Prompt Completo -->
+                            <div class="bg-background border border-outline-variant/60 rounded-xl p-3 max-h-40 overflow-y-auto font-mono text-[11px] text-on-surface/90 whitespace-pre-wrap select-text leading-relaxed">
+                                ${escaparHtml(p.promptSistema)}
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t border-outline-variant/50 flex items-center justify-between">
+                            <button onclick="copiarTextoPrompt(\`${promptEscapado}\`, this)" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 transition-all">
+                                <span>📋 Copiar System Prompt Sênior (Colar na IA)</span>
+                            </button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        function copiarTextoPrompt(texto, btn) {
+            navigator.clipboard.writeText(texto).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<span>✓ Prompt Copiado! Cole no ChatGPT / Claude / Gemini</span>';
+                btn.className = 'w-full bg-green-400 text-black font-bold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 transition-all';
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.className = 'w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 transition-all';
+                }, 3000);
+            });
         }
 
         // Inicialização

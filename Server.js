@@ -666,6 +666,218 @@ app.post('/api/logs', (req, res) => {
     res.json({ success: true, entry });
 });
 
+// =======================================================================
+// HELPER: GERADOR DE PAYLOAD PIX EMV BR CODE (Padrão Banco Central)
+// =======================================================================
+function gerarPayloadPixEMV(chavePix, nome, cidade, valor, txId = 'CONNECTMEDIA') {
+    const cleanStr = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9 ]/g, '').trim();
+    const cleanChave = (chavePix || 'connectmedia@pix.com.br').trim();
+    const cleanNome = cleanStr(nome || 'Connect Media').substring(0, 25) || 'Connect Media';
+    const cleanCidade = cleanStr(cidade || 'Sao Paulo').substring(0, 15) || 'Sao Paulo';
+    const valStr = parseFloat(valor || 0).toFixed(2);
+
+    const f = (id, val) => id + String(val.length).padStart(2, '0') + val;
+
+    const gui = f('00', 'br.gov.bcb.pix');
+    const key = f('01', cleanChave);
+    const merchantAccount = f('26', gui + key);
+
+    const payloadSemCRC = 
+        f('00', '01') + 
+        merchantAccount +
+        f('52', '0000') + 
+        f('53', '986') + 
+        f('54', valStr) + 
+        f('58', 'BR') + 
+        f('59', cleanNome) + 
+        f('60', cleanCidade) + 
+        f('62', f('05', txId.substring(0, 25))) + 
+        '6304';
+
+    function calcularCRC16(str) {
+        let crc = 0xFFFF;
+        for (let i = 0; i < str.length; i++) {
+            crc ^= (str.charCodeAt(i) << 8);
+            for (let j = 0; j < 8; j++) {
+                if ((crc & 0x8000) !== 0) {
+                    crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
+                } else {
+                    crc = (crc << 1) & 0xFFFF;
+                }
+            }
+        }
+        return crc.toString(16).toUpperCase().padStart(4, '0');
+    }
+
+    return payloadSemCRC + calcularCRC16(payloadSemCRC);
+}
+
+// =======================================================================
+// ROTAS DA LOJA DE PROMPTS & CHECKOUT PIX
+// =======================================================================
+
+// Rota: Lista todos os prompts da loja
+app.get('/api/prompts', (req, res) => {
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        const query = 'SELECT ID_PROMPT, TITULO, CATEGORIA, DESCRICAO_CURTA, PRECO_REAIS, TAGS, AUTOR, DATA_CADASTRO FROM TB_PROMPTS_LOJA WHERE ATIVO = 1 ORDER BY ID_PROMPT DESC';
+        db.query(query, (err, result) => {
+            if (err) {
+                db.detach();
+                return res.status(500).json({ error: 'Erro ao buscar catálogo de prompts.' });
+            }
+
+            // Busca IDs comprados para marcar no catálogo
+            db.query('SELECT ID_PROMPT FROM TB_MINHAS_COMPRAS', (errCompras, resCompras) => {
+                db.detach();
+                const compradosSet = new Set((resCompras || []).map(c => c.ID_PROMPT));
+
+                const prompts = result.map(p => ({
+                    id: p.ID_PROMPT,
+                    titulo: p.TITULO,
+                    categoria: p.CATEGORIA,
+                    descricao: p.DESCRICAO_CURTA,
+                    preco: parseFloat(p.PRECO_REAIS || 0),
+                    tags: p.TAGS ? p.TAGS.split(',').map(t => t.trim()) : [],
+                    autor: p.AUTOR,
+                    comprado: compradosSet.has(p.ID_PROMPT)
+                }));
+
+                res.json(prompts);
+            });
+        });
+    });
+});
+
+// Rota: Lista prompts comprados pelo usuário com o texto completo do System Prompt
+app.get('/api/prompts/meus', (req, res) => {
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        const query = `
+            SELECT p.ID_PROMPT, p.TITULO, p.CATEGORIA, p.DESCRICAO_CURTA, p.PROMPT_SISTEMA, p.TAGS, c.DATA_COMPRA
+            FROM TB_MINHAS_COMPRAS c
+            JOIN TB_PROMPTS_LOJA p ON c.ID_PROMPT = p.ID_PROMPT
+            ORDER BY c.DATA_COMPRA DESC
+        `;
+
+        db.query(query, (err, result) => {
+            db.detach();
+            if (err) return res.status(500).json({ error: 'Erro ao buscar meus prompts.' });
+
+            const meusPrompts = (result || []).map(p => ({
+                id: p.ID_PROMPT,
+                titulo: p.TITULO,
+                categoria: p.CATEGORIA,
+                descricao: p.DESCRICAO_CURTA,
+                promptSistema: p.PROMPT_SISTEMA ? p.PROMPT_SISTEMA.toString('utf8') : '',
+                tags: p.TAGS ? p.TAGS.split(',').map(t => t.trim()) : [],
+                dataCompra: p.DATA_COMPRA
+            }));
+
+            res.json(meusPrompts);
+        });
+    });
+});
+
+// Rota: Gera QR Code PIX e ordem de venda para os itens do carrinho
+app.post('/api/prompts/gerar-pix', (req, res) => {
+    const { promptIds } = req.body;
+    if (!Array.isArray(promptIds) || promptIds.length === 0) {
+        return res.status(400).json({ error: 'Nenhum prompt selecionado.' });
+    }
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        // Busca valores e títulos dos prompts
+        const inClause = promptIds.map(() => '?').join(',');
+        const queryPrompts = `SELECT ID_PROMPT, TITULO, PRECO_REAIS FROM TB_PROMPTS_LOJA WHERE ID_PROMPT IN (${inClause})`;
+
+        db.query(queryPrompts, promptIds, (err, prompts) => {
+            if (err || !prompts || prompts.length === 0) {
+                db.detach();
+                return res.status(400).json({ error: 'Prompts não encontrados.' });
+            }
+
+            // Calcula total
+            const totalVal = prompts.reduce((acc, p) => acc + parseFloat(p.PRECO_REAIS || 0), 0);
+
+            // Busca configurações Pix do usuário
+            db.query('SELECT CHAVE_PIX, NOME_RECEBEDOR_PIX, CIDADE_RECEBEDOR_PIX FROM TB_CONFIGURACOES WHERE ID_CONFIG = 1', (errCfg, resCfg) => {
+                const cfg = (resCfg && resCfg[0]) || {};
+                const chavePix = cfg.CHAVE_PIX || 'connectmedia@pix.com.br';
+                const nome = cfg.NOME_RECEBEDOR_PIX || 'Connect Media Solucoes';
+                const cidade = cfg.CIDADE_RECEBEDOR_PIX || 'Sao Paulo';
+
+                const txId = 'PROMPT' + Date.now().toString().slice(-8);
+                const codigoPix = gerarPayloadPixEMV(chavePix, nome, cidade, totalVal, txId);
+                const itensJson = JSON.stringify(prompts.map(p => ({ id: p.ID_PROMPT, titulo: p.TITULO, preco: p.PRECO_REAIS })));
+
+                const insertVenda = `
+                    INSERT INTO TB_VENDAS_PIX (VALOR_TOTAL, STATUS, CODIGO_PIX, ITENS_JSON)
+                    VALUES (?, 'PENDENTE', ?, ?)
+                    RETURNING ID_VENDA
+                `;
+
+                db.query(insertVenda, [totalVal, codigoPix, itensJson], (errIns, resIns) => {
+                    db.detach();
+                    if (errIns) return res.status(500).json({ error: 'Erro ao registrar ordem de pagamento Pix.' });
+
+                    const idVenda = (resIns && resIns[0] && resIns[0].ID_VENDA) ? resIns[0].ID_VENDA : ((resIns && resIns.ID_VENDA) ? resIns.ID_VENDA : 1);
+                    logger.info('LOJA PIX', `🛒 Nova ordem Pix gerada (#${idVenda}) - R$ ${totalVal.toFixed(2)} (${prompts.length} itens)`);
+
+                    res.json({
+                        idVenda,
+                        valorTotal: totalVal,
+                        codigoPix,
+                        itens: prompts.map(p => ({ id: p.ID_PROMPT, titulo: p.TITULO, preco: parseFloat(p.PRECO_REAIS || 0) }))
+                    });
+                });
+            });
+        });
+    });
+});
+
+// Rota: Confirma pagamento Pix e libera os prompts comprados
+app.post('/api/prompts/confirmar-pix', (req, res) => {
+    const { idVenda } = req.body;
+    if (!idVenda) return res.status(400).json({ error: 'ID da venda é obrigatório.' });
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        db.query('SELECT ID_VENDA, ITENS_JSON, STATUS FROM TB_VENDAS_PIX WHERE ID_VENDA = ?', [idVenda], (err, resVenda) => {
+            if (err || !resVenda || resVenda.length === 0) {
+                db.detach();
+                return res.status(404).json({ error: 'Venda não encontrada.' });
+            }
+
+            const venda = resVenda[0];
+            let itens = [];
+            try { itens = JSON.parse(venda.ITENS_JSON || '[]'); } catch (_) {}
+
+            // Atualiza status para PAGO
+            db.query("UPDATE TB_VENDAS_PIX SET STATUS = 'PAGO' WHERE ID_VENDA = ?", [idVenda], () => {
+                let idx = 0;
+                function insereProximo() {
+                    if (idx >= itens.length) {
+                        db.detach();
+                        logger.success('LOJA PIX', `✅ Pagamento confirmado para ordem Pix #${idVenda}! Prompts liberados com sucesso.`);
+                        return res.json({ success: true, message: 'Pagamento Pix confirmado! Prompts adicionados à sua biblioteca com sucesso.' });
+                    }
+                    const item = itens[idx++];
+                    db.query('INSERT INTO TB_MINHAS_COMPRAS (ID_PROMPT, ID_VENDA) VALUES (?, ?)', [item.id, idVenda], () => {
+                        insereProximo();
+                    });
+                }
+                insereProximo();
+            });
+        });
+    });
+});
+
 // Inicializa o Servidor
 app.listen(PORT, () => {
     logger.info('SERVIDIOR', `🚀 Connect Media rodando em http://localhost:${PORT}`);
