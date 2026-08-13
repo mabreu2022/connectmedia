@@ -39,7 +39,9 @@ app.get('/api/canais', (req, res) => {
 
 // Rota 2: Cadastrar um novo Canal Monitorado (Com resposta imediata e varredura em background)
 app.post('/api/canais', (req, res) => {
-    let { nome, url } = req.body;
+    let { nome, url, nomeCanal, urlYoutube } = req.body;
+    nome = nome || nomeCanal;
+    url = url || urlYoutube;
 
     if (!nome || !url) {
         return res.status(400).json({ error: 'Nome e URL do canal são obrigatórios.' });

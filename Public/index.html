@@ -1353,6 +1353,11 @@
 
     <!-- Script de Gerenciamento da Interface -->
     <script>
+        function tratarErroThumb(img) {
+            img.onerror = null;
+            img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360"><rect width="640" height="360" fill="%23191c20"/><text x="50%" y="50%" fill="%238d9199" font-family="sans-serif" font-size="18" text-anchor="middle" dominant-baseline="middle">Connect Media</text></svg>';
+        }
+
         let intervaloFila = null;
         let intervaloDescoberta = null;
 
@@ -1669,7 +1674,7 @@
                                     <input type="checkbox" id="check-${v.ID_VIDEO}" value="${v.ID_VIDEO}" class="check-video w-5 h-5 cursor-pointer accent-primary rounded" ${checkedAttr} onclick="event.stopPropagation(); atualizarVisualCard(${v.ID_VIDEO}, this.checked)">
                                 </div>
                                 <div class="aspect-video bg-background relative overflow-hidden">
-                                    <img src="${v.THUMBNAIL_URL}" alt="Thumb" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'640\' height=\'360\' viewBox=\'0 0 640 360\'><rect width=\'640\' height=\'360\' fill=\'%23191c20\'/><text x=\'50%\' y=\'50%\' fill=\'%238d9199\' font-family=\'sans-serif\' font-size=\'18\' text-anchor=\'middle\' dominant-baseline=\'middle\'>Connect Media</text></svg>';">
+                                    <img src="${v.THUMBNAIL_URL}" alt="Thumb" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="tratarErroThumb(this)">
                                 </div>
                                 <div class="p-4">
                                     <span class="text-[10px] bg-surface-variant/30 text-outline px-2 py-0.5 rounded font-mono uppercase">${v.NOME_CANAL || 'Canal'}</span>
@@ -1807,7 +1812,7 @@
                         card.innerHTML = `
                             <div>
                                 <div class="aspect-video bg-background relative overflow-hidden group cursor-pointer" data-title="${safeTitle}" onclick="abrirPlayer(${v.ID_VIDEO}, this.getAttribute('data-title'))">
-                                    <img src="${v.THUMBNAIL_URL}" alt="Thumb" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90 group-hover:opacity-100" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'640\' height=\'360\' viewBox=\'0 0 640 360\'><rect width=\'640\' height=\'360\' fill=\'%23191c20\'/><text x=\'50%\' y=\'50%\' fill=\'%238d9199\' font-family=\'sans-serif\' font-size=\'18\' text-anchor=\'middle\' dominant-baseline=\'middle\'>Connect Media</text></svg>';">
+                                    <img src="${v.THUMBNAIL_URL}" alt="Thumb" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90 group-hover:opacity-100" onerror="tratarErroThumb(this)">
                                     <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
                                         <div class="bg-primary text-on-primary rounded-full p-3 shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
@@ -1860,6 +1865,54 @@
             const modal = document.getElementById('modal-player');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+        }
+
+        function abrirModalCanal() {
+            if (document.getElementById('modal-nome')) document.getElementById('modal-nome').value = '';
+            if (document.getElementById('modal-url')) document.getElementById('modal-url').value = '';
+            const modal = document.getElementById('modal-canal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function fecharModalCanal() {
+            const modal = document.getElementById('modal-canal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        async function salvarNovoCanal(e) {
+            e.preventDefault();
+            const nome = document.getElementById('modal-nome').value.trim();
+            const url = document.getElementById('modal-url').value.trim();
+
+            if (!nome || !url) {
+                alert('Preencha o Nome e a URL do canal.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/canais', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, url })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    fecharModalCanal();
+                    carregarCanais();
+                    alert(data.message || 'Canal cadastrado com sucesso!');
+                } else {
+                    alert(data.error || 'Erro ao salvar canal.');
+                }
+            } catch(err) {
+                console.error(err);
+                alert('Erro de conexão ao salvar canal.');
+            }
         }
 
         async function carregarCanais() {
