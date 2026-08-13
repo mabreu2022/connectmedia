@@ -377,22 +377,24 @@
 <span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">download_for_offline</span>
 </nav>
 
-<!-- Modal Novo Canal -->
-<div id="modal-canal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-surface border border-outline-variant rounded-xl p-6 w-full max-w-md shadow-2xl">
-        <h2 class="text-lg font-bold text-on-surface mb-4">Adicionar Novo Canal</h2>
-        <form onsubmit="salvarNovoCanal(event)" class="space-y-4">
-            <div>
-                <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Nome do Canal</label>
-                <input type="text" id="modal-nome" required placeholder="Ex: Canal Tech" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+<!-- Modal Novo Canal (style inline - evita conflito com Tailwind hidden) -->
+<div id="modal-canal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); align-items:center; justify-content:center; z-index:9999; padding:1rem;">
+    <div style="background:#1a1d24; border:1px solid #424754; border-radius:12px; padding:1.5rem; width:100%; max-width:28rem; box-shadow:0 25px 50px rgba(0,0,0,0.6);">
+        <h2 style="font-size:1.125rem; font-weight:700; color:#e1e2ec; margin-bottom:1rem;">Adicionar Novo Canal</h2>
+        <form id="form-novo-canal">
+            <div style="margin-bottom:1rem;">
+                <label style="display:block; font-size:0.7rem; font-weight:700; color:#c2c6d6; text-transform:uppercase; margin-bottom:0.25rem;">Nome do Canal</label>
+                <input type="text" id="modal-nome" required placeholder="Ex: Canal Tech"
+                    style="width:100%; background:#10131a; border:1px solid #424754; border-radius:6px; padding:0.5rem 0.75rem; color:#e1e2ec; outline:none; font-size:0.875rem; box-sizing:border-box;">
             </div>
-            <div>
-                <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">URL do YouTube</label>
-                <input type="text" id="modal-url" required placeholder="Ex: https://www.youtube.com/@CanalTech" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+            <div style="margin-bottom:1rem;">
+                <label style="display:block; font-size:0.7rem; font-weight:700; color:#c2c6d6; text-transform:uppercase; margin-bottom:0.25rem;">URL do YouTube</label>
+                <input type="text" id="modal-url" required placeholder="Ex: https://www.youtube.com/@CanalTech"
+                    style="width:100%; background:#10131a; border:1px solid #424754; border-radius:6px; padding:0.5rem 0.75rem; color:#e1e2ec; outline:none; font-size:0.875rem; box-sizing:border-box;">
             </div>
-            <div class="flex justify-end space-x-3 mt-6">
-                <button type="button" onclick="fecharModalCanal()" class="bg-surface-variant/30 hover:bg-surface-variant/50 text-on-surface px-4 py-2 rounded text-sm transition-colors">Cancelar</button>
-                <button type="submit" class="bg-primary hover:bg-[#d8e2ff] text-on-primary px-4 py-2 rounded text-sm font-medium transition-colors">Salvar Canal</button>
+            <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem;">
+                <button type="button" id="btn-cancelar-modal" style="background:rgba(50,53,60,0.5); color:#e1e2ec; padding:0.5rem 1rem; border-radius:6px; border:1px solid #424754; font-size:0.875rem; cursor:pointer;">Cancelar</button>
+                <button type="submit" style="background:#adc6ff; color:#002e6a; padding:0.5rem 1rem; border-radius:6px; border:none; font-size:0.875rem; font-weight:700; cursor:pointer;">Salvar Canal</button>
             </div>
         </form>
     </div>
@@ -400,36 +402,28 @@
 
 <script>
     function abrirModalCanal() {
-        if (document.getElementById('modal-nome')) document.getElementById('modal-nome').value = '';
-        if (document.getElementById('modal-url')) document.getElementById('modal-url').value = '';
         const modal = document.getElementById('modal-canal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            modal.style.setProperty('display', 'flex', 'important');
-        }
+        if (modal) modal.style.display = 'flex';
+        const inp1 = document.getElementById('modal-nome');
+        const inp2 = document.getElementById('modal-url');
+        if (inp1) inp1.value = '';
+        if (inp2) inp2.value = '';
     }
     window.abrirModalCanal = abrirModalCanal;
 
     function fecharModalCanal() {
         const modal = document.getElementById('modal-canal');
-        if (modal) {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            modal.style.setProperty('display', 'none', 'important');
-        }
+        if (modal) modal.style.display = 'none';
     }
+    window.fecharModalCanal = fecharModalCanal;
 
-    async function salvarNovoCanal(e) {
+    document.getElementById('btn-cancelar-modal').addEventListener('click', fecharModalCanal);
+
+    document.getElementById('form-novo-canal').addEventListener('submit', async function(e) {
         e.preventDefault();
         const nome = document.getElementById('modal-nome').value.trim();
         const url = document.getElementById('modal-url').value.trim();
-
-        if (!nome || !url) {
-            alert('Preencha o Nome e a URL do canal.');
-            return;
-        }
-
+        if (!nome || !url) { alert('Preencha o Nome e a URL do canal.'); return; }
         try {
             const res = await fetch('/api/canais', {
                 method: 'POST',
@@ -448,6 +442,6 @@
             console.error(err);
             alert('Erro de conexão ao salvar canal.');
         }
-    }
+    });
 </script>
 </body></html>
