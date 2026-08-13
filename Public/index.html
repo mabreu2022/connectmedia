@@ -1314,21 +1314,21 @@
     </div>
 
     <!-- Modal Novo Canal -->
-    <div id="modal-canal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-surface border border-outline-variant rounded-xl p-6 w-full max-w-md shadow-2xl">
-            <h2 class="text-lg font-bold text-on-surface mb-4">Adicionar Novo Canal</h2>
-            <form onsubmit="salvarNovoCanal(event)" class="space-y-4">
+    <div id="modal-canal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); align-items:center; justify-content:center; z-index:9999; padding:1rem;">
+        <div style="background:#1a1d24; border:1px solid #424754; border-radius:12px; padding:1.5rem; width:100%; max-width:28rem; box-shadow:0 25px 50px rgba(0,0,0,0.5);">
+            <h2 style="font-size:1.125rem; font-weight:700; color:#e1e2ec; margin-bottom:1rem;">Adicionar Novo Canal</h2>
+            <form id="form-canal" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">Nome do Canal</label>
-                    <input type="text" id="modal-nome" required placeholder="Ex: Canal Tech" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#c2c6d6; text-transform:uppercase; margin-bottom:0.25rem;">Nome do Canal</label>
+                    <input type="text" id="modal-nome" required placeholder="Ex: Canal Tech" style="width:100%; background:#10131a; border:1px solid #424754; border-radius:6px; padding:0.5rem 0.75rem; color:#e1e2ec; outline:none; font-size:0.875rem;">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-on-surface-variant uppercase mb-1">URL do YouTube</label>
-                    <input type="text" id="modal-url" required placeholder="Ex: https://www.youtube.com/@CanalTech" class="w-full bg-background border border-outline-variant rounded px-3 py-2 text-on-surface focus:border-primary outline-none">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#c2c6d6; text-transform:uppercase; margin-bottom:0.25rem;">URL do YouTube</label>
+                    <input type="text" id="modal-url" required placeholder="Ex: https://www.youtube.com/@CanalTech" style="width:100%; background:#10131a; border:1px solid #424754; border-radius:6px; padding:0.5rem 0.75rem; color:#e1e2ec; outline:none; font-size:0.875rem;">
                 </div>
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" onclick="fecharModalCanal()" class="bg-surface-variant/30 hover:bg-surface-variant/50 text-on-surface px-4 py-2 rounded text-sm transition-colors">Cancelar</button>
-                    <button type="submit" class="bg-primary hover:bg-[#d8e2ff] text-on-primary px-4 py-2 rounded text-sm font-medium transition-colors">Salvar Canal</button>
+                <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem;">
+                    <button type="button" id="btn-cancelar-canal" style="background:rgba(50,53,60,0.3); color:#e1e2ec; padding:0.5rem 1rem; border-radius:6px; border:none; font-size:0.875rem; cursor:pointer;">Cancelar</button>
+                    <button type="submit" style="background:#adc6ff; color:#002e6a; padding:0.5rem 1rem; border-radius:6px; border:none; font-size:0.875rem; font-weight:600; cursor:pointer;">Salvar Canal</button>
                 </div>
             </form>
         </div>
@@ -1869,25 +1869,33 @@
         }
 
         function abrirModalCanal() {
+            const modal = document.getElementById('modal-canal');
+            if (modal) modal.style.display = 'flex';
             if (document.getElementById('modal-nome')) document.getElementById('modal-nome').value = '';
             if (document.getElementById('modal-url')) document.getElementById('modal-url').value = '';
-            const modal = document.getElementById('modal-canal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-                modal.style.setProperty('display', 'flex', 'important');
-            }
         }
         window.abrirModalCanal = abrirModalCanal;
 
         function fecharModalCanal() {
             const modal = document.getElementById('modal-canal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-                modal.style.setProperty('display', 'none', 'important');
-            }
+            if (modal) modal.style.display = 'none';
         }
+        window.fecharModalCanal = fecharModalCanal;
+
+        // Vincula o form do modal ao submit via addEventListener (evita conflitos Tailwind)
+        document.addEventListener('DOMContentLoaded', function() {
+            const formCanal = document.getElementById('form-canal');
+            const btnCancelar = document.getElementById('btn-cancelar-canal');
+            if (btnCancelar) btnCancelar.addEventListener('click', fecharModalCanal);
+            if (formCanal) formCanal.addEventListener('submit', salvarNovoCanal);
+        });
+        // Tambem executa imediatamente caso DOMContentLoaded ja tenha passado
+        (function() {
+            const formCanal = document.getElementById('form-canal');
+            const btnCancelar = document.getElementById('btn-cancelar-canal');
+            if (btnCancelar) btnCancelar.addEventListener('click', fecharModalCanal);
+            if (formCanal) formCanal.addEventListener('submit', salvarNovoCanal);
+        })();
 
         async function salvarNovoCanal(e) {
             e.preventDefault();
