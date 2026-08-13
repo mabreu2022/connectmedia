@@ -3243,15 +3243,26 @@
 
         function abrirModalCrudPrompt(idPrompt = null) {
             capaBase64Temp = '';
-            document.getElementById('modal-crud-prompt-id').value = idPrompt || '';
-            document.getElementById('modal-crud-prompt-nome').value = '';
-            document.getElementById('modal-crud-prompt-categoria').value = '';
-            document.getElementById('modal-crud-prompt-preco').value = '9.90';
-            document.getElementById('modal-crud-prompt-descricao').value = '';
-            document.getElementById('modal-crud-prompt-sistema').value = '';
-            document.getElementById('modal-crud-prompt-tags').value = '';
-            document.getElementById('modal-crud-prompt-autor').value = 'Connect Media AI';
-            document.getElementById('modal-crud-prompt-tipo').value = 'PROMPT';
+            const elId = document.getElementById('modal-crud-prompt-id');
+            const elNome = document.getElementById('modal-crud-prompt-nome');
+            const elCat = document.getElementById('modal-crud-prompt-categoria');
+            const elPreco = document.getElementById('modal-crud-prompt-preco');
+            const elDesc = document.getElementById('modal-crud-prompt-descricao');
+            const elSist = document.getElementById('modal-crud-prompt-sistema');
+            const elTags = document.getElementById('modal-crud-prompt-tags');
+            const elAutor = document.getElementById('modal-crud-prompt-autor');
+            const elTipo = document.getElementById('modal-crud-prompt-tipo');
+            const elTitulo = document.getElementById('modal-crud-prompt-titulo');
+
+            if (elId) elId.value = idPrompt || '';
+            if (elNome) elNome.value = '';
+            if (elCat) elCat.value = '';
+            if (elPreco) elPreco.value = '9.90';
+            if (elDesc) elDesc.value = '';
+            if (elSist) elSist.value = '';
+            if (elTags) elTags.value = '';
+            if (elAutor) elAutor.value = 'Connect Media AI';
+            if (elTipo) elTipo.value = 'PROMPT';
 
             const boxCapa = document.getElementById('modal-crud-prompt-capa-box');
             const imgCapa = document.getElementById('modal-crud-prompt-capa-img');
@@ -3261,15 +3272,15 @@
             if (idPrompt) {
                 const item = adminPromptsCache.find(p => p.id === idPrompt);
                 if (item) {
-                    document.getElementById('modal-crud-prompt-titulo').innerText = `Editar Prompt #${item.id}`;
-                    document.getElementById('modal-crud-prompt-nome').value = item.titulo || '';
-                    document.getElementById('modal-crud-prompt-categoria').value = item.categoria || '';
-                    document.getElementById('modal-crud-prompt-preco').value = item.preco || 0;
-                    document.getElementById('modal-crud-prompt-descricao').value = item.descricao || '';
-                    document.getElementById('modal-crud-prompt-sistema').value = item.promptSistema || '';
-                    document.getElementById('modal-crud-prompt-tags').value = item.tags || '';
-                    document.getElementById('modal-crud-prompt-autor').value = item.autor || '';
-                    document.getElementById('modal-crud-prompt-tipo').value = item.tipoItem || 'PROMPT';
+                    if (elTitulo) elTitulo.innerText = `Editar Prompt #${item.id}`;
+                    if (elNome) elNome.value = item.titulo || '';
+                    if (elCat) elCat.value = item.categoria || '';
+                    if (elPreco) elPreco.value = item.preco || 0;
+                    if (elDesc) elDesc.value = item.descricao || '';
+                    if (elSist) elSist.value = item.promptSistema || '';
+                    if (elTags) elTags.value = item.tags || '';
+                    if (elAutor) elAutor.value = item.autor || '';
+                    if (elTipo) elTipo.value = item.tipoItem || 'PROMPT';
                     if (item.capaUrl) {
                         capaBase64Temp = item.capaUrl;
                         if (imgCapa) imgCapa.src = item.capaUrl;
@@ -3277,23 +3288,27 @@
                     }
                 }
             } else {
-                document.getElementById('modal-crud-prompt-titulo').innerText = 'Cadastro de Prompt / Módulo Premium';
+                if (elTitulo) elTitulo.innerText = 'Cadastro de Prompt / Módulo Premium';
             }
 
             const modal = document.getElementById('modal-crud-prompt');
             if (modal) {
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
+                modal.style.display = 'flex';
             }
         }
+        window.abrirModalCrudPrompt = abrirModalCrudPrompt;
 
         function fecharModalCrudPrompt() {
             const modal = document.getElementById('modal-crud-prompt');
             if (modal) {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
+                modal.style.display = 'none';
             }
         }
+        window.fecharModalCrudPrompt = fecharModalCrudPrompt;
 
         function processarCapaPromptFile(input) {
             if (!input.files || !input.files[0]) return;
@@ -3308,21 +3323,32 @@
             };
             reader.readAsDataURL(file);
         }
+        window.processarCapaPromptFile = processarCapaPromptFile;
 
         async function salvarPromptCrudAdmin(e) {
-            e.preventDefault();
+            if (e) e.preventDefault();
             const token = obterTokenAuth();
-            const idPrompt = document.getElementById('modal-crud-prompt-id').value;
+            const elId = document.getElementById('modal-crud-prompt-id');
+            const idPrompt = elId ? elId.value : '';
+
+            const elNome = document.getElementById('modal-crud-prompt-nome');
+            const elCat = document.getElementById('modal-crud-prompt-categoria');
+            const elPreco = document.getElementById('modal-crud-prompt-preco');
+            const elDesc = document.getElementById('modal-crud-prompt-descricao');
+            const elSist = document.getElementById('modal-crud-prompt-sistema');
+            const elTags = document.getElementById('modal-crud-prompt-tags');
+            const elAutor = document.getElementById('modal-crud-prompt-autor');
+            const elTipo = document.getElementById('modal-crud-prompt-tipo');
 
             const payload = {
-                titulo: document.getElementById('modal-crud-prompt-nome').value,
-                categoria: document.getElementById('modal-crud-prompt-categoria').value,
-                preco: parseFloat(document.getElementById('modal-crud-prompt-preco').value || 0),
-                descricao: document.getElementById('modal-crud-prompt-descricao').value,
-                promptSistema: document.getElementById('modal-crud-prompt-sistema').value,
-                tags: document.getElementById('modal-crud-prompt-tags').value,
-                autor: document.getElementById('modal-crud-prompt-autor').value,
-                tipoItem: document.getElementById('modal-crud-prompt-tipo').value,
+                titulo: elNome ? elNome.value : '',
+                categoria: elCat ? elCat.value : '',
+                preco: parseFloat((elPreco ? elPreco.value : 0) || 0),
+                descricao: elDesc ? elDesc.value : '',
+                promptSistema: elSist ? elSist.value : '',
+                tags: elTags ? elTags.value : '',
+                autor: elAutor ? elAutor.value : 'Connect Media AI',
+                tipoItem: elTipo ? elTipo.value : 'PROMPT',
                 capaUrl: capaBase64Temp
             };
 
@@ -3338,8 +3364,8 @@
                 if (res.ok) {
                     alert(idPrompt ? 'Prompt atualizado com sucesso!' : 'Novo prompt cadastrado com sucesso!');
                     fecharModalCrudPrompt();
-                    carregarAdminDashboard();
-                    carregarLojaPrompts();
+                    if (typeof carregarAdminDashboard === 'function') carregarAdminDashboard();
+                    if (typeof carregarLojaPrompts === 'function') carregarLojaPrompts();
                 } else {
                     alert('Erro ao salvar prompt.');
                 }
