@@ -53,6 +53,18 @@ Connect Media/
 | `GET` | `/api/logs/stream` | Stream contínuo em tempo real via Server-Sent Events (SSE) |
 | `POST` | `/api/logs` | Registra uma nova entrada de log (`{ fonte, nivel, mensagem }`) |
 | `GET` | `/api/video-info` | Obtém instantaneamente metadados do vídeo (título/autor) via oEmbed/yt-dlp (`?url=...`) |
-| `POST` | `/api/gerar-skill` | Executa o gerador de skills (`{ url, urls, titulo, idioma }`), suporta URL única ou lote |
-| `GET` | `/api/skills` | Lista todas as skills aprendidas (`.agents/skills/`) com caminhos de diretórios absolutos |
-| `GET` | `/api/skills/:slug` | Retorna o conteúdo Markdown completo de uma skill |
+| `POST` | `/api/auth/register` | Cadastro de novo usuário (`{ nome, email, senha }`) |
+| `POST` | `/api/auth/login` | Login de usuário (`{ email, senha }`) |
+| `POST` | `/api/auth/esqueci-senha` | Solicita código de 6 dígitos para recuperação de senha |
+| `POST` | `/api/auth/redefinir-senha` | Redefine senha com o código recebido |
+| `GET` | `/api/auth/me` | Retorna o perfil do usuário logado |
+| `GET` | `/api/prompts` | Lista o catálogo de prompts disponíveis para compra |
+| `GET` | `/api/prompts/meus` | Lista os prompts comprados pelo usuário |
+| `POST` | `/api/prompts/gerar-pix` | Gera Ordem Pix e QR Code Copia e Cola (`{ promptIds }`) |
+| `POST` | `/api/prompts/enviar-comprovante` | Envia comprovante de pagamento Pix (`{ idVenda, comprovante }`) |
+| `POST` | `/api/prompts/confirmar-pix` | Confirma pagamento e libera prompts adquiridos (`{ idVenda }`) |
+| `GET` | `/api/admin/metricas` | [Admin] Retorna métricas globais e faturamento do SaaS |
+| `GET` | `/api/admin/usuarios` | [Admin] Lista todos os usuários cadastrados |
+| `POST` | `/api/admin/usuarios/:id/status` | [Admin] Altera o status do usuário (Ativo / Bloqueado) |
+| `GET` | `/api/admin/vendas` | [Admin] Retorna o extrato global de vendas Pix com comprovantes |
+| `POST` | `/api/admin/config-pix` | [Admin] Atualiza a Chave Pix Mestre da empresa |
