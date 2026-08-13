@@ -3474,74 +3474,98 @@
 
 <script>
     (function() {
-        var overlay = document.getElementById('canal-modal-overlay');
-        var inpNome = document.getElementById('canal-input-nome');
-        var inpUrl  = document.getElementById('canal-input-url');
+        // Cria overlay via JS e injeta no <html> (escapa do body overflow:hidden)
+        var overlay = document.createElement('div');
+        overlay.id = 'canal-modal-overlay';
+        overlay.style.cssText = [
+            'display:none',
+            'position:fixed',
+            'top:0', 'left:0',
+            'width:100%', 'height:100%',
+            'background:rgba(0,0,0,0.82)',
+            'z-index:2147483647',
+            'align-items:center',
+            'justify-content:center',
+            'padding:20px',
+            'box-sizing:border-box'
+        ].join(';');
+
+        var box = document.createElement('div');
+        box.style.cssText = [
+            'background:#1e2128',
+            'border:1px solid #5c6370',
+            'border-radius:14px',
+            'padding:32px',
+            'width:100%',
+            'max-width:480px',
+            'box-shadow:0 30px 80px rgba(0,0,0,0.8)',
+            'position:relative'
+        ].join(';');
+
+        box.innerHTML = [
+            '<h2 style="font-size:1.2rem;font-weight:700;color:#e8eaf0;margin:0 0 24px 0;">➕ Adicionar Novo Canal</h2>',
+            '<div style="margin-bottom:14px;">',
+            '<label style="display:block;font-size:11px;font-weight:700;color:#adb5c8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Nome do Canal</label>',
+            '<input id="canal-inp-nome" type="text" placeholder="Ex: Canal Tech Brasil" style="display:block;width:100%;background:#111418;border:1px solid #5c6370;border-radius:8px;padding:10px 14px;color:#e8eaf0;font-size:14px;outline:none;box-sizing:border-box;">',
+            '</div>',
+            '<div style="margin-bottom:24px;">',
+            '<label style="display:block;font-size:11px;font-weight:700;color:#adb5c8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">URL do YouTube</label>',
+            '<input id="canal-inp-url" type="text" placeholder="Ex: https://www.youtube.com/@CanalTech" style="display:block;width:100%;background:#111418;border:1px solid #5c6370;border-radius:8px;padding:10px 14px;color:#e8eaf0;font-size:14px;outline:none;box-sizing:border-box;">',
+            '</div>',
+            '<div style="display:flex;justify-content:flex-end;gap:10px;">',
+            '<button id="canal-btn-cancelar" type="button" style="background:#2c3140;color:#c8ccda;padding:9px 20px;border-radius:8px;border:1px solid #5c6370;font-size:14px;cursor:pointer;font-weight:500;">Cancelar</button>',
+            '<button id="canal-btn-salvar" type="button" style="background:#adc6ff;color:#002a78;padding:9px 20px;border-radius:8px;border:none;font-size:14px;font-weight:700;cursor:pointer;">Salvar Canal</button>',
+            '</div>'
+        ].join('');
+
+        overlay.appendChild(box);
+        document.documentElement.appendChild(overlay);
 
         function abrirCanal() {
-            if (!overlay) return;
             overlay.style.display = 'flex';
-            if (inpNome) inpNome.value = '';
-            if (inpUrl)  inpUrl.value  = '';
-            if (inpNome) setTimeout(function(){ inpNome.focus(); }, 100);
+            var n = document.getElementById('canal-inp-nome');
+            var u = document.getElementById('canal-inp-url');
+            if (n) { n.value = ''; setTimeout(function(){ n.focus(); }, 50); }
+            if (u) u.value = '';
         }
 
         function fecharCanal() {
-            if (overlay) overlay.style.display = 'none';
+            overlay.style.display = 'none';
         }
 
-        // Exporta globalmente
         window.abrirModalCanal  = abrirCanal;
         window.fecharModalCanal = fecharCanal;
 
-        // Botao cancelar
-        var btnCancelar = document.getElementById('canal-btn-cancelar');
-        if (btnCancelar) btnCancelar.onclick = fecharCanal;
+        document.getElementById('canal-btn-cancelar').onclick = fecharCanal;
+        overlay.addEventListener('click', function(e){ if (e.target === overlay) fecharCanal(); });
 
-        // Fechar no fundo
-        if (overlay) overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) fecharCanal();
-        });
-
-        // Botao salvar
-        var btnSalvar = document.getElementById('canal-btn-salvar');
-        if (btnSalvar) btnSalvar.onclick = async function() {
-            var nome = (inpNome ? inpNome.value : '').trim();
-            var url  = (inpUrl  ? inpUrl.value  : '').trim();
+        document.getElementById('canal-btn-salvar').onclick = async function() {
+            var nome = (document.getElementById('canal-inp-nome').value || '').trim();
+            var url  = (document.getElementById('canal-inp-url').value  || '').trim();
             if (!nome || !url) { alert('Preencha o Nome e a URL do canal.'); return; }
-            btnSalvar.disabled = true;
-            btnSalvar.textContent = 'Salvando...';
+            var btn = document.getElementById('canal-btn-salvar');
+            btn.disabled = true; btn.textContent = 'Salvando...';
             try {
-                var res = await fetch('/api/canais', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nome: nome, url: url })
-                });
+                var res  = await fetch('/api/canais', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({nome:nome, url:url}) });
                 var data = await res.json();
                 if (res.ok) {
                     fecharCanal();
                     if (typeof carregarCanais      === 'function') carregarCanais();
                     if (typeof carregarComboCanais === 'function') carregarComboCanais();
                     alert(data.message || 'Canal cadastrado com sucesso!');
-                } else {
-                    alert(data.error || 'Erro ao salvar canal.');
-                }
-            } catch(e) {
-                alert('Erro de conexão. Tente novamente.');
-            } finally {
-                btnSalvar.disabled = false;
-                btnSalvar.textContent = 'Salvar Canal';
-            }
+                } else { alert(data.error || 'Erro ao salvar.'); }
+            } catch(e) { alert('Erro de conexão.'); }
+            finally { btn.disabled = false; btn.textContent = 'Salvar Canal'; }
         };
 
-        // Vincula TODOS os botoes com id btn-adicionar-canal
+        // Vincula todos os botoes de adicionar canal
         var botoesAdicionar = document.querySelectorAll('#btn-adicionar-canal, [onclick*="abrirModalCanal"]');
         botoesAdicionar.forEach(function(btn) {
-            btn.onclick = null; // remove inline onclick
+            btn.onclick = null;
             btn.addEventListener('click', abrirCanal);
         });
 
-        console.log('[Canal Modal] Inicializado. Botoes vinculados:', botoesAdicionar.length, '| Overlay:', !!overlay);
+        console.log('[Canal Modal v3] OK. Botoes:', botoesAdicionar.length, '| Overlay no html:', overlay.parentElement.tagName);
     })();
 </script>
 
