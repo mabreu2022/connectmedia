@@ -9,6 +9,7 @@
     "start": "node init_db.js && node Server.js",
     "skill": "node gerar_skill.js",
     "build-installer": "node gerar_instalador.js",
+    "build-exe": "node gerar_instalador.js && \"C:\\Users\\Denize Abreu\\AppData\\Local\\Programs\\Inno Setup 6\\ISCC.exe\" ConnectMedia_Setup.iss",
     "install-app": "call instalar.bat"
   },
   "keywords": [],
