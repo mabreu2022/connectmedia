@@ -5,11 +5,22 @@ const fs = require('fs');
 
 const dbOptions = require('./dbConfig');
 
+let isWorking = false;
+
 function verificarDownloads() {
+    if (isWorking) {
+        return;
+    }
+    isWorking = true;
+
     console.log("🔍 [Worker] Verificando novos pedidos de download...");
     
     Firebird.attach(dbOptions, (err, db) => {
-        if (err) { console.error("❌ Erro de conexão:", err); return; }
+        if (err) {
+            console.error("❌ Erro de conexão:", err);
+            isWorking = false;
+            return;
+        }
 
         db.query("SELECT CAMINHO_DOWNLOADS FROM TB_CONFIGURACOES WHERE ID_CONFIG = 1", (err, configRes) => {
             let pastaDownloads = path.join(__dirname, 'downloads');
@@ -25,6 +36,7 @@ function verificarDownloads() {
                 db.detach(); 
 
                 if (err || !videos || videos.length === 0) {
+                    isWorking = false;
                     return;
                 }
 
@@ -33,6 +45,7 @@ function verificarDownloads() {
                 let index = 0;
                 function processarProximo() {
                     if (index >= videos.length) {
+                        isWorking = false;
                         return;
                     }
 

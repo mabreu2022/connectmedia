@@ -35,7 +35,7 @@ function sleepSync(ms) {
  * Tenta adquirir o lock de arquivo. Aguarda de forma síncrona com backoff exponencial.
  * Retorna true se conseguiu, false se deu timeout.
  */
-function acquireLock(timeoutMs = 15000) {
+function acquireLock(timeoutMs = 30000) {
     const pid = process.pid;
     const startTime = Date.now();
     let delay = 50;
@@ -48,11 +48,20 @@ function acquireLock(timeoutMs = 15000) {
             fs.closeSync(fd);
             return true;
         } catch (e) {
-            // Arquivo já existe — verifica se o PID dono ainda está vivo
+            // Arquivo já existe — verifica PID e idade do lock
             try {
+                const stats = fs.statSync(lockPath);
+                const lockAgeMs = Date.now() - stats.mtimeMs;
                 const lockedPid = parseInt(fs.readFileSync(lockPath, 'utf8'), 10);
+
+                // Se o lock pertence ao MESMO processo, ou se é um lock antigo (>45s)
+                if (lockedPid === pid || lockAgeMs > 45000) {
+                    try { fs.unlinkSync(lockPath); } catch (_) {}
+                    continue;
+                }
+
                 if (lockedPid && lockedPid !== pid) {
-                    // Verifica se o processo ainda existe
+                    // Verifica se o processo dono do lock ainda existe
                     try {
                         process.kill(lockedPid, 0);
                     } catch (killErr) {
@@ -123,13 +132,14 @@ function executeISQLInternal(sql, params = []) {
         script += `${formattedSql};\nCOMMIT;\n`;
     }
 
-    // Escreve o script em arquivo temporário (evita problemas de BOM/encoding no stdin do Windows)
-    const tmpFile = path.join(os.tmpdir(), `isql_${process.pid}_${Date.now()}.sql`);
+    // Escreve o script em arquivo temporário único
+    const tmpSuffix = Math.random().toString(36).substring(2, 7);
+    const tmpFile = path.join(os.tmpdir(), `isql_${process.pid}_${Date.now()}_${tmpSuffix}.sql`);
     fs.writeFileSync(tmpFile, script, { encoding: 'utf8' });
 
-    const acquired = acquireLock(15000);
+    const acquired = acquireLock(30000);
     if (!acquired) {
-        fs.unlinkSync(tmpFile);
+        try { fs.unlinkSync(tmpFile); } catch (_) {}
         throw new Error('[ISQL Bridge] Timeout ao aguardar lock do banco de dados.');
     }
 
