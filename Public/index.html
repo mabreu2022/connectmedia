@@ -1628,9 +1628,16 @@
             logEventSource.onerror = function() {
                 const indicator = document.getElementById('logs-status-indicator');
                 if (indicator) {
-                    indicator.innerText = 'RECONECTANDO...';
+                    indicator.innerText = 'DESCONECTADO (RETESTANDO EM 5s)';
                     indicator.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 flex items-center space-x-1.5';
                 }
+                if (logEventSource) {
+                    logEventSource.close();
+                    logEventSource = null;
+                }
+                setTimeout(() => {
+                    if (!logEventSource) iniciarStreamLogs();
+                }, 5000);
             };
 
             logEventSource.onopen = function() {
@@ -1845,6 +1852,7 @@
 
         function gerarCapaVideoFallback(imgEl, titulo, canal) {
             if (!imgEl || !imgEl.parentElement) return;
+            imgEl.onerror = null;
             const container = imgEl.parentElement;
             container.innerHTML = gerarBandeiraGradientVideoHtml(titulo, canal);
         }
@@ -1852,7 +1860,8 @@
 
         function obterCapaVideoHtml(v) {
             const rawThumb = (v.THUMBNAIL_URL || '').trim();
-            const temThumbValida = rawThumb && rawThumb !== 'THUMBNAIL_URL' && !rawThumb.includes('null') && !rawThumb.includes('undefined') && (rawThumb.startsWith('http') || rawThumb.startsWith('data:image'));
+            const ehUrlDefault404 = rawThumb.includes('/vi/default/') || rawThumb.includes('/vi//') || rawThumb.includes('/vi/undefined/') || rawThumb.includes('/vi/null/');
+            const temThumbValida = rawThumb && rawThumb !== 'THUMBNAIL_URL' && !rawThumb.includes('null') && !rawThumb.includes('undefined') && !ehUrlDefault404 && (rawThumb.startsWith('http') || rawThumb.startsWith('data:image'));
 
             if (temThumbValida) {
                 return `<img src="${rawThumb}" alt="Thumb" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="gerarCapaVideoFallback(this, '${escaparHtml(v.TITULO_VIDEO || '').replace(/'/g, "\\'")}', '${escaparHtml(v.NOME_CANAL || '').replace(/'/g, "\\'")}')">`;

@@ -18,6 +18,7 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '200mb' }));
 app.use(express.urlencoded({ limit: '200mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public'), { etag: false, lastModified: false }));
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 // Configuração de Conexão com o Firebird 5.0
 const dbOptions = require('./dbConfig');
