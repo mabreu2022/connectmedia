@@ -215,7 +215,9 @@
                         <h1 class="text-2xl font-bold text-on-surface">Canais Monitorados</h1>
                         <p class="text-xs text-outline mt-1">Fontes do YouTube cadastradas para varredura automática.</p>
                     </div>
-                    <button id="btn-adicionar-canal" onclick="abrirModalCanal()" class="bg-primary hover:bg-[#d8e2ff] text-on-primary px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 cursor-pointer">
+                    <button id="btn-adicionar-canal" 
+                        onclick="(function(){ var m=document.getElementById('modal-canal'); if(m){ m.style.cssText='display:flex !important; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); align-items:center; justify-content:center; z-index:99999; padding:1rem;'; } else { alert('ERRO: elemento modal-canal nao encontrado!'); } })()"
+                        class="bg-primary hover:bg-[#d8e2ff] text-on-primary px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                         <span>Adicionar Canal</span>
                     </button>
