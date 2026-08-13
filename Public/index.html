@@ -1332,6 +1332,30 @@
         </div>
     </div>
 
+    <!-- MODAL ADICIONAR CANAL -->
+    <div id="modal-canal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); align-items:center; justify-content:center; z-index:99999; padding:1rem;">
+        <div style="background:#191c20; border:1px solid #43474e; border-radius:12px; padding:1.5rem; width:100%; max-width:28rem; box-shadow:0 25px 50px rgba(0,0,0,0.6);">
+            <h2 style="font-size:1.125rem; font-weight:700; color:#e2e2e6; margin-bottom:1rem;">Adicionar Novo Canal</h2>
+            <form id="form-canal">
+                <div id="modal-canal-error" style="display:none; color:#ffb4ab; background:rgba(147,0,10,0.3); border:1px solid #ff5540; padding:0.5rem 0.75rem; border-radius:6px; font-size:0.8rem; margin-bottom:1rem;"></div>
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block; font-size:0.7rem; font-weight:700; color:#8d9199; text-transform:uppercase; margin-bottom:0.25rem;">Nome do Canal</label>
+                    <input type="text" id="modal-nome" required placeholder="Ex: Canal Tech"
+                        style="width:100%; background:#111318; border:1px solid #43474e; border-radius:6px; padding:0.5rem 0.75rem; color:#e2e2e6; outline:none; font-size:0.875rem; box-sizing:border-box;">
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block; font-size:0.7rem; font-weight:700; color:#8d9199; text-transform:uppercase; margin-bottom:0.25rem;">URL do YouTube</label>
+                    <input type="text" id="modal-url" required placeholder="Ex: https://www.youtube.com/@CanalTech"
+                        style="width:100%; background:#111318; border:1px solid #43474e; border-radius:6px; padding:0.5rem 0.75rem; color:#e2e2e6; outline:none; font-size:0.875rem; box-sizing:border-box;">
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem;">
+                    <button type="button" id="btn-cancelar-canal" onclick="fecharModalCanal()" style="background:rgba(67,71,78,0.5); color:#e2e2e6; padding:0.5rem 1rem; border-radius:6px; border:1px solid #43474e; font-size:0.875rem; cursor:pointer;">Cancelar</button>
+                    <button type="submit" id="btn-salvar-canal" style="background:#b4c5ff; color:#002a78; padding:0.5rem 1rem; border-radius:6px; border:none; font-size:0.875rem; font-weight:700; cursor:pointer;">Salvar Canal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Script de Gerenciamento da Interface -->
     <script>
         function tratarErroThumb(img) {
@@ -1851,6 +1875,10 @@
 
         function abrirModalCanal() {
             const modal = document.getElementById('modal-canal');
+            const errDiv = document.getElementById('modal-canal-error');
+            const btnSalvar = document.getElementById('btn-salvar-canal');
+            if (errDiv) { errDiv.style.display = 'none'; errDiv.innerText = ''; }
+            if (btnSalvar) { btnSalvar.disabled = false; btnSalvar.innerText = 'Salvar Canal'; }
             if (modal) modal.style.display = 'flex';
             if (document.getElementById('modal-nome')) document.getElementById('modal-nome').value = '';
             if (document.getElementById('modal-url')) document.getElementById('modal-url').value = '';
@@ -1879,13 +1907,25 @@
         })();
 
         async function salvarNovoCanal(e) {
-            e.preventDefault();
-            const nome = document.getElementById('modal-nome').value.trim();
-            const url = document.getElementById('modal-url').value.trim();
+            if (e) e.preventDefault();
+            const errDiv = document.getElementById('modal-canal-error');
+            const btnSalvar = document.getElementById('btn-salvar-canal');
+            if (errDiv) { errDiv.style.display = 'none'; errDiv.innerText = ''; }
+
+            const nomeInput = document.getElementById('modal-nome');
+            const urlInput = document.getElementById('modal-url');
+            const nome = nomeInput ? nomeInput.value.trim() : '';
+            const url = urlInput ? urlInput.value.trim() : '';
 
             if (!nome || !url) {
-                alert('Preencha o Nome e a URL do canal.');
+                if (errDiv) { errDiv.innerText = 'Preencha o Nome e a URL do canal.'; errDiv.style.display = 'block'; }
+                else alert('Preencha o Nome e a URL do canal.');
                 return;
+            }
+
+            if (btnSalvar) {
+                btnSalvar.disabled = true;
+                btnSalvar.innerText = 'Salvando...';
             }
 
             try {
@@ -1897,15 +1937,30 @@
                 const data = await res.json();
                 if (res.ok) {
                     fecharModalCanal();
-                    carregarCanais();
-                    carregarComboCanais();
+                    if (typeof carregarCanais === 'function') carregarCanais();
+                    if (typeof carregarComboCanais === 'function') carregarComboCanais();
                     alert(data.message || 'Canal cadastrado com sucesso!');
                 } else {
-                    alert(data.error || 'Erro ao salvar canal.');
+                    if (errDiv) {
+                        errDiv.innerText = data.error || 'Erro ao salvar canal.';
+                        errDiv.style.display = 'block';
+                    } else {
+                        alert(data.error || 'Erro ao salvar canal.');
+                    }
                 }
             } catch(err) {
                 console.error(err);
-                alert('Erro de conexão ao salvar canal.');
+                if (errDiv) {
+                    errDiv.innerText = 'Erro de conexão ao salvar canal.';
+                    errDiv.style.display = 'block';
+                } else {
+                    alert('Erro de conexão ao salvar canal.');
+                }
+            } finally {
+                if (btnSalvar) {
+                    btnSalvar.disabled = false;
+                    btnSalvar.innerText = 'Salvar Canal';
+                }
             }
         }
 
