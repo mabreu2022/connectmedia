@@ -1,6 +1,6 @@
 # Connect Media — Documentação do Sistema
 
-> **Versão**: 2.0.0  
+> **Versão**: 2.2.0  
 > **Data de Atualização**: 13 de Agosto de 2026  
 > **Tecnologias**: Node.js, Express, Firebird 5.0, yt-dlp, @xenova/transformers (Whisper), Vanilla JS, Tailwind CSS  
 > **Repositório Git**: `git@github.com:mabreu2022/connectmedia.git`
@@ -46,7 +46,9 @@ Acesse o painel web em: [http://localhost:3000](http://localhost:3000)
 ## 🎨 Principais Recursos Desenvolvidos
 - **Monitoramento Automático de Canais**: Varredura periódica configurável de canais do YouTube.
 - **Suporte a Formatos MP4 e MP3**: Opção de download de vídeo completo ou extração de áudio em alta qualidade.
-- **Gerador de Skills para Antigravity IDE**: Extração automática de conhecimento de vídeos para criar arquivos `SKILL.md` estruturados em `.agents/skills/`.
+- **Gerador de Skills em Lote**: Suporte para colar múltiplos links de vídeos (um por linha) e gerar todas as skills em lote.
+- **Auto-Preenchimento Instantâneo do Título**: Carregamento do título do vídeo em `< 100ms` via API oEmbed ao colar a URL.
+- **Extração Inteligente de Conteúdo Técnico**: Identificação de comandos de terminal CLI (`npm`, `git`, `docker`, `SQL`, etc.), conceitos chave e passos numerados para orientar o Antigravity IDE.
+- **Visualizador de Skills Aprendidas**: Exibição dos diretórios físicos absolutos no disco (`D:\Projetos...`), botão para copiar o caminho, link direto para o vídeo no YouTube e leitor modal.
 - **Fallback com Whisper Local**: Transcrição automática 100% offline via IA quando o vídeo não possui legendas no YouTube.
 - **Trava de Arquivo Cross-Process (`.fdb.lock`)**: Mecanismo de concorrência com backoff exponencial para gerenciar múltiplos processos acessando o Firebird 5.0 sem colisões.
-- **Painel Interativo de Skills Aprendidas**: Visualizador no frontend com busca e link direto para o vídeo fonte no YouTube.

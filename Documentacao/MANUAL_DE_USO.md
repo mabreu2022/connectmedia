@@ -1,6 +1,6 @@
 # Connect Media — Manual do Usuário
 
-O **Connect Media** é um gerenciador de biblioteca de mídias locais e monitor de canais do YouTube com inteligência artificial para geração de contexto (Skills) para o Antigravity IDE.
+O **Connect Media** é um gerenciador de biblioteca de mídias locais, monitor de canais do YouTube e sistema de inteligência artificial para geração de contexto (Skills) para o Antigravity IDE.
 
 ---
 
@@ -50,15 +50,18 @@ Ajustes globais do aplicativo:
 
 ### 6. 🧠 Gerador de Skills para Antigravity
 Ferramenta de IA para transformar vídeos técnicos em conhecimento estruturado para o agente Antigravity.
-1. Cole a URL do vídeo do YouTube.
-2. Defina o título e idioma (opcional).
-3. Clique em **Gerar Skill .md**.
-4. O arquivo será criado em `.agents/skills/<nome_do_topico>/SKILL.md`.
+
+#### ⚡ Recursos Avançados:
+- **Auto-Preenchimento Instantâneo do Título**: Ao colar uma URL no campo de Vídeo Único, o título do vídeo é obtido automaticamente em `< 100ms`.
+- **Geração em Lote (Múltiplas URLs)**: Alterne para a aba **`📋 Processar em Lote`** e insira uma lista de URLs do YouTube (uma por linha) para gerar todas as skills em sequência.
+- **Estruturação Inteligente para IA**: Extração automática de **comandos CLI (`npm`, `git`, `docker`, `SQL`, etc.)**, **passo a passo numerado** e **diretivas de contextualização** (`@slug`).
+- **Transcrição Offline via Whisper**: Quando o vídeo não tem legendas, o áudio é transcrito localmente via Whisper AI (100% gratuito e offline).
 
 ---
 
 ### 7. 🎓 Skills Aprendidas
 Biblioteca visual com todas as Skills já geradas e disponíveis para o Antigravity IDE.
-- Exibe o slug da skill (`@slug`), resumo do conteúdo e data de geração.
-- **Link do YouTube**: Clique em "Ver no YouTube" para abrir o vídeo fonte.
-- **Ler Transcrição**: Abre um modal para leitura completa do Markdown gerado.
+- **Exibição do Diretório Exato no Disco**: Exibe o caminho absoluto do arquivo `.md` (ex: `D:\Projetos AntiGravity\Connect Media\.agents\skills\<slug>\SKILL.md`).
+- **Copiar Caminho**: Botão direto para copiar a localização física do arquivo para a área de transferência.
+- **Assistir no YouTube**: Link direto para abrir o vídeo fonte no navegador.
+- **Ler Conteúdo**: Modal interativo para visualizar todo o Markdown estruturado sem abrir o arquivo externamente.

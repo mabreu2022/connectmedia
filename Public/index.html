@@ -519,25 +519,43 @@
                                 <h2 class="font-bold text-on-surface">Gerador de Skills para Antigravity</h2>
                             </div>
                             <div class="p-6 space-y-3 text-sm text-on-surface/80 leading-relaxed">
-                                <p>Extrai conhecimento de vídeos do YouTube e gera arquivos <code class="bg-surface-variant/30 px-1 rounded text-primary">.md</code> prontos para uso como Skills no Antigravity IDE.</p>
+                                <p>Extrai conhecimento de vídeos do YouTube e gere arquivos <code class="bg-surface-variant/30 px-1 rounded text-primary">.md</code> prontos para uso como Skills no Antigravity IDE.</p>
                                 <div class="bg-background rounded-lg p-4 border border-outline-variant/50">
-                                    <p class="text-xs font-bold text-outline mb-2">Pipeline de extração</p>
+                                    <p class="text-xs font-bold text-outline mb-2">Pipeline de extração inteligente</p>
                                     <div class="flex items-center gap-2 text-xs flex-wrap">
-                                        <span class="bg-surface-variant/30 px-2 py-1 rounded">YouTube URL</span>
+                                        <span class="bg-surface-variant/30 px-2 py-1 rounded">YouTube URL(s)</span>
                                         <span class="text-outline">→</span>
-                                        <span class="bg-surface-variant/30 px-2 py-1 rounded">yt-dlp (legendas)</span>
-                                        <span class="text-outline">→ se não houver →</span>
-                                        <span class="bg-purple-900/30 border border-purple-700/30 px-2 py-1 rounded text-purple-300">Whisper (áudio local)</span>
+                                        <span class="bg-surface-variant/30 px-2 py-1 rounded">oEmbed (Título Auto)</span>
                                         <span class="text-outline">→</span>
-                                        <span class="bg-surface-variant/30 px-2 py-1 rounded">SKILL.md</span>
+                                        <span class="bg-surface-variant/30 px-2 py-1 rounded">yt-dlp / Whisper Local</span>
                                         <span class="text-outline">→</span>
-                                        <span class="bg-primary/20 px-2 py-1 rounded text-primary">.agents/skills/</span>
+                                        <span class="bg-primary/20 px-2 py-1 rounded text-primary">Extração de Comandos & Passo a Passo</span>
+                                        <span class="text-outline">→</span>
+                                        <span class="bg-surface-variant/30 px-2 py-1 rounded">.agents/skills/</span>
                                     </div>
                                 </div>
                                 <ul class="space-y-2 ml-4">
-                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Whisper</strong> é 100% gratuito e roda offline — não precisa de chave de API</span></li>
-                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>O Skill gerado é detectado automaticamente pelo Antigravity na próxima conversa</span></li>
-                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>Use também pela linha de comando: <code class="bg-background px-1 rounded text-primary">node gerar_skill.js URL</code></span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Auto-Preenchimento de Título</strong>: ao colar a URL no modo Vídeo Único, o título é carregado em &lt; 100ms</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Processamento em Lote</strong>: alterne para a aba "Processar em Lote" e cole múltiplos links (um por linha)</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Whisper AI Local</strong>: 100% gratuito e offline para vídeos sem legendas nativas</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Uso via Terminal</strong>: <code class="bg-background px-1 rounded text-primary">node gerar_skill.js url1 url2</code> ou <code class="bg-background px-1 rounded text-primary">node gerar_skill.js --lista links.txt</code></span></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 6. Skills Aprendidas -->
+                        <div class="bg-surface border border-outline-variant rounded-xl overflow-hidden">
+                            <div class="bg-primary/10 border-b border-outline-variant px-6 py-4 flex items-center gap-3">
+                                <span class="bg-primary text-on-primary text-xs font-bold px-2.5 py-1 rounded-full">06</span>
+                                <h2 class="font-bold text-on-surface">Skills Aprendidas</h2>
+                            </div>
+                            <div class="p-6 space-y-3 text-sm text-on-surface/80 leading-relaxed">
+                                <p>Consulte todos os conhecimentos já extraídos para o Antigravity IDE.</p>
+                                <ul class="space-y-2 ml-4">
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Diretório Exato no Disco</strong>: cada cartão exibe o caminho absoluto do arquivo <code class="bg-surface-variant/30 px-1 rounded text-primary">SKILL.md</code> no computador</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Botão Copiar Caminho</strong>: copia instantaneamente a localização física do arquivo para a área de transferência</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Link do YouTube</strong>: botão direto para assistir ao vídeo original fonte do aprendizado</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Leitor de Conteúdo</strong>: modal interativo para visualizar todo o Markdown estruturado sem abrir o arquivo externamente</span></li>
                                 </ul>
                             </div>
                         </div>

@@ -20,7 +20,7 @@ Connect Media/
 ├── Public/
 │   └── index.html               # Single Page Application (Dashboard Web)
 ├── dbConfig.js                  # Conexão e trava de concorrência (.fdb.lock)
-├── gerar_skill.js               # Script CLI para extração de Skills e Whisper
+├── gerar_skill.js               # Script CLI e batch para extração de Skills e Whisper
 ├── init_db.js                   # Inicializador e migrador do banco
 ├── popular_e_rodar.js           # Worker monitor de canais do YouTube
 ├── Server.js                    # Servidor Express com a API REST
@@ -47,6 +47,7 @@ Connect Media/
 | `DELETE` | `/api/canais/:id` | Deleta um canal e seus vídeos vinculados |
 | `GET` | `/api/configuracoes` | Retorna as configurações do sistema |
 | `POST` | `/api/configuracoes` | Salva as configurações do sistema |
-| `POST` | `/api/gerar-skill` | Executa o gerador de skills (`{ url, titulo, idioma }`) |
-| `GET` | `/api/skills` | Lista todas as skills aprendidas (`.agents/skills/`) |
+| `GET` | `/api/video-info` | Obtém instantaneamente metadados do vídeo (título/autor) via oEmbed/yt-dlp (`?url=...`) |
+| `POST` | `/api/gerar-skill` | Executa o gerador de skills (`{ url, urls, titulo, idioma }`), suporta URL única ou lote |
+| `GET` | `/api/skills` | Lista todas as skills aprendidas (`.agents/skills/`) com caminhos de diretórios absolutos |
 | `GET` | `/api/skills/:slug` | Retorna o conteúdo Markdown completo de uma skill |
