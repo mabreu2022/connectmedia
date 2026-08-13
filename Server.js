@@ -756,13 +756,128 @@ ${textoLimpo}
 `;
         }
 
-        const skillContent = estruturarConhecimentoParaSkill(pdfData.text, tituloSkill, nomeDoc, numPages);
+        // 🤖 Motor de Síntese e Interpretação via Inteligência Artificial
+        async function sintetizarSkillComIA(rawText, tituloDoc, nomeArquivo, totalPaginas, userApiKey = '') {
+            const apiKey = userApiKey.trim() || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
+            const slug = slugify(tituloDoc);
+            const dataHoje = new Date().toLocaleString('pt-BR');
+
+            const systemPrompt = `Você é um Arquiteto de Software Sênior e Especialista em Antigravity IDE.
+Sua missão é analisar o texto do livro/documento técnico PDF "${nomeArquivo}" (Título: "${tituloDoc}") e GERAR UMA SKILL TÉCNICA EXTREMAMENTE ÚTIL, DIDÁTICA E ESTRUTURADA no formato SKILL.md para o Antigravity IDE.
+
+A Skill NÃO deve ser um resumo genérico. Deve ser um GUIA ACIONÁVEL que ensine o Antigravity IDE como projetar, codificar, estruturar e aplicar os padrões de projeto e regras deste livro.
+
+Gere a resposta EXATAMENTE no seguinte formato Markdown com Frontmatter YAML:
+
+---
+name: ${slug}
+description: >
+  Skill técnica e guia de arquitetura extraído do livro PDF "${nomeArquivo}" (${totalPaginas} páginas). Fornece orientações acionáveis, padrões de projeto, regras de conduta e trechos de código compilados para o Antigravity IDE.
+source: ${nomeArquivo}
+generated_at: ${dataHoje}
+---
+
+# 🧠 Skill: ${tituloDoc}
+
+> [!IMPORTANT]
+> **Antigravity Skill Specification** — Conhecimento técnico interpretado por IA a partir do livro: \`${nomeArquivo}\`
+> - **Total de Páginas**: ${totalPaginas}
+> - **Data de Geramento**: ${dataHoje}
+> - **Interpretação**: Inteligência Artificial Ativada
+
+---
+
+## 📌 1. Visão Geral & Filosofia Arquitetural
+[Resumo dos conceitos centrais do livro, visão de design e a mentalidade técnica a ser adotada]
+
+---
+
+## 📐 2. Padrões de Projeto & Arquitetura (Design Patterns)
+[Explicação detalhada dos principais padrões do livro, quando usar cada um, por que usar e a solução recomendada]
+
+---
+
+## ⚙️ 3. Regras Estritas de Implementação & Diretrizes de Código
+[Lista de regras claras: O que a IA DEVE fazer, O que NÃO DEVE fazer, convenções e boas práticas de código]
+
+---
+
+## 💻 4. Exemplos Práticos de Código & Schemas de Referência
+[Exemplos de código completos e didáticos implementando os padrões do livro]
+
+---
+
+## ⚠️ 5. Armadilhas, Antipadrões & Erros Comuns
+[O que evitar e gotchas conhecidos ao aplicar estes padrões]
+`;
+
+            let promptText = (rawText || '').substring(0, 80000);
+
+            // 1. Tenta via Google Gemini API se a chave estiver disponível
+            if (apiKey) {
+                try {
+                    console.log('[AI Synthesis] Interpretando PDF via Google Gemini API...');
+                    const resAi = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [
+                                    { text: systemPrompt },
+                                    { text: `\n\n--- TEXTO BRUTO DO LIVRO PDF ---\n\n${promptText}` }
+                                ]
+                            }]
+                        })
+                    });
+
+                    if (resAi.ok) {
+                        const dataAi = await resAi.json();
+                        const markdownContent = dataAi.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (markdownContent && markdownContent.includes('---')) {
+                            return { sucesso: true, content: markdownContent, provedor: 'Google Gemini AI (1.5 Flash)' };
+                        }
+                    }
+                } catch(err) {
+                    console.error('[Gemini API Error]:', err.message);
+                }
+            }
+
+            // 2. Tenta via Ollama Local (http://localhost:11434)
+            try {
+                console.log('[AI Synthesis] Checando Ollama Local para interpretação do PDF...');
+                const resOllama = await fetch('http://127.0.0.1:11434/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'llama3',
+                        prompt: `${systemPrompt}\n\n--- TEXTO BRUTO DO LIVRO PDF ---\n\n${promptText}`,
+                        stream: false
+                    })
+                });
+
+                if (resOllama.ok) {
+                    const dataOllama = await resOllama.json();
+                    if (dataOllama.response && dataOllama.response.includes('---')) {
+                        return { sucesso: true, content: dataOllama.response, provedor: 'Ollama Local (LLM)' };
+                    }
+                }
+            } catch(err) {
+                // Ollama indisponível
+            }
+
+            // 3. Fallback estruturado caso nenhuma IA esteja configurada
+            return { sucesso: false, content: estruturarConhecimentoParaSkill(rawText, tituloDoc, nomeArquivo, totalPaginas), provedor: 'Algoritmo de Estruturação Técnica' };
+        }
+
+        let apiKeyUser = req.body.apiKey || '';
+        const aiResult = await sintetizarSkillComIA(pdfData.text, tituloSkill, nomeDoc, numPages, apiKeyUser);
+        const skillContent = aiResult.content;
 
         fs.writeFileSync(targetFilePath, skillContent, 'utf8');
 
-        console.log(`[PDF Skill] Gerada com sucesso e estruturada: ${targetFilePath} (${numPages} páginas)`);
+        console.log(`[PDF Skill] Gerada com sucesso e interpretada (${aiResult.provedor}): ${targetFilePath} (${numPages} páginas)`);
         
-        const log = `✅ Skill "${tituloSkill}" extraída e ESTRUTURADA para o Antigravity com sucesso!\n• Total de Páginas: ${numPages}\n• Tópicos & Padrões Mapeados automaticamente\n• Caracteres Extraídos: ${pdfData.text ? pdfData.text.length : 0}\n• Arquivo Final: ${targetFilePath}`;
+        const log = `✅ Skill "${tituloSkill}" gerada com sucesso!\n• Provedor de Interpretação: ${aiResult.provedor}\n• Total de Páginas do Livro: ${numPages}\n• Arquivo da Skill: ${targetFilePath}`;
 
         res.json({
             sucesso: true,
@@ -770,7 +885,8 @@ ${textoLimpo}
             caminho: targetFilePath,
             slug,
             titulo: tituloSkill,
-            paginas: numPages
+            paginas: numPages,
+            provedor: aiResult.provedor
         });
 
     } catch (e) {

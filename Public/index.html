@@ -547,6 +547,14 @@
                                     <input type="text" id="skill-pdf-caminho-local" placeholder="C:\Livros\Manual.pdf" class="w-full bg-background border border-outline-variant rounded-lg px-4 py-2.5 text-on-surface focus:border-primary outline-none transition-colors text-sm font-mono">
                                 </div>
                             </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-amber-400 uppercase mb-2 flex justify-between items-center">
+                                    <span>🤖 Chave API Gemini para Interpretação Avançada por IA (Opcional)</span>
+                                    <span class="text-[10px] text-outline font-normal">Sintetiza o livro com Inteligência Artificial</span>
+                                </label>
+                                <input type="password" id="skill-pdf-api-key" placeholder="Cole sua chave API (ex: AIzaSy...)" class="w-full bg-background border border-amber-500/30 rounded-lg px-4 py-2.5 text-on-surface focus:border-amber-400 outline-none transition-colors text-sm font-mono">
+                            </div>
                         </div>
 
                         <div class="bg-background/50 rounded-lg p-3 border border-outline-variant/50">
@@ -2339,7 +2347,8 @@
             resultado.classList.add('hidden');
 
             try {
-                let payload = { titulo, pdfPath: caminhoLocal };
+                const apiKey = document.getElementById('skill-pdf-api-key')?.value.trim();
+                let payload = { titulo, pdfPath: caminhoLocal, apiKey };
 
                 if (file) {
                     logEl.textContent += '⏳ Processando bytes do arquivo PDF...\n';
