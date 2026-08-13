@@ -74,8 +74,11 @@ CREATE TABLE TB_CONFIGURACOES (
 
 ## 🔒 Mecanismo de Concorrência e Lock (`.fdb.lock`)
 
-O Firebird em sistemas Windows restringe acessos simultâneos concorrentes via ponte ISQL. Para solucionar o erro de colisão de processos (`-O arquivo já está sendo usado por outro processo`):
+O Firebird em sistemas Windows restringe acessos simultâneos concorrentes via ponte ISQL. Para solucionar o erro de colisão de processos e timeouts (`[ISQL Bridge] Timeout ao aguardar lock do banco de dados`):
 
-- Foi implementado um **mecanismo de trava baseado em arquivo de SO (`Database/.fdb.lock`)** em `dbConfig.js`.
-- Qualquer script (`Server.js`, `worker_download.js`, `popular_e_rodar.js` ou ponte ISQL) solicita a trava antes de conectar.
-- Caso o arquivo de trava esteja ocupado, o script aguarda com **backoff exponencial com jitter** antes de tentar novamente.
+- **Trava de Arquivo do Sistema (`Database/.fdb.lock`)**: Todos os processos (`Server.js`, `worker_download.js`, `popular_e_rodar.js` ou scripts avulsos) solicitam a trava exclusiva antes de executar chamadas via `executeISQLInternal`.
+- **Auto-Recuperação de Lock Órfão / Mesma Instância**: Se o arquivo de lock pertencer ao mesmo PID do processo atual (`lockedPid === pid`) ou se tiver sido modificado há mais de 45 segundos (`lockAgeMs > 45000`), a trava é reconhecida como órfã e removida automaticamente antes da tentativa de aquisição.
+- **Ajuste Dinâmico de Timeout e Backoff**: Aguarda com backoff exponencial (50ms a 500ms) até o tempo máximo de 30 segundos (30.000ms), correspondendo ao tempo limite de execução do binário `isql.exe`.
+- **Sufixos Únicos em Scripts Temporários**: Cada query gera um arquivo `.sql` temporário contendo um sufixo alfanumérico aleatório (`isql_<pid>_<timestamp>_<random>.sql`), impedindo colisões de I/O em execuções paralelas.
+- **Semáforo Concorrente no Worker (`isWorking`)**: Em `worker_download.js`, a execução do `setInterval` utiliza o controle `isWorking` para evitar requisições sobrepostas durante downloads ativos, prevenindo saturação na ponte ISQL.
+

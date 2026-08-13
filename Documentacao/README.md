@@ -51,4 +51,4 @@ Acesse o painel web em: [http://localhost:3000](http://localhost:3000)
 - **Extração Inteligente de Conteúdo Técnico**: Identificação de comandos de terminal CLI (`npm`, `git`, `docker`, `SQL`, etc.), conceitos chave e passos numerados para orientar o Antigravity IDE.
 - **Visualizador de Skills Aprendidas**: Exibição dos diretórios físicos absolutos no disco (`D:\Projetos...`), botão para copiar o caminho, link direto para o vídeo no YouTube e leitor modal.
 - **Fallback com Whisper Local**: Transcrição automática 100% offline via IA quando o vídeo não possui legendas no YouTube.
-- **Trava de Arquivo Cross-Process (`.fdb.lock`)**: Mecanismo de concorrência com backoff exponencial para gerenciar múltiplos processos acessando o Firebird 5.0 sem colisões.
+- **Trava de Arquivo Cross-Process com Auto-Healing (`.fdb.lock`)**: Mecanismo de concorrência com backoff exponencial, limpeza automática de locks órfãos (mesmo PID ou idade > 45s), nomes únicos em scripts temporários e semáforo isolado de worker para gerenciar o Firebird 5.0 sem colisões ou timeouts.
