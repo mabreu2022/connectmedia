@@ -99,6 +99,25 @@ app.post('/api/canais', (req, res) => {
     });
 });
 
+// Rota 2.1: Deletar um Canal Monitorado
+app.delete('/api/canais/:id', (req, res) => {
+    const idCanal = req.params.id;
+    if (!idCanal) return res.status(400).json({ error: 'ID do canal é obrigatório.' });
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        db.query('DELETE FROM TB_CANAIS WHERE ID_CANAL = ?', [idCanal], (err, result) => {
+            db.detach();
+            if (err) {
+                console.error('Erro ao deletar canal:', err);
+                return res.status(500).json({ error: 'Erro ao deletar canal do banco de dados.' });
+            }
+            res.json({ message: 'Canal removido com sucesso!' });
+        });
+    });
+});
+
 // Rota 3: Buscar Vídeos Pendentes para a Descoberta (Com suporte a filtro por canal)
 app.get('/api/videos', (req, res) => {
     const idCanal = req.query.canal;
