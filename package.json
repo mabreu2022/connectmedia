@@ -6,7 +6,8 @@
   "scripts": {
     "setup-db": "node init_db.js",
     "test": "node testar_canais.js",
-    "start": "node init_db.js && node Server.js"
+    "start": "node init_db.js && node Server.js",
+    "skill": "node gerar_skill.js"
   },
   "keywords": [],
   "author": "",

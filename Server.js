@@ -511,6 +511,40 @@ app.delete('/api/videos/limpar-descoberta', (req, res) => {
 });
 
 
+// Rota: Gerador de Skills para Antigravity
+app.post('/api/gerar-skill', (req, res) => {
+    const { url, titulo, idioma } = req.body;
+
+    if (!url) {
+        return res.status(400).json({ sucesso: false, error: 'URL é obrigatória.' });
+    }
+
+    const scriptPath = path.join(__dirname, 'gerar_skill.js');
+    let args = [url];
+    if (titulo) { args.push('--titulo', titulo); }
+    if (idioma) { args.push('--idioma', idioma); }
+
+    const { execFile } = require('child_process');
+    const processo = execFile(process.execPath, [scriptPath, ...args], {
+        cwd: __dirname,
+        timeout: 300000, // 5 minutos
+        maxBuffer: 1024 * 1024 * 10
+    }, (err, stdout, stderr) => {
+        const log = (stdout || '') + (stderr ? '\n' + stderr : '');
+
+        if (err) {
+            console.error('[Skill] Erro:', err.message);
+            return res.status(500).json({ sucesso: false, log, error: err.message });
+        }
+
+        // Extrai o caminho do arquivo gerado do log
+        const match = log.match(/Salvo em:\s*(.+\.md)/i);
+        const caminho = match ? match[1].trim() : 'Skill gerado em .agents/skills/';
+
+        res.json({ sucesso: true, log, caminho });
+    });
+});
+
 // Inicializa o Servidor
 app.listen(PORT, () => {
     console.log(`🚀 Connect Media rodando em http://localhost:${PORT}`);

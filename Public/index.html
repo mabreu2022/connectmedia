@@ -63,6 +63,18 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                     <span>Configurações</span>
                 </button>
+
+                <!-- Divisor -->
+                <div class="border-t border-outline-variant/40 my-2"></div>
+
+                <button onclick="mudarSecao('skill')" id="nav-skill" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-variant/20 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                    <span>Gerador de Skills</span>
+                </button>
+                <button onclick="mudarSecao('manual')" id="nav-manual" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-variant/20 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                    <span>Manual de Uso</span>
+                </button>
             </nav>
         </div>
         <div class="p-4 border-t border-outline-variant text-xs text-outline text-center">
@@ -266,6 +278,257 @@
             </section>
 
         </div>
+            <!-- 6. SEÇÃO: GERADOR DE SKILLS -->
+            <section class="content-section hidden flex flex-col h-full overflow-y-auto" id="sec-skill">
+                <div class="p-8 max-w-3xl mx-auto w-full">
+                    <div class="mb-8">
+                        <h1 class="text-2xl font-bold text-on-surface">🧠 Gerador de Skills para Antigravity</h1>
+                        <p class="text-sm text-outline mt-2">Extraia o conhecimento de vídeos do YouTube e gere arquivos <code class="bg-surface-variant/30 px-1 rounded text-primary">.md</code> prontos para uso como Skills no Antigravity IDE.</p>
+                    </div>
+
+                    <!-- Card de input -->
+                    <div class="bg-surface border border-outline-variant rounded-xl p-6 mb-6 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-outline uppercase mb-2">URL do Vídeo YouTube</label>
+                            <input type="url" id="skill-url" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-background border border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:border-primary outline-none transition-colors text-sm">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-outline uppercase mb-2">Título (opcional)</label>
+                                <input type="text" id="skill-titulo" placeholder="Ex: Firebird 5.0 Setup" class="w-full bg-background border border-outline-variant rounded-lg px-4 py-2 text-on-surface focus:border-primary outline-none transition-colors text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-outline uppercase mb-2">Idioma preferencial</label>
+                                <select id="skill-idioma" class="w-full bg-background border border-outline-variant rounded-lg px-4 py-2 text-on-surface focus:border-primary outline-none transition-colors text-sm">
+                                    <option value="pt">🇧🇷 Português</option>
+                                    <option value="en">🇺🇸 Inglês</option>
+                                    <option value="">🌐 Automático</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="bg-background/50 rounded-lg p-3 border border-outline-variant/50">
+                            <p class="text-xs text-outline flex items-start gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 mt-0.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                O sistema tenta primeiro legendas automáticas do YouTube. Se não houver, usa o <strong class="text-on-surface">Whisper</strong> para transcrição local do áudio (gratuito, roda 100% offline).
+                            </p>
+                        </div>
+                        <button onclick="gerarSkill()" id="btn-gerar-skill" class="w-full bg-primary hover:bg-[#d8e2ff] text-on-primary py-3 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                            Gerar Skill .md
+                        </button>
+                    </div>
+
+                    <!-- Log de execução -->
+                    <div id="skill-log-container" class="hidden bg-surface border border-outline-variant rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold text-outline uppercase">Log de Execução</span>
+                            <div id="skill-status-badge" class="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary">Processando...</div>
+                        </div>
+                        <pre id="skill-log" class="text-xs text-on-surface/80 font-mono bg-background/50 rounded p-3 overflow-y-auto max-h-64 whitespace-pre-wrap"></pre>
+                        <div id="skill-resultado" class="hidden mt-4 p-3 bg-[#0a2010] border border-green-700/40 rounded-lg">
+                            <p class="text-xs text-green-400 font-semibold mb-1">✅ Skill gerado com sucesso!</p>
+                            <p id="skill-resultado-path" class="text-xs text-outline font-mono"></p>
+                        </div>
+                    </div>
+
+                    <!-- Linha de comando -->
+                    <div class="mt-6 bg-surface border border-outline-variant rounded-xl p-5">
+                        <h3 class="text-sm font-semibold text-on-surface mb-3">⌨️ Uso via Linha de Comando</h3>
+                        <div class="space-y-2">
+                            <div class="bg-background rounded p-3 font-mono text-xs text-primary">node gerar_skill.js https://youtube.com/watch?v=VIDEO_ID</div>
+                            <div class="bg-background rounded p-3 font-mono text-xs text-primary">node gerar_skill.js URL --titulo "Meu Tópico" --idioma en</div>
+                            <div class="bg-background rounded p-3 font-mono text-xs text-primary">npm run skill -- https://youtube.com/watch?v=VIDEO_ID</div>
+                        </div>
+                        <p class="text-xs text-outline mt-3">O Skill gerado é salvo em: <code class="text-primary">.agents/skills/&lt;slug&gt;/SKILL.md</code></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. SEÇÃO: MANUAL DE USO -->
+            <section class="content-section hidden flex flex-col h-full overflow-y-auto" id="sec-manual">
+                <div class="p-8 max-w-4xl mx-auto w-full pb-16">
+                    <!-- Header -->
+                    <div class="mb-10">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="bg-primary/20 p-3 rounded-xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                            </div>
+                            <div>
+                                <h1 class="text-3xl font-bold text-on-surface">Manual de Uso</h1>
+                                <p class="text-sm text-outline mt-0.5">Connect Media v2.0 — Sistema de gerenciamento de biblioteca de vídeos</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3 mt-6">
+                            <div class="bg-surface border border-outline-variant rounded-xl p-4 text-center">
+                                <div class="text-2xl mb-1">📺</div>
+                                <div class="text-xs text-outline">Monitora canais</div>
+                                <div class="text-sm font-semibold text-on-surface">YouTube</div>
+                            </div>
+                            <div class="bg-surface border border-outline-variant rounded-xl p-4 text-center">
+                                <div class="text-2xl mb-1">💾</div>
+                                <div class="text-xs text-outline">Downloads em</div>
+                                <div class="text-sm font-semibold text-on-surface">MP4 e MP3</div>
+                            </div>
+                            <div class="bg-surface border border-outline-variant rounded-xl p-4 text-center">
+                                <div class="text-2xl mb-1">🧠</div>
+                                <div class="text-xs text-outline">Gera Skills para</div>
+                                <div class="text-sm font-semibold text-on-surface">Antigravity</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seções do manual -->
+                    <div class="space-y-8">
+
+                        <!-- 1. Descoberta -->
+                        <div class="bg-surface border border-outline-variant rounded-xl overflow-hidden">
+                            <div class="bg-primary/10 border-b border-outline-variant px-6 py-4 flex items-center gap-3">
+                                <span class="bg-primary text-on-primary text-xs font-bold px-2.5 py-1 rounded-full">01</span>
+                                <h2 class="font-bold text-on-surface">Descoberta de Vídeos</h2>
+                            </div>
+                            <div class="p-6 space-y-3 text-sm text-on-surface/80 leading-relaxed">
+                                <p>A tela de <strong class="text-on-surface">Descoberta</strong> exibe todos os vídeos encontrados automaticamente pelo monitor de canais que ainda não foram baixados.</p>
+                                <ul class="space-y-2 ml-4">
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>Clique no thumbnail ou no checkbox para <strong class="text-on-surface">selecionar vídeos</strong></span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>Use <strong class="text-on-surface">Marcar Todos</strong> para selecionar a lista completa visível</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>Escolha o <strong class="text-on-surface">Formato</strong> (🎥 MP4 ou 🎵 MP3) antes de "Baixar Marcados"</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>Cada card tem botões individuais <strong class="text-on-surface">MP4</strong> e <strong class="text-[#bb86fc]">MP3</strong> para agendar um único vídeo</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>O botão <strong class="text-red-400">Limpar Tudo</strong> remove todos os pendentes sem baixar</span></li>
+                                </ul>
+                                <div class="bg-background rounded-lg p-3 border border-outline-variant/50 mt-3">
+                                    <p class="text-xs text-outline">💡 A lista atualiza automaticamente a cada 15 segundos enquanto a tela está aberta.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Fila de Downloads -->
+                        <div class="bg-surface border border-outline-variant rounded-xl overflow-hidden">
+                            <div class="bg-primary/10 border-b border-outline-variant px-6 py-4 flex items-center gap-3">
+                                <span class="bg-primary text-on-primary text-xs font-bold px-2.5 py-1 rounded-full">02</span>
+                                <h2 class="font-bold text-on-surface">Fila de Downloads</h2>
+                            </div>
+                            <div class="p-6 space-y-3 text-sm text-on-surface/80 leading-relaxed">
+                                <p>Monitora em tempo real o progresso dos downloads em execução.</p>
+                                <ul class="space-y-2 ml-4">
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>A barra de progresso atualiza automaticamente a cada 3 segundos</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>Downloads são processados <strong class="text-on-surface">em sequência</strong> pelo worker em segundo plano</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>Após conclusão, o vídeo vai automaticamente para o <strong class="text-on-surface">Acervo</strong></span></li>
+                                </ul>
+                                <div class="grid grid-cols-3 gap-2 mt-3 text-xs text-center">
+                                    <div class="bg-background rounded p-2 border border-outline-variant"><span class="text-yellow-400 font-mono">DOWNLOAD_AGENDADO</span><br><span class="text-outline">Na fila</span></div>
+                                    <div class="bg-background rounded p-2 border border-outline-variant"><span class="text-blue-400 font-mono">BAIXANDO</span><br><span class="text-outline">Em progresso</span></div>
+                                    <div class="bg-background rounded p-2 border border-outline-variant"><span class="text-green-400 font-mono">DOWNLOAD_CONCLUIDO</span><br><span class="text-outline">Concluído</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Canais Monitorados -->
+                        <div class="bg-surface border border-outline-variant rounded-xl overflow-hidden">
+                            <div class="bg-primary/10 border-b border-outline-variant px-6 py-4 flex items-center gap-3">
+                                <span class="bg-primary text-on-primary text-xs font-bold px-2.5 py-1 rounded-full">03</span>
+                                <h2 class="font-bold text-on-surface">Canais Monitorados</h2>
+                            </div>
+                            <div class="p-6 space-y-3 text-sm text-on-surface/80 leading-relaxed">
+                                <p>Gerencie os canais que o sistema monitora automaticamente.</p>
+                                <ul class="space-y-2 ml-4">
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>Clique em <strong class="text-on-surface">+ Novo Canal</strong> e cole a URL do canal do YouTube</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>O monitor roda automaticamente a cada <strong class="text-on-surface">60 minutos</strong> buscando novos vídeos</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>Use <strong class="text-on-surface">Atualizar Agora</strong> para forçar uma varredura imediata</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>O botão <strong class="text-red-400">Excluir</strong> remove o canal e todos os seus vídeos da biblioteca</span></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 4. Configurações -->
+                        <div class="bg-surface border border-outline-variant rounded-xl overflow-hidden">
+                            <div class="bg-primary/10 border-b border-outline-variant px-6 py-4 flex items-center gap-3">
+                                <span class="bg-primary text-on-primary text-xs font-bold px-2.5 py-1 rounded-full">04</span>
+                                <h2 class="font-bold text-on-surface">Configurações</h2>
+                            </div>
+                            <div class="p-6 text-sm text-on-surface/80 leading-relaxed">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <h4 class="text-xs font-bold text-outline uppercase mb-2">Opções disponíveis</h4>
+                                        <ul class="space-y-2 ml-2">
+                                            <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Pasta de downloads</strong>: destino dos arquivos baixados</span></li>
+                                            <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Qtd. de vídeos</strong> por canal em cada varredura</span></li>
+                                            <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Tipos de conteúdo</strong>: vídeos, shorts e/ou lives</span></li>
+                                            <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Intervalo</strong> entre varreduras automáticas (minutos)</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-background rounded-lg p-4 border border-outline-variant/50">
+                                        <p class="text-xs font-bold text-outline mb-2">Arquitetura do sistema</p>
+                                        <div class="space-y-1.5 text-xs font-mono">
+                                            <div class="flex items-center gap-2"><span class="text-green-400">●</span> <span>Server.js</span> <span class="text-outline">— API REST :3000</span></div>
+                                            <div class="flex items-center gap-2"><span class="text-blue-400">●</span> <span>popular_e_rodar.js</span> <span class="text-outline">— Monitor</span></div>
+                                            <div class="flex items-center gap-2"><span class="text-purple-400">●</span> <span>worker_download.js</span> <span class="text-outline">— Downloads</span></div>
+                                            <div class="flex items-center gap-2"><span class="text-yellow-400">●</span> <span>BIBLIOTECA_YT.FDB</span> <span class="text-outline">— Firebird 5</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. Gerador de Skills -->
+                        <div class="bg-surface border border-outline-variant rounded-xl overflow-hidden">
+                            <div class="bg-primary/10 border-b border-outline-variant px-6 py-4 flex items-center gap-3">
+                                <span class="bg-primary text-on-primary text-xs font-bold px-2.5 py-1 rounded-full">05</span>
+                                <h2 class="font-bold text-on-surface">Gerador de Skills para Antigravity</h2>
+                            </div>
+                            <div class="p-6 space-y-3 text-sm text-on-surface/80 leading-relaxed">
+                                <p>Extrai conhecimento de vídeos do YouTube e gera arquivos <code class="bg-surface-variant/30 px-1 rounded text-primary">.md</code> prontos para uso como Skills no Antigravity IDE.</p>
+                                <div class="bg-background rounded-lg p-4 border border-outline-variant/50">
+                                    <p class="text-xs font-bold text-outline mb-2">Pipeline de extração</p>
+                                    <div class="flex items-center gap-2 text-xs flex-wrap">
+                                        <span class="bg-surface-variant/30 px-2 py-1 rounded">YouTube URL</span>
+                                        <span class="text-outline">→</span>
+                                        <span class="bg-surface-variant/30 px-2 py-1 rounded">yt-dlp (legendas)</span>
+                                        <span class="text-outline">→ se não houver →</span>
+                                        <span class="bg-purple-900/30 border border-purple-700/30 px-2 py-1 rounded text-purple-300">Whisper (áudio local)</span>
+                                        <span class="text-outline">→</span>
+                                        <span class="bg-surface-variant/30 px-2 py-1 rounded">SKILL.md</span>
+                                        <span class="text-outline">→</span>
+                                        <span class="bg-primary/20 px-2 py-1 rounded text-primary">.agents/skills/</span>
+                                    </div>
+                                </div>
+                                <ul class="space-y-2 ml-4">
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span><strong class="text-on-surface">Whisper</strong> é 100% gratuito e roda offline — não precisa de chave de API</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>O Skill gerado é detectado automaticamente pelo Antigravity na próxima conversa</span></li>
+                                    <li class="flex gap-2"><span class="text-primary shrink-0">▸</span> <span>Use também pela linha de comando: <code class="bg-background px-1 rounded text-primary">node gerar_skill.js URL</code></span></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 6. Iniciando o sistema -->
+                        <div class="bg-surface border border-outline-variant rounded-xl overflow-hidden">
+                            <div class="bg-primary/10 border-b border-outline-variant px-6 py-4 flex items-center gap-3">
+                                <span class="bg-primary text-on-primary text-xs font-bold px-2.5 py-1 rounded-full">06</span>
+                                <h2 class="font-bold text-on-surface">Iniciando o Sistema</h2>
+                            </div>
+                            <div class="p-6 space-y-4 text-sm text-on-surface/80 leading-relaxed">
+                                <p>O sistema é composto por 3 processos que devem rodar juntos:</p>
+                                <div class="bg-background rounded-lg p-4 border border-outline-variant/50 font-mono text-xs space-y-2">
+                                    <p class="text-outline"># Método mais fácil — inicia tudo de uma vez:</p>
+                                    <p class="text-primary">iniciar_sistema.bat</p>
+                                    <p class="text-outline mt-3"># Ou manualmente em 3 terminais separados:</p>
+                                    <p class="text-green-400">node Server.js</p>
+                                    <p class="text-blue-400">node popular_e_rodar.js</p>
+                                    <p class="text-purple-400">node worker_download.js</p>
+                                </div>
+                                <p>Acesse o sistema em: <a href="http://localhost:3000" target="_blank" class="text-primary hover:underline">http://localhost:3000</a></p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Footer do manual -->
+                    <div class="mt-10 text-center text-xs text-outline border-t border-outline-variant pt-6">
+                        Connect Media v2.0 • Desenvolvido com Antigravity IDE • Banco de dados: Firebird 5.0
+                    </div>
+                </div>
+            </section>
+
+        </div>
     </main>
 
     <!-- Modal Novo Canal -->
@@ -344,12 +607,14 @@
 
         function mudarSecao(secao) {
             document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`sec-${secao}`).classList.remove('hidden');
+            const secEl = document.getElementById(`sec-${secao}`);
+            if (secEl) secEl.classList.remove('hidden');
 
             document.querySelectorAll('aside nav button').forEach(btn => {
                 btn.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-variant/20 transition-colors";
             });
-            document.getElementById(`nav-${secao}`).className = "w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors bg-primary text-on-primary";
+            const navEl = document.getElementById(`nav-${secao}`);
+            if (navEl) navEl.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors bg-primary text-on-primary";
 
             if (intervaloFila && secao !== 'fila') {
                 clearInterval(intervaloFila);
@@ -728,6 +993,61 @@
                 const res = await fetch(`/api/videos/${idVideo}`, { method: 'DELETE' });
                 if(res.ok) carregarFila();
             } catch(e) { console.error(e); }
+        }
+        // ─── Gerador de Skills ────────────────────────────────────────────────────────
+        async function gerarSkill() {
+            const url = document.getElementById('skill-url').value.trim();
+            const titulo = document.getElementById('skill-titulo').value.trim();
+            const idioma = document.getElementById('skill-idioma').value;
+
+            if (!url) {
+                alert('Por favor, informe a URL do vídeo do YouTube.');
+                return;
+            }
+
+            const btn = document.getElementById('btn-gerar-skill');
+            const logContainer = document.getElementById('skill-log-container');
+            const logEl = document.getElementById('skill-log');
+            const badge = document.getElementById('skill-status-badge');
+            const resultado = document.getElementById('skill-resultado');
+            const resultadoPath = document.getElementById('skill-resultado-path');
+
+            btn.disabled = true;
+            btn.innerHTML = `<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Gerando...`;
+            logContainer.classList.remove('hidden');
+            logEl.textContent = '⏳ Iniciando extração...\n';
+            badge.textContent = 'Processando...';
+            badge.className = 'text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary';
+            resultado.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/gerar-skill', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, titulo, idioma })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.sucesso) {
+                    logEl.textContent = data.log || '✅ Concluído!';
+                    badge.textContent = '✅ Concluído';
+                    badge.className = 'text-xs px-2 py-0.5 rounded-full bg-green-700/30 text-green-400';
+                    resultado.classList.remove('hidden');
+                    resultadoPath.textContent = data.caminho;
+                } else {
+                    logEl.textContent = data.log || data.error || 'Erro desconhecido.';
+                    badge.textContent = '❌ Erro';
+                    badge.className = 'text-xs px-2 py-0.5 rounded-full bg-red-700/30 text-red-400';
+                }
+            } catch(e) {
+                logEl.textContent = '❌ Erro de comunicação: ' + e.message;
+                badge.textContent = '❌ Erro';
+                badge.className = 'text-xs px-2 py-0.5 rounded-full bg-red-700/30 text-red-400';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg> Gerar Skill .md`;
         }
 
         async function carregarConfiguracoes() {
