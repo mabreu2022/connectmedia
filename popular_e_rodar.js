@@ -5,14 +5,64 @@ const fs = require('fs');
 
 const dbOptions = require('./dbConfig');
 
+const runOnce = process.argv.includes('--once');
+const monitorLockPath = path.join(__dirname, 'Database', '.monitor.lock');
+
+function acquireMonitorLock() {
+    const pid = process.pid;
+    try {
+        if (fs.existsSync(monitorLockPath)) {
+            const lockedPid = parseInt(fs.readFileSync(monitorLockPath, 'utf8'), 10);
+            if (lockedPid && lockedPid !== pid) {
+                try {
+                    process.kill(lockedPid, 0);
+                    return false; // Processo dono ainda está em execução
+                } catch (_) {
+                    // PID inativo — limpa o lock antigo
+                    try { fs.unlinkSync(monitorLockPath); } catch (_) {}
+                }
+            }
+        }
+        fs.writeFileSync(monitorLockPath, String(pid));
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+function releaseMonitorLock() {
+    try {
+        if (fs.existsSync(monitorLockPath)) {
+            const lockedPid = parseInt(fs.readFileSync(monitorLockPath, 'utf8'), 10);
+            if (lockedPid === process.pid) {
+                fs.unlinkSync(monitorLockPath);
+            }
+        }
+    } catch (_) {}
+}
+
+process.on('exit', releaseMonitorLock);
+process.on('SIGINT', () => { releaseMonitorLock(); process.exit(0); });
+process.on('uncaughtException', (err) => { releaseMonitorLock(); console.error(err); process.exit(1); });
+
 function monitorarCanais() {
+    if (!acquireMonitorLock()) {
+        console.log("ℹ️ [Monitor de Canais] Uma varredura já está em andamento. Execução duplicada ignorada.");
+        if (runOnce) process.exit(0);
+        return;
+    }
+
     console.log("\n🔍 [Monitor de Canais] Iniciando ciclo de varredura...");
 
     Firebird.attach(dbOptions, (err, db) => {
         if (err) {
             console.error("❌ Erro de conexão com o Firebird:", err);
-            // Tenta de novo em 1 minuto se o banco cair
-            setTimeout(monitorarCanais, 60000); 
+            releaseMonitorLock();
+            if (runOnce) {
+                process.exit(1);
+            } else {
+                setTimeout(monitorarCanais, 60000); 
+            }
             return;
         }
 
@@ -61,10 +111,14 @@ function monitorarCanais() {
                 if (err || !canais || canais.length === 0) {
                     console.log("⚠️ Nenhum canal ativo encontrado.");
                     db.detach();
+                    releaseMonitorLock();
                     
-                    // Se não tiver canal, aguarda o intervalo configurado e tenta de novo
-                    console.log(`⏳ Aguardando ${intervaloMinutos} minutos para verificar novamente...`);
-                    setTimeout(monitorarCanais, intervaloMinutos * 60000);
+                    if (runOnce) {
+                        process.exit(0);
+                    } else {
+                        console.log(`⏳ Aguardando ${intervaloMinutos} minutos para verificar novamente...`);
+                        setTimeout(monitorarCanais, intervaloMinutos * 60000);
+                    }
                     return;
                 }
 
@@ -73,11 +127,15 @@ function monitorarCanais() {
                 function processarProximoCanal() {
                     if (canalIndex >= canais.length) {
                         db.detach();
+                        releaseMonitorLock();
                         console.log(`\n✨ Ciclo de monitoramento concluído!`);
-                        console.log(`⏳ Próximo ciclo agendado para daqui a ${intervaloMinutos} minutos...`);
                         
-                        // 👉 AQUI OCORRE A MÁGICA DO TEMPORIZADOR DINÂMICO
-                        setTimeout(monitorarCanais, intervaloMinutos * 60000);
+                        if (runOnce) {
+                            process.exit(0);
+                        } else {
+                            console.log(`⏳ Próximo ciclo agendado para daqui a ${intervaloMinutos} minutos...`);
+                            setTimeout(monitorarCanais, intervaloMinutos * 60000);
+                        }
                         return;
                     }
 
@@ -152,7 +210,8 @@ function monitorarCanais() {
                                         (ID_CANAL, TITULO_VIDEO, URL_VIDEO, THUMBNAIL_URL, STATUS_DOWNLOAD, PROGRESSO) 
                                         VALUES (?, ?, ?, ?, 'PENDENTE', 0)
                                     `;
-                                    db.query(insertQuery, [canal.ID_CANAL, titulo, urlVideo, thumbnail], (err) => {
+                                    const queryFn = (db.querySilent || db.query).bind(db);
+                                    queryFn(insertQuery, [canal.ID_CANAL, titulo, urlVideo, thumbnail], (err) => {
                                         if (!err) console.log(`   📺 Novo conteúdo salvo: ${titulo}`);
                                         processarProximoVideo();
                                     });

@@ -77,9 +77,9 @@ app.post('/api/canais', (req, res) => {
                 // 3. Responde IMEDIATAMENTE para a tela fechar o modal sem travar
                 res.status(201).json({ message: 'Canal cadastrado com sucesso! A varredura inicial está rodando em segundo plano.' });
 
-                // 4. Executa a varredura em background (assíncrona) sem prender a interface
+                // 4. Executa a varredura em background (assíncrona e pontual) sem prender a interface
                 const scriptMonitor = path.join(__dirname, 'popular_e_rodar.js');
-                exec(`node "${scriptMonitor}"`, (error, stdout, stderr) => {
+                exec(`node "${scriptMonitor}" --once`, (error, stdout, stderr) => {
                     if (error) {
                         console.error('Erro ao executar varredura inicial em background:', error);
                     } else {
@@ -304,7 +304,7 @@ app.delete('/api/videos/:id', (req, res) => {
 // Rota 10: para forçar varredura manual de todos os canais ativos
 app.post('/api/canais/atualizar', (req, res) => {
     const scriptMonitor = path.join(__dirname, 'popular_e_rodar.js');
-    exec(`node "${scriptMonitor}"`, (error, stdout, stderr) => {
+    exec(`node "${scriptMonitor}" --once`, (error, stdout, stderr) => {
         if (error) {
             console.error('Erro ao executar varredura manual:', error);
             return res.status(500).json({ error: 'Erro ao executar a varredura.' });
@@ -380,7 +380,8 @@ app.post('/api/baixar-avulso', (req, res) => {
                                 (ID_CANAL, TITULO_VIDEO, URL_VIDEO, THUMBNAIL_URL, STATUS_DOWNLOAD, PROGRESSO) 
                                 VALUES (?, ?, ?, ?, 'PENDENTE', 0)
                             `;
-                            db.query(insertQuery, [idCanalAvulso, tituloFormatado, urlVideo, thumbnail], () => {});
+                            const queryFn = (db.querySilent || db.query).bind(db);
+                            queryFn(insertQuery, [idCanalAvulso, tituloFormatado, urlVideo, thumbnail], () => {});
                         }
                     } catch (e) {
                         console.error("Erro ao ler JSON da URL avulsa:", e);

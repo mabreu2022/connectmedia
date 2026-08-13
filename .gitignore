@@ -17,8 +17,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Lock file do banco (gerado em runtime)
+# Lock files do banco e do monitor (gerados em runtime)
 Database/.fdb.lock
+Database/.monitor.lock
 
 # Executável yt-dlp (binário externo, deve ser baixado manualmente)
 yt-dlp.exe
