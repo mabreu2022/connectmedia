@@ -56,8 +56,19 @@ async function rodarTestes() {
         }
         console.log("   ✅ Payload Pix EMV gerado com sucesso!");
 
-        // 3. Testa confirmação de pagamento Pix
-        console.log("\n3️⃣ Testando POST /api/prompts/confirmar-pix...");
+        // 3. Testa envio de comprovante Pix pelo cliente
+        console.log("\n3️⃣ Testando POST /api/prompts/enviar-comprovante...");
+        const comprovanteSimulado = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+        const resComp = await request('POST', '/api/prompts/enviar-comprovante', { idVenda: resPix.body.idVenda, comprovante: comprovanteSimulado });
+        console.log(`   Status: ${resComp.status}`);
+        console.log(`   Mensagem: ${resComp.body.message}`);
+        if (resComp.status !== 200) {
+            throw new Error("Falha ao enviar comprovante Pix.");
+        }
+        console.log("   ✅ Comprovante Pix anexado com sucesso!");
+
+        // 4. Testa confirmação de pagamento Pix
+        console.log("\n4️⃣ Testando POST /api/prompts/confirmar-pix...");
         const resConf = await request('POST', '/api/prompts/confirmar-pix', { idVenda: resPix.body.idVenda });
         console.log(`   Status: ${resConf.status}`);
         console.log(`   Mensagem: ${resConf.body.message}`);

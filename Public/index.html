@@ -923,6 +923,7 @@
                                         <th class="p-3">Status</th>
                                         <th class="p-3">Data</th>
                                         <th class="p-3">Itens Comprados</th>
+                                        <th class="p-3 text-center">Comprovante</th>
                                     </tr>
                                 </thead>
                                 <tbody id="admin-tabela-vendas">
@@ -1028,6 +1029,12 @@
 
             <!-- Footer do Modal com confirmação -->
             <div class="p-6 border-t border-outline-variant bg-surface space-y-3">
+                <input type="file" id="modal-pix-file" accept="image/*,.pdf" class="hidden" onchange="processarArquivoComprovante(this)">
+                <button id="btn-anexar-comprovante" onclick="document.getElementById('modal-pix-file').click()" class="w-full bg-surface-variant/40 hover:bg-surface-variant/60 text-amber-300 border border-dashed border-amber-500/40 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-2">
+                    <span>📎 Anexar / Enviar Comprovante de Pagamento</span>
+                </button>
+                <div id="modal-pix-comprovante-status" class="hidden text-xs font-semibold text-center py-1"></div>
+
                 <button id="btn-confirmar-pagamento-pix" onclick="confirmarPagamentoPixManual()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2 transition-all">
                     <span>✅ Já Realizei o Pagamento (Liberar Prompts)</span>
                 </button>
@@ -1035,6 +1042,25 @@
                     Cancelar / Pagar Mais Tarde
                 </button>
             </div>
+    </div>
+
+    <!-- MODAL DE VISUALIZAÇÃO DE COMPROVANTE (ADMIN) -->
+    <div id="modal-ver-comprovante-admin" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="bg-surface border border-outline-variant rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface">
+                <h3 class="text-sm font-bold text-on-surface uppercase flex items-center gap-2">
+                    <span>📄 Comprovante de Pagamento PIX</span>
+                    <span id="modal-comprovante-id-venda" class="text-xs text-amber-400 font-mono">#--</span>
+                </h3>
+                <button onclick="fecharModalComprovanteAdmin()" class="text-outline hover:text-on-surface p-1.5 rounded-lg hover:bg-surface-variant/30 transition-colors">✕</button>
+            </div>
+            <div class="p-6 overflow-y-auto flex items-center justify-center bg-background min-h-[300px]" id="modal-comprovante-container">
+                <!-- Imagem ou preview do comprovante -->
+            </div>
+            <div class="p-4 border-t border-outline-variant bg-surface flex justify-end">
+                <button onclick="fecharModalComprovanteAdmin()" class="bg-surface-variant/40 hover:bg-surface-variant/60 text-on-surface px-4 py-2 rounded-xl text-xs font-bold transition-colors">Fechar</button>
+            </div>
+        </div>
     </div>
 
     <!-- MODAL SAAS DE AUTENTICAÇÃO (LOGIN, REGISTRO, ESQUECI MINHA SENHA) -->
@@ -2384,6 +2410,14 @@
             document.getElementById('modal-pix-id-venda').innerText = `Ordem #${ordemPix.idVenda}`;
             document.getElementById('modal-pix-copia-cola').value = ordemPix.codigoPix;
 
+            const lblStatus = document.getElementById('modal-pix-comprovante-status');
+            if (lblStatus) {
+                lblStatus.innerText = '';
+                lblStatus.classList.add('hidden');
+            }
+            const fileInput = document.getElementById('modal-pix-file');
+            if (fileInput) fileInput.value = '';
+
             // Renderiza QR Code visual usando serviço público seguro de QR Code SVG/PNG
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(ordemPix.codigoPix)}`;
             document.getElementById('modal-pix-qrcode-img').src = qrUrl;
@@ -2433,6 +2467,46 @@
                 navigator.clipboard.writeText(input.value);
                 alert('Código PIX Copia e Cola copiado para a área de transferência!');
             }
+        }
+
+        async function processarArquivoComprovante(input) {
+            if (!input.files || !input.files[0] || !ordemPixAtual || !ordemPixAtual.idVenda) return;
+            const file = input.files[0];
+            const lblStatus = document.getElementById('modal-pix-comprovante-status');
+            if (lblStatus) {
+                lblStatus.innerText = '⏳ Enviando comprovante...';
+                lblStatus.className = 'text-xs text-amber-400 font-semibold mb-2 text-center block';
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64Data = e.target.result;
+                try {
+                    const res = await fetch('/api/prompts/enviar-comprovante', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idVenda: ordemPixAtual.idVenda, comprovante: base64Data })
+                    });
+                    if (res.ok) {
+                        if (lblStatus) {
+                            lblStatus.innerText = '✅ Comprovante enviado com sucesso! Aguardando verificação.';
+                            lblStatus.className = 'text-xs text-emerald-400 font-bold mb-2 text-center block';
+                        }
+                    } else {
+                        if (lblStatus) {
+                            lblStatus.innerText = '❌ Erro ao enviar comprovante. Tente novamente.';
+                            lblStatus.className = 'text-xs text-red-400 font-bold mb-2 text-center block';
+                        }
+                    }
+                } catch(err) {
+                    console.error(err);
+                    if (lblStatus) {
+                        lblStatus.innerText = '❌ Erro de conexão ao enviar comprovante.';
+                        lblStatus.className = 'text-xs text-red-400 font-bold mb-2 text-center block';
+                    }
+                }
+            };
+            reader.readAsDataURL(file);
         }
 
         async function confirmarPagamentoPixManual() {
@@ -2876,13 +2950,46 @@
             } catch(e) { console.error(e); }
         }
 
+        function visualizarComprovanteAdmin(idVenda, comprovanteData) {
+            const modal = document.getElementById('modal-ver-comprovante-admin');
+            const lblId = document.getElementById('modal-comprovante-id-venda');
+            const container = document.getElementById('modal-comprovante-container');
+            if (!modal || !container) return;
+
+            if (lblId) lblId.innerText = `#${idVenda}`;
+            container.innerHTML = '';
+
+            if (!comprovanteData) {
+                container.innerHTML = '<p class="text-outline text-xs">Nenhum comprovante anexado para esta venda.</p>';
+            } else if (comprovanteData.startsWith('data:image/') || comprovanteData.startsWith('data:application/pdf')) {
+                if (comprovanteData.startsWith('data:image/')) {
+                    container.innerHTML = `<img src="${comprovanteData}" alt="Comprovante Ordem #${idVenda}" class="max-w-full max-h-[70vh] object-contain rounded-xl border border-outline-variant shadow-md">`;
+                } else {
+                    container.innerHTML = `<iframe src="${comprovanteData}" class="w-full h-[60vh] rounded-xl border border-outline-variant"></iframe>`;
+                }
+            } else {
+                container.innerHTML = `<div class="bg-surface p-4 rounded-xl text-xs font-mono text-on-surface whitespace-pre-wrap max-w-full overflow-auto">${escaparHtml(comprovanteData)}</div>`;
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function fecharModalComprovanteAdmin() {
+            const modal = document.getElementById('modal-ver-comprovante-admin');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
         function renderizarTabelaVendasAdmin(vendas) {
             const tbody = document.getElementById('admin-tabela-vendas');
             if (!tbody) return;
             tbody.innerHTML = '';
 
             if (vendas.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-outline">Nenhuma ordem de pagamento registrada ainda.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-outline">Nenhuma ordem de pagamento registrada ainda.</td></tr>';
                 return;
             }
 
@@ -2901,12 +3008,21 @@
                     if (Array.isArray(parsed)) itensResumo = parsed.map(i => i.titulo).join(', ');
                 } catch(_) {}
 
+                if (!window._vendasAdminComprovantes) window._vendasAdminComprovantes = {};
+                window._vendasAdminComprovantes[v.ID_VENDA] = v.COMPROVANTE;
+
+                let btnComprovante = '<span class="text-outline text-[11px]">Sem anexo</span>';
+                if (v.COMPROVANTE) {
+                    btnComprovante = `<button onclick="visualizarComprovanteAdmin('${v.ID_VENDA}', window._vendasAdminComprovantes['${v.ID_VENDA}'])" class="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all inline-flex items-center gap-1">📄 Ver Comprovante</button>`;
+                }
+
                 tr.innerHTML = `
                     <td class="p-3 font-mono font-bold">#${v.ID_VENDA}</td>
                     <td class="p-3 font-bold text-amber-400">R$ ${parseFloat(v.VALOR_TOTAL || 0).toFixed(2).replace('.', ',')}</td>
                     <td class="p-3">${statusBadge}</td>
                     <td class="p-3 font-mono text-outline">${v.DATA_CRIACAO ? new Date(v.DATA_CRIACAO).toLocaleString('pt-BR') : '-'}</td>
                     <td class="p-3 text-outline truncate max-w-xs" title="${escaparHtml(itensResumo)}">${escaparHtml(itensResumo)}</td>
+                    <td class="p-3 text-center">${btnComprovante}</td>
                 `;
                 tbody.appendChild(tr);
             });

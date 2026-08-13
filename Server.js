@@ -11,7 +11,8 @@ const PORT = 3000;
 
 // Middlewares
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ limit: '15mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Configuração de Conexão com o Firebird 5.0
@@ -878,6 +879,26 @@ app.post('/api/prompts/confirmar-pix', (req, res) => {
     });
 });
 
+// Rota: Envia comprovante de pagamento Pix da ordem
+app.post('/api/prompts/enviar-comprovante', (req, res) => {
+    const { idVenda, comprovante } = req.body;
+    if (!idVenda || !comprovante) {
+        return res.status(400).json({ error: 'ID da venda e comprovante são obrigatórios.' });
+    }
+
+    Firebird.attach(dbOptions, (err, db) => {
+        if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
+
+        db.query('UPDATE TB_VENDAS_PIX SET COMPROVANTE = ? WHERE ID_VENDA = ?', [comprovante, idVenda], (errUp) => {
+            db.detach();
+            if (errUp) return res.status(500).json({ error: 'Erro ao salvar comprovante no banco de dados.' });
+
+            logger.success('LOJA PIX', `📄 Comprovante anexado para a ordem Pix #${idVenda}`);
+            res.json({ success: true, message: 'Comprovante de pagamento enviado com sucesso!' });
+        });
+    });
+});
+
 // =======================================================================
 // ROTAS DE AUTENTICAÇÃO SAAS (LOGIN, CADASTRO, ESQUECI SENHA)
 // =======================================================================
@@ -1125,14 +1146,24 @@ app.get('/api/admin/vendas', (req, res) => {
         if (err) return res.status(500).json({ error: 'Erro de conexão com o banco.' });
 
         const query = `
-            SELECT v.ID_VENDA, v.VALOR_TOTAL, v.STATUS, v.DATA_CRIACAO, v.ITENS_JSON
+            SELECT v.ID_VENDA, v.VALOR_TOTAL, v.STATUS, v.DATA_CRIACAO, v.ITENS_JSON, v.COMPROVANTE
             FROM TB_VENDAS_PIX v
             ORDER BY v.ID_VENDA DESC
         `;
         db.query(query, (err, result) => {
             db.detach();
             if (err) return res.status(500).json({ error: 'Erro ao buscar extrato de vendas.' });
-            res.json(result || []);
+
+            const vendas = (result || []).map(v => ({
+                ID_VENDA: v.ID_VENDA,
+                VALOR_TOTAL: v.VALOR_TOTAL,
+                STATUS: v.STATUS,
+                DATA_CRIACAO: v.DATA_CRIACAO,
+                ITENS_JSON: v.ITENS_JSON,
+                COMPROVANTE: v.COMPROVANTE ? v.COMPROVANTE.toString('utf8') : null
+            }));
+
+            res.json(vendas);
         });
     });
 });
