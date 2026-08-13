@@ -1131,7 +1131,9 @@
                     card.className = "bg-surface border border-outline-variant hover:border-primary/50 rounded-xl p-6 flex flex-col justify-between transition-all duration-200 shadow-sm hover:shadow-md";
                     
                     const dateFormatted = s.generated_at ? `Gerado em ${s.generated_at}` : 'Skill Recente';
-                    const ytLink = s.source ? `<a href="${s.source}" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 font-medium hover:underline"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg> Ver no YouTube</a>` : '<span class="text-xs text-outline">Vídeo local</span>';
+                    const ytLink = s.source ? `<a href="${s.source}" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 font-semibold hover:underline"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg> Assistir no YouTube</a>` : '<span class="text-xs text-outline">Vídeo local</span>';
+
+                    const exatoCaminho = s.filePath || s.dirPath || s.path;
 
                     card.innerHTML = `
                         <div>
@@ -1141,12 +1143,21 @@
                             </div>
                             <h3 class="text-base font-bold text-on-surface line-clamp-2 mb-2">${s.name}</h3>
                             <p class="text-xs text-outline line-clamp-3 leading-relaxed mb-4">${s.description}</p>
+                            
+                            <!-- Caixa do Diretório Exato -->
+                            <div class="bg-background border border-outline-variant/60 rounded-lg p-2.5 mb-4 space-y-1">
+                                <div class="flex items-center justify-between text-[10px] text-outline font-semibold uppercase">
+                                    <span>📁 Diretório do arquivo .md</span>
+                                    <button onclick="copiarCaminho('${exatoCaminho.replace(/\\/g, '\\\\')}', this)" class="text-primary hover:underline text-[10px] lowercase">copiar caminho</button>
+                                </div>
+                                <div class="text-[11px] text-on-surface/90 font-mono break-all bg-surface-variant/20 p-1.5 rounded select-all">${exatoCaminho}</div>
+                            </div>
                         </div>
                         <div class="pt-4 border-t border-outline-variant/60 flex items-center justify-between gap-2 mt-2">
                             ${ytLink}
                             <button onclick="abrirModalSkill('${s.slug}')" class="bg-surface-variant/30 hover:bg-surface-variant/60 text-on-surface px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                Ler Transcrição
+                                Ler Conteúdo
                             </button>
                         </div>
                     `;
@@ -1189,6 +1200,20 @@
             const modal = document.getElementById('modal-skill-viewer');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+        }
+
+        function copiarCaminho(texto, btn) {
+            navigator.clipboard.writeText(texto).then(() => {
+                const originalText = btn.textContent;
+                btn.textContent = '✓ copiado!';
+                btn.classList.add('text-green-400');
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('text-green-400');
+                }, 2000);
+            }).catch(err => {
+                console.error('Erro ao copiar:', err);
+            });
         }
 
 

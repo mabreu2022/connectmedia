@@ -575,13 +575,16 @@ app.get('/api/skills', (req, res) => {
                     description = descMatch[1].replace(/\n/g, ' ').trim();
                 }
 
+                const skillFolder = path.join(skillsDir, slug);
                 skills.push({
                     slug,
                     name: nameMatch ? nameMatch[1].trim() : slug,
                     source: sourceMatch ? sourceMatch[1].trim() : '',
                     description: description || 'Conhecimento extraído para o Antigravity IDE.',
                     generated_at: dateMatch ? dateMatch[1].trim() : '',
-                    path: `.agents/skills/${slug}/SKILL.md`
+                    path: `.agents/skills/${slug}/SKILL.md`,
+                    dirPath: skillFolder,
+                    filePath: filePath
                 });
             }
         }

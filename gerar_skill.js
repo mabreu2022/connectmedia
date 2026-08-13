@@ -100,59 +100,127 @@ function dividirEmSegmentos(texto, tamanhoMax = 800) {
     return segmentos;
 }
 
-function gerarConteudoMD({ titulo, url, idioma, transcricao, dataGeracao }) {
-    const segmentos = dividirEmSegmentos(transcricao, 1200);
-    const numTopicos = Math.min(segmentos.length, 8);
+function extrairComandosEFormatar(texto) {
+    const comandos = [];
+    const padroesComandos = [
+        /(?:npm|npx|yarn|pnpm)\s+[a-z0-9@/_-]+/gi,
+        /(?:git)\s+[a-z0-9_-]+/gi,
+        /(?:docker|docker-compose)\s+[a-z0-9_-]+/gi,
+        /(?:pip|pip3|python|python3)\s+[a-z0-9._-]+/gi,
+        /(?:node|deno|bun)\s+[a-z0-9._-]+\.js/gi,
+        /(?:SELECT|INSERT|UPDATE|DELETE|CREATE TABLE|ALTER TABLE|DROP TABLE)\s+[^.;\n]+/gi,
+        /(?:chcp|cd|mkdir|rmdir|copy|xcopy|del|powershell|cmd)\s+[^;\n]+/gi,
+        /(?:apt|apt-get|brew|choco|winget)\s+install\s+[a-z0-9_-]+/gi
+    ];
+
+    for (const regex of padroesComandos) {
+        const matches = texto.match(regex);
+        if (matches) {
+            matches.forEach(m => {
+                const limpo = m.trim().replace(/[.,;:!]+$/, '');
+                if (limpo.length > 4 && !comandos.includes(limpo)) {
+                    comandos.push(limpo);
+                }
+            });
+        }
+    }
+    return comandos;
+}
+
+function extrairPassosEPontosChave(texto) {
+    const frases = texto.match(/[^.!?]+[.!?]+/g) || [texto];
+    const passos = [];
+    const conceitos = [];
+
+    const marcadoresPasso = /primeir|segund|terceir|em seguida|depois|próximo passo|passo \d|para começar|em seguida|por fim|finalmente|configurar|instalar|executar/i;
+    const marcadoresConceito = /importante|atenção|regra|conceito|dica|arquitetura|vantagem|problema|solução|diferença|padrão/i;
+
+    for (const f of frases) {
+        const limpa = f.trim();
+        if (limpa.length < 20) continue;
+
+        if (marcadoresPasso.test(limpa) && passos.length < 10) {
+            passos.push(limpa);
+        } else if (marcadoresConceito.test(limpa) && conceitos.length < 8) {
+            conceitos.push(limpa);
+        }
+    }
+
+    return { passos, conceitos };
+}
+
+function gerarConteudoMD({ titulo, url, idioma, transcricao, dataGeracao, pastaAbsoluta }) {
+    const comandosEncontrados = extrairComandosEFormatar(transcricao);
+    const { passos, conceitos } = extrairPassosEPontosChave(transcricao);
+    const segmentos = dividirEmSegmentos(transcricao, 1500);
+
+    const slug = slugify(titulo);
+    const caminhoCompleto = pastaAbsoluta ? path.join(pastaAbsoluta, 'SKILL.md') : `.agents/skills/${slug}/SKILL.md`;
 
     let md = `---
 name: ${titulo}
 description: >
-  Conhecimento extraído automaticamente do vídeo "${titulo}".
-  Use este skill para obter contexto técnico sobre o tema abordado.
-tags: [video, transcricao, ${idioma || 'auto'}]
+  Skill técnica extraída do vídeo "${titulo}". Contém diretrizes de implementação,
+  comandos práticos e transcrição estruturada para contextualização do Antigravity IDE.
+tags: [video-skill, transcricao, ${idioma || 'auto'}]
 source: ${url}
 generated_at: ${dataGeracao}
+file_path: "${caminhoCompleto}"
 ---
 
 # ${titulo}
 
-> **Fonte**: [Assistir no YouTube](${url})
-> **Idioma detectado**: ${idioma || 'automático'}
-> **Gerado em**: ${dataGeracao}
-
-## Resumo do Conteúdo
-
-Este documento contém o conhecimento extraído da transcrição do vídeo acima.
-Utilize como referência técnica para entender o tema e orientar implementações.
+> **Diretiva para a IA Antigravity**: Utilize este documento como base de conhecimento técnico e contexto de referência para código, comandos e arquitetura do projeto.
 
 ---
 
-## Transcrição Estruturada
+### 📋 Ficha Técnica da Skill
+- 📌 **Título**: ${titulo}
+- 🔗 **Vídeo Fonte**: [Assistir no YouTube](${url})
+- 📁 **Diretório do Arquivo**: \`${caminhoCompleto}\`
+- 📅 **Data de Aprendizado**: ${dataGeracao}
+- 🌐 **Idioma**: ${idioma || 'detectado automaticamente'}
+
+---
+
+## 🎯 Conceitos Chave e Diretrizes
+
+${conceitos.length > 0 ? conceitos.map(c => `- ${c}`).join('\n') : '- Conhecimento técnico extraído e disponível para orientação de desenvolvimento no Antigravity IDE.'}
+
+---
+
+## 💻 Comandos e Snippets Identificados
+
+${comandosEncontrados.length > 0 ? '```bash\n# Comandos detectados durante o tutorial:\n' + comandosEncontrados.join('\n') + '\n```' : '> *Nenhum comando de terminal explícito detectado na fala; consulte as seções abaixo.*'}
+
+---
+
+## 📋 Passo a Passo & Fluxo de Implementação
+
+${passos.length > 0 ? passos.map((p, i) => `**${i + 1}.** ${p}`).join('\n\n') : 'Consulte a transcrição detalhada para os passos completos.'}
+
+---
+
+## 📜 Transcrição Completa Estruturada
 
 `;
 
-    segmentos.slice(0, numTopicos).forEach((seg, i) => {
-        md += `### Parte ${i + 1}\n\n${seg}\n\n`;
+    segmentos.forEach((seg, i) => {
+        md += `### Seção ${i + 1}\n\n${seg}\n\n`;
     });
-
-    if (segmentos.length > numTopicos) {
-        md += `### Conteúdo Adicional\n\n`;
-        md += segmentos.slice(numTopicos).join(' ') + '\n\n';
-    }
 
     md += `---
 
-## Como Usar Este Skill
+## 🤖 Instrução de Uso no Antigravity
 
-Quando precisar de orientações sobre os temas abordados neste vídeo, você pode referenciar
-este documento diretamente em suas instruções para o Antigravity.
+Para referenciar esta skill em qualquer chat com o Antigravity IDE, utilize:
 
 \`\`\`
-@${slugify(titulo)} — use o contexto deste skill para...
+@${slug} — aplique o contexto deste skill nesta tarefa
 \`\`\`
 
 ---
-*Gerado automaticamente pelo Connect Media Skill Generator*
+*Skill gerada automaticamente pelo Connect Media v2.0*
 `;
     return md;
 }
@@ -293,19 +361,19 @@ async function main() {
 
     console.log(`   ✅ Transcrição final: ${transcricao.length} caracteres`);
 
-    // 4. Gera o Markdown
-    console.log('\n✍️  Gerando Skill .md...');
-    const dataGeracao = new Date().toISOString().split('T')[0];
-    const conteudoMD = gerarConteudoMD({ titulo, url, idioma, transcricao, dataGeracao });
-
-    // 5. Salva na pasta correta
+    // 4. Salva na pasta correta
     const destDir = destinoManual
         ? path.resolve(destinoManual, slug)
         : path.join(AGENTS_DIR, slug);
 
     fs.mkdirSync(destDir, { recursive: true });
-
     const destFile = path.join(destDir, 'SKILL.md');
+
+    // 5. Gera o Markdown
+    console.log('\n✍️  Gerando Skill .md...');
+    const dataGeracao = new Date().toISOString().split('T')[0];
+    const conteudoMD = gerarConteudoMD({ titulo, url, idioma, transcricao, dataGeracao, pastaAbsoluta: destDir });
+
     fs.writeFileSync(destFile, conteudoMD, 'utf8');
 
     // 6. Limpa arquivos temporários
